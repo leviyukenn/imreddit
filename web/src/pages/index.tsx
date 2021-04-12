@@ -1,20 +1,13 @@
 import { Container } from "../components/default/Container";
-import { useEffect } from "react";
+
 import { DarkModeSwitch } from "../components/default/DarkModeSwitch";
+import NavBar from "../components/NavBar";
 
 const Index = () => {
   return (
     <Container>
-      <div>hello world</div>
-      <div>hello world</div>
-      <div>hello world</div>
-      <div>hello world</div>
-      <div>hello world</div>
-      <div>hello world</div>
-      <div>hello world</div>
-      <div>hello world</div>
-      <div>hello world</div>
-      <DarkModeSwitch />
+      <NavBar />
+     
     </Container>
   );
 };
