@@ -22,7 +22,7 @@ const login = ({}: loginProps) => {
   const onlogin = useCallback(
     async (values: FormData, actions: FormikHelpers<FormData>) => {
       const result = await login(values);
-      console.log(result.error);
+
       if (result.error) {
         setDisplayInnerError(true);
         return;

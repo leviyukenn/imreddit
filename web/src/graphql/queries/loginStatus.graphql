@@ -1,0 +1,10 @@
+query LoginStatus {
+  loginStatus {
+    errors {
+      ...RegularErrors
+    }
+    user {
+      ...RegularUser
+    }
+  }
+}
