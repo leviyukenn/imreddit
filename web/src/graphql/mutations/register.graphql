@@ -1,7 +1,9 @@
-mutation Register($username: String!, $password: String!) {
-  register(userInput: { username: $username, password: $password }) {
+mutation Register($email: String!, $username: String!, $password: String!) {
+  register(
+    userInput: { email: $email, username: $username, password: $password }
+  ) {
     errors {
-     ...RegularErrors
+      ...RegularErrors
     }
     user {
       ...RegularUser

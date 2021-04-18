@@ -11,19 +11,20 @@ interface registerProps {}
 
 interface FormData {
   username: string;
+  email: string;
   password: string;
 }
 
 const register = ({}: registerProps) => {
-  const [, register] = useRegisterMutation();
+  const [register, { error: registerError }] = useRegisterMutation();
   const [displayInnerError, setDisplayInnerError] = useState<boolean>(false);
   const router = useRouter();
 
   const onRegister = useCallback(
     async (values: FormData, actions: FormikHelpers<FormData>) => {
-      const result = await register(values);
-      console.log(result.error);
-      if (result.error) {
+      const result = await register({ variables: values });
+
+      if (registerError || result.errors) {
         setDisplayInnerError(true);
         return;
       }
@@ -46,7 +47,7 @@ const register = ({}: registerProps) => {
       ) : null}
 
       <Formik
-        initialValues={{ username: "", password: "" }}
+        initialValues={{ username: "", password: "", email: "" }}
         validationSchema={Yup.object({
           username: Yup.string()
             .min(3, "Username must be between 3 and 20 characters")
@@ -56,6 +57,7 @@ const register = ({}: registerProps) => {
               "Letters, numbers, underscores only. Please try again without symbols."
             )
             .required("Required"),
+          email: Yup.string().email().required("Required"),
           password: Yup.string()
             .min(4, "Password must be at least 4 characters long")
             .matches(
@@ -69,6 +71,7 @@ const register = ({}: registerProps) => {
         {(formik) => (
           <Form>
             <TextInputField label="username" name="username" />
+            <TextInputField label="email" name="email" />
             <PasswordInputField label="password" name="password" />
             <Button
               mt={4}

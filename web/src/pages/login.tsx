@@ -3,7 +3,7 @@ import React, { useCallback, useState } from "react";
 import { Form, Formik, FormikHelpers } from "formik";
 import { PasswordInputField, TextInputField } from "../components/InputField";
 import * as Yup from "yup";
-import { useLoginMutation } from "../generated/graphql";
+import { RegularUserFragmentDoc, useLoginMutation } from "../generated/graphql";
 import { toErrorMap } from "../utils/toErrorMap";
 import { useRouter } from "next/router";
 
@@ -15,22 +15,40 @@ interface FormData {
 }
 
 const login = ({}: loginProps) => {
-  const [, login] = useLoginMutation();
+  const [login, { error: loginError }] = useLoginMutation({
+    update(cache, { data: loginResponse }) {
+      cache.modify({
+        fields: {
+          me() {
+            if (!loginResponse?.login.user) {
+              return null;
+            }
+            const loggedInUserRef = cache.writeFragment({
+              fragment: RegularUserFragmentDoc,
+              data: loginResponse.login.user,
+            });
+            return loggedInUserRef;
+          },
+        },
+      });
+    },
+  });
+
   const [displayInnerError, setDisplayInnerError] = useState<boolean>(false);
   const router = useRouter();
 
   const onlogin = useCallback(
     async (values: FormData, actions: FormikHelpers<FormData>) => {
-      const result = await login(values);
+      const loginResult = await login({ variables: values });
 
-      if (result.error) {
+      if (loginError || loginResult.errors) {
         setDisplayInnerError(true);
         return;
       }
-      if (result.data?.login.errors) {
-        actions.setErrors(toErrorMap(result.data?.login.errors));
+      if (loginResult.data?.login.errors) {
+        actions.setErrors(toErrorMap(loginResult.data?.login.errors));
         return;
-      } else if (result.data?.login.user) {
+      } else if (loginResult.data?.login.user) {
         router.push("/");
       }
     },

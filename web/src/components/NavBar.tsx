@@ -10,28 +10,45 @@ import {
 import React, { useEffect } from "react";
 import Link from "next/link";
 import { DarkModeSwitch } from "./default/DarkModeSwitch";
-import { useLoginStatusQuery } from "../generated/graphql";
+import { useMeQuery, useLogoutMutation } from "../generated/graphql";
 
 export default function NavBar() {
   const { colorMode } = useColorMode();
   const bgColor = { light: "white", dark: "gray.800" };
   const color = { light: "black", dark: "white" };
+  const { loading: loginStatusLoading, error, data: meResponse } = useMeQuery();
 
-  const [{ data, fetching, error }] = useLoginStatusQuery();
-  useEffect(() => {
-    console.log("mount");
-  }, []);
-  console.log(data);
+  const [logout, { loading: logoutLoading }] = useLogoutMutation({
+    update(cache, { data: logoutResponse }) {
+      cache.modify({
+        fields: {
+          me(loggedInUser) {
+            if (logoutResponse?.logout) {
+              return null;
+            }
+            return loggedInUser;
+          },
+        },
+      });
+    },
+  });
+
   let body = null;
 
-  if (!error && !fetching && data?.loginStatus.user) {
+  if (!error && !loginStatusLoading && meResponse?.me) {
     body = (
       <>
         <Box px="4">
-          <Heading size="sm">{data.loginStatus.user.username}</Heading>
+          <Heading size="sm">{meResponse.me.username}</Heading>
         </Box>
-        <Button colorScheme="teal" variant="outline" size="sm">
-          <Link href="/">Log Out</Link>
+        <Button
+          colorScheme="teal"
+          variant="outline"
+          size="sm"
+          isLoading={logoutLoading}
+          onClick={() => logout()}
+        >
+          Log Out
         </Button>
       </>
     );
