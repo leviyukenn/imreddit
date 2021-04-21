@@ -6,18 +6,33 @@ import {
   Flex,
   Heading,
   useColorMode,
+  useDisclosure,
+  Modal,
+  ModalOverlay,
+  ModalBody,
+  ModalContent,
+  ModalFooter,
+  ModalCloseButton,
+  ModalHeader,
 } from "@chakra-ui/react";
-import React, { useEffect } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { DarkModeSwitch } from "./default/DarkModeSwitch";
 import { useMeQuery, useLogoutMutation } from "../generated/graphql";
+import LoginRegisterModal from "./LoginRegisterModal";
+
+export enum MODAL_CONTENT {
+  LOGIN = "Login",
+  REGISTER = "Sign up",
+  FORGOT_PASSWORD = "Reset your password",
+}
 
 export default function NavBar() {
   const { colorMode } = useColorMode();
   const bgColor = { light: "white", dark: "gray.800" };
   const color = { light: "black", dark: "white" };
-  const { loading: loginStatusLoading, error, data: meResponse } = useMeQuery();
 
+  const { loading: meLoading, error, data: meResponse } = useMeQuery();
   const [logout, { loading: logoutLoading }] = useLogoutMutation({
     update(cache, { data: logoutResponse }) {
       cache.modify({
@@ -33,9 +48,24 @@ export default function NavBar() {
     },
   });
 
+  const { isOpen, onOpen, onClose } = useDisclosure();
+  const [showWhichContent, setShowWhichContent] = useState<MODAL_CONTENT>(
+    MODAL_CONTENT.LOGIN
+  );
+
+  const showLoginModal = useCallback(() => {
+    onOpen();
+    setShowWhichContent(MODAL_CONTENT.LOGIN);
+  }, [onOpen, setShowWhichContent]);
+
+  const showRegisterModal = useCallback(() => {
+    onOpen();
+    setShowWhichContent(MODAL_CONTENT.REGISTER);
+  }, [onOpen, setShowWhichContent]);
+
   let body = null;
 
-  if (!error && !loginStatusLoading && meResponse?.me) {
+  if (!error && !meLoading && meResponse?.me) {
     body = (
       <>
         <Box px="4">
@@ -54,14 +84,27 @@ export default function NavBar() {
     );
   } else {
     body = (
-      <ButtonGroup mtvariant="outline" spacing="6" size="sm">
-        <Button colorScheme="teal" variant="outline">
-          <Link href="/login">Login In</Link>
-        </Button>
-        <Button colorScheme="teal" variant="outline">
-          <Link href="/register">Sign Up</Link>
-        </Button>
-      </ButtonGroup>
+      <>
+        <ButtonGroup mtvariant="outline" spacing="6" size="sm">
+          <Button colorScheme="teal" variant="outline" onClick={showLoginModal}>
+            Login In
+          </Button>
+          <Button
+            colorScheme="teal"
+            variant="outline"
+            onClick={showRegisterModal}
+          >
+            Sign Up
+          </Button>
+        </ButtonGroup>
+        <LoginRegisterModal
+          isOpen={isOpen}
+          onClose={onClose}
+          children={null}
+          showWhichContent={showWhichContent}
+          setShowWhichContent={setShowWhichContent}
+        />
+      </>
     );
   }
   return (

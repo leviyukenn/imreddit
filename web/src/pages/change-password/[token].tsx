@@ -25,6 +25,7 @@ const ChangePassword: NextPage<{ token: string }> = ({ token }) => {
       cache.modify({
         fields: {
           me() {
+            console.log(changePasswordResponse);
             if (!changePasswordResponse?.changePassword.user) return null;
             const loggedInUserRef = cache.writeFragment({
               fragment: RegularUserFragmentDoc,
