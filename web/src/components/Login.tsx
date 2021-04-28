@@ -1,11 +1,20 @@
-import { Alert, AlertIcon, Box, Button, Link } from "@chakra-ui/react";
+import {
+  Button,
+  createStyles,
+  Grid,
+  LinearProgress,
+  Link,
+  makeStyles,
+  Theme,
+} from "@material-ui/core";
+import Typography from "@material-ui/core/Typography";
+import MuiAlert from "@material-ui/lab/Alert";
+import { Field, Form, Formik, FormikHelpers } from "formik";
 import React, { Dispatch, SetStateAction, useCallback, useState } from "react";
-import { Form, Formik, FormikHelpers } from "formik";
-import { PasswordInputField, TextInputField } from "../components/InputField";
 import * as Yup from "yup";
 import { RegularUserFragmentDoc, useLoginMutation } from "../generated/graphql";
 import { toErrorMap } from "../utils/toErrorMap";
-import { useRouter } from "next/router";
+import { TextInputField } from "./InputField";
 import { MODAL_CONTENT } from "./NavBar";
 
 interface FormData {
@@ -17,6 +26,18 @@ interface LoginProps {
   onClose: () => void;
   setShowWhichContent: Dispatch<SetStateAction<MODAL_CONTENT>>;
 }
+
+const useStyles = makeStyles((theme: Theme) =>
+  createStyles({
+    formContainer: {
+      width: theme.spacing(45),
+      margin: "20px auto",
+    },
+    formItem: {
+      width: "100%",
+    },
+  })
+);
 
 const Login = ({ onClose, setShowWhichContent }: LoginProps) => {
   const [login, { error: loginError }] = useLoginMutation({
@@ -65,64 +86,92 @@ const Login = ({ onClose, setShowWhichContent }: LoginProps) => {
   const goToForgotPasswordModal = useCallback(() => {
     setShowWhichContent(MODAL_CONTENT.FORGOT_PASSWORD);
   }, [setShowWhichContent]);
-  return (
-    <Box mx="auto" w={80} mb={10}>
-      {displayInnerError ? (
-        <Alert status="error">
-          <AlertIcon />
-          Inner error.Please try it again later.
-        </Alert>
-      ) : null}
 
-      <Formik
-        initialValues={{ username: "", password: "" }}
-        validationSchema={Yup.object({
-          username: Yup.string()
-            .min(3, "Username must be between 3 and 20 characters")
-            .max(20, "Username must be between 3 and 20 characters")
-            .matches(
-              /^\w+$/,
-              "Letters, numbers, underscores only. Please try again without symbols."
-            )
-            .required("Required"),
-          password: Yup.string()
-            .min(4, "Password must be at least 4 characters long")
-            .matches(
-              /^\w+$/,
-              "Letters, numbers, underscores only. Please try again without symbols."
-            )
-            .required("Required"),
-        })}
-        onSubmit={onlogin}
-      >
-        {(formik) => (
-          <Form>
-            <TextInputField label="username" name="username" />
-            <PasswordInputField label="password" name="password" />
-            <Button
-              mt={4}
-              colorScheme="blue"
-              isLoading={formik.isSubmitting}
-              type="submit"
-            >
-              Login
-            </Button>
-          </Form>
-        )}
-      </Formik>
-      <Box mt={4}>
-        Forgot your{" "}
-        <Link color="blue.500" onClick={goToForgotPasswordModal}>
-          password?
-        </Link>
-      </Box>
-      <Box mt={4}>
-        Don't have an account?{" "}
-        <Link color="blue.500" onClick={goToRegisterModal}>
-          SIGN UP
-        </Link>
-      </Box>
-    </Box>
+  const classes = useStyles();
+  return (
+    <Formik
+      initialValues={{ username: "", password: "" }}
+      validationSchema={Yup.object({
+        username: Yup.string()
+          .min(3, "Username must be between 3 and 20 characters")
+          .max(20, "Username must be between 3 and 20 characters")
+          .matches(
+            /^\w+$/,
+            "Letters, numbers, underscores only. Please try again without symbols."
+          )
+          .required("Required"),
+        password: Yup.string()
+          .min(4, "Password must be at least 4 characters long")
+          .matches(
+            /^\w+$/,
+            "Letters, numbers, underscores only. Please try again without symbols."
+          )
+          .required("Required"),
+      })}
+      onSubmit={onlogin}
+    >
+      {({ submitForm, isSubmitting }) => (
+        <Form>
+          <Grid
+            container
+            direction="column"
+            justify="flex-start"
+            alignItems="center"
+            className={classes.formContainer}
+            spacing={3}
+          >
+            <Grid item className={classes.formItem}>
+              {displayInnerError ? (
+                <MuiAlert elevation={6} variant="filled" severity="error">
+                  Inner error.Please try it again later.
+                </MuiAlert>
+              ) : null}
+            </Grid>
+
+            <Grid item className={classes.formItem}>
+              <Field
+                component={TextInputField}
+                name="username"
+                type="text"
+                label="USERNAME"
+              />
+            </Grid>
+            <Grid item className={classes.formItem}>
+              <Field
+                component={TextInputField}
+                type="password"
+                label="PASSWORD"
+                name="password"
+              />
+            </Grid>
+            {isSubmitting && <LinearProgress />}
+            <br />
+            <Grid item className={classes.formItem}>
+              <Button
+                variant="contained"
+                color="primary"
+                disabled={isSubmitting}
+                onClick={submitForm}
+              >
+                Log In
+              </Button>
+            </Grid>
+            <Grid item className={classes.formItem}>
+              <Typography variant="caption">
+                Forgot your{" "}
+                <Link onClick={goToForgotPasswordModal}>PASSWORD?</Link>
+              </Typography>
+            </Grid>
+            <Grid item className={classes.formItem}>
+              <Typography variant="caption">
+                Don't have an account?{" "}
+                <Link onClick={goToRegisterModal}>SIGN UP</Link>
+              </Typography>
+            </Grid>
+          </Grid>
+        </Form>
+      )}
+    </Formik>
   );
 };
 export default Login;

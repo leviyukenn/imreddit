@@ -1,65 +1,53 @@
-import React, { InputHTMLAttributes } from "react";
-import { useField } from "formik";
-import {
-  FormControl,
-  FormLabel,
-  Input,
-  FormErrorMessage,
-  Button,
-  InputGroup,
-  InputRightElement,
-} from "@chakra-ui/react";
+import { createStyles, makeStyles, Theme } from "@material-ui/core";
+import { TextField, TextFieldProps } from "formik-material-ui";
+import React from "react";
 
-interface InputFieldProps extends InputHTMLAttributes<HTMLInputElement> {
-  name: string;
-  label: string;
-}
+const useStyles = makeStyles((theme: Theme) =>
+  createStyles({
+    field: {
+      width: "100%",
+    },
+  })
+);
 
-export const TextInputField = ({
-  label,
-  size: _,
-  ...props
-}: InputFieldProps) => {
-  const [field, meta] = useField<string>(props.name);
+export const TextInputField = ({ children, ...props }: TextFieldProps) => {
+  const classes = useStyles();
 
   return (
-    <FormControl isInvalid={meta.touched && !!meta.error}>
-      <FormLabel htmlFor={field.name}>{label}</FormLabel>
-      <Input id={field.name} {...field} {...props} pr="4.5rem" />
-      <FormErrorMessage>{meta.error}</FormErrorMessage>
-    </FormControl>
+    <TextField variant="outlined" {...props} className={classes.field}>
+      {children}
+    </TextField>
   );
 };
 
-export const PasswordInputField = ({
-  label,
-  size: _,
-  ...props
-}: InputFieldProps) => {
-  const [field, meta] = useField<string>(props.name);
-  const [showPassword, setshowPassword] = React.useState(false);
-  const handleClick = () => setshowPassword(!showPassword);
-  
+// export const PasswordInputField = ({
+//   label,
+//   size: _,
+//   ...props
+// }: InputFieldProps) => {
+//   const [field, meta] = useField<string>(props.name);
+//   const [showPassword, setshowPassword] = React.useState(false);
+//   const handleClick = () => setshowPassword(!showPassword);
 
-  return (
-    <FormControl isInvalid={meta.touched && !!meta.error}>
-      <FormLabel htmlFor={field.name}>{label}</FormLabel>
-      <InputGroup>
-        <Input
-          id={field.name}
-          {...field}
-          {...props}
-          pr="4.5rem"
-          type={showPassword ? "text" : "password"}
-        />
-        <InputRightElement width="4.5rem">
-          <Button h="1.75rem" size="sm" onClick={handleClick}>
-            {showPassword ? "Hide" : "Show"}
-          </Button>
-        </InputRightElement>
-      </InputGroup>
+//   return (
+//     <FormControl isInvalid={meta.touched && !!meta.error}>
+//       <FormLabel htmlFor={field.name}>{label}</FormLabel>
+//       <InputGroup>
+//         <Input
+//           id={field.name}
+//           {...field}
+//           {...props}
+//           pr="4.5rem"
+//           type={showPassword ? "text" : "password"}
+//         />
+//         <InputRightElement width="4.5rem">
+//           <Button h="1.75rem" size="sm" onClick={handleClick}>
+//             {showPassword ? "Hide" : "Show"}
+//           </Button>
+//         </InputRightElement>
+//       </InputGroup>
 
-      <FormErrorMessage>{meta.error}</FormErrorMessage>
-    </FormControl>
-  );
-};
+//       <FormErrorMessage>{meta.error}</FormErrorMessage>
+//     </FormControl>
+//   );
+// };

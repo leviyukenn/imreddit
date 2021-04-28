@@ -1,15 +1,6 @@
-import { Container } from "../components/default/Container";
-
+import Grid from "@material-ui/core/Grid";
+import { createStyles, makeStyles, Theme } from "@material-ui/core/styles";
 import NavBar from "../components/NavBar";
-import apolloClient from "../apollo-client/apollo-client";
-import {
-  Post,
-  PostsDocument,
-  PostsQuery,
-  PostsQueryVariables,
-  usePostsQuery,
-} from "../generated/graphql";
-import { Box } from "@chakra-ui/react";
 
 // export async function getServerSideProps() {
 //   const { data } = await apolloClient.query<PostsQuery, PostsQueryVariables>({
@@ -23,7 +14,17 @@ import { Box } from "@chakra-ui/react";
 //   };
 // }
 
-const Index = ({ posts }: { posts: Post[] }) => {
+const useStyles = makeStyles((theme: Theme) =>
+  createStyles({
+    root: {
+      height: "100vh",
+      backgroundColor: theme.palette.background.default,
+    },
+  })
+);
+// { posts }: { posts: Post[] }
+const Index = () => {
+  const classes = useStyles();
   // const { loading: postsLoading, error, data: postsResponse } = usePostsQuery({
   //   skip: typeof window === "undefined",
   // });
@@ -43,13 +44,18 @@ const Index = ({ posts }: { posts: Post[] }) => {
   // }
 
   return (
-    <Container>
+    <Grid
+      container
+      direction="column"
+      justify="flex-start"
+      className={classes.root}
+    >
       <NavBar />
 
       {/* <Box w={200} h={400} bgColor="teal">
         {body}
       </Box> */}
-    </Container>
+    </Grid>
   );
 };
 

@@ -1,20 +1,39 @@
-import { Alert, AlertIcon, Box, Button, Flex, Link } from "@chakra-ui/react";
+import {
+  Button,
+  createStyles,
+  Grid,
+  LinearProgress,
+  makeStyles,
+  Theme,
+} from "@material-ui/core";
+import MuiAlert from "@material-ui/lab/Alert";
+import { Field, Form, Formik, FormikHelpers } from "formik";
+import { NextPage } from "next";
+import { useRouter } from "next/router";
 import React, { useCallback, useState } from "react";
-import { Form, Formik, FormikHelpers } from "formik";
-import { PasswordInputField } from "../../components/InputField";
 import * as Yup from "yup";
+import { TextInputField } from "../../components/InputField";
 import {
   RegularUserFragmentDoc,
   useChangePasswordMutation,
 } from "../../generated/graphql";
 import { toErrorMap } from "../../utils/toErrorMap";
-import { useRouter } from "next/router";
-import { NextPage } from "next";
-import NextLink from "next/link";
 
 interface FormData {
   password: string;
 }
+
+const useStyles = makeStyles((theme: Theme) =>
+  createStyles({
+    formContainer: {
+      width: theme.spacing(45),
+      margin: "20px auto",
+    },
+    formItem: {
+      width: "100%",
+    },
+  })
+);
 
 const ChangePassword: NextPage<{ token: string }> = ({ token }) => {
   const [
@@ -41,6 +60,7 @@ const ChangePassword: NextPage<{ token: string }> = ({ token }) => {
   const [displayInnerError, setDisplayInnerError] = useState<boolean>(false);
   const [tokenError, setTokenError] = useState("");
   const router = useRouter();
+  const classes = useStyles();
 
   const onChangePassword = useCallback(
     async (values: FormData, actions: FormikHelpers<FormData>) => {
@@ -70,56 +90,67 @@ const ChangePassword: NextPage<{ token: string }> = ({ token }) => {
     [changePassword, setDisplayInnerError, router]
   );
   return (
-    <Box maxW="400px" mx="auto" mt="50px">
-      {displayInnerError ? (
-        <Alert status="error">
-          <AlertIcon />
-          Inner error.Please try it again later.
-        </Alert>
-      ) : null}
+    <Formik
+      initialValues={{ password: "" }}
+      validationSchema={Yup.object({
+        password: Yup.string()
+          .min(4, "Password must be at least 4 characters long")
+          .matches(
+            /^\w+$/,
+            "Letters, numbers, underscores only. Please try again without symbols."
+          )
+          .required("Required"),
+      })}
+      onSubmit={onChangePassword}
+    >
+      {({ submitForm, isSubmitting }) => (
+        <Form>
+          <Grid
+            container
+            direction="column"
+            justify="flex-start"
+            alignItems="center"
+            className={classes.formContainer}
+            spacing={3}
+          >
+            <Grid item className={classes.formItem}>
+              {displayInnerError ? (
+                <MuiAlert elevation={6} variant="filled" severity="error">
+                  Inner error.Please try it again later.
+                </MuiAlert>
+              ) : null}
 
-      <Formik
-        initialValues={{ password: "" }}
-        validationSchema={Yup.object({
-          password: Yup.string()
-            .min(4, "Password must be at least 4 characters long")
-            .matches(
-              /^\w+$/,
-              "Letters, numbers, underscores only. Please try again without symbols."
-            )
-            .required("Required"),
-        })}
-        onSubmit={onChangePassword}
-      >
-        {(formik) => (
-          <Form>
-            <PasswordInputField label="password" name="password" />
+              {tokenError ? (
+                <MuiAlert elevation={6} variant="filled" severity="error">
+                  {tokenError}
+                </MuiAlert>
+              ) : null}
+            </Grid>
 
-            <Button
-              mt={4}
-              colorScheme="teal"
-              isLoading={formik.isSubmitting}
-              type="submit"
-            >
-              Reset Password
-            </Button>
-          </Form>
-        )}
-      </Formik>
-      {tokenError ? (
-        <Box mt={5}>
-          <Alert status="error">
-            <AlertIcon />
-            {tokenError}
-          </Alert>
-          <Box mt={4}>
-            <NextLink href="/forgot-password">
-              <Link color="blue.400">Go send email again</Link>
-            </NextLink>
-          </Box>
-        </Box>
-      ) : null}
-    </Box>
+            <Grid item className={classes.formItem}>
+              <Field
+                component={TextInputField}
+                type="password"
+                label="PASSWORD"
+                name="password"
+              />
+            </Grid>
+            {isSubmitting && <LinearProgress />}
+            <br />
+            <Grid item className={classes.formItem}>
+              <Button
+                variant="contained"
+                color="primary"
+                disabled={isSubmitting}
+                onClick={submitForm}
+              >
+                Change Password
+              </Button>
+            </Grid>
+          </Grid>
+        </Form>
+      )}
+    </Formik>
   );
 };
 

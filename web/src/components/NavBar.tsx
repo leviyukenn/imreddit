@@ -1,37 +1,49 @@
-import {
-  Spacer,
-  Box,
-  Button,
-  ButtonGroup,
-  Flex,
-  Heading,
-  useColorMode,
-  useDisclosure,
-  Modal,
-  ModalOverlay,
-  ModalBody,
-  ModalContent,
-  ModalFooter,
-  ModalCloseButton,
-  ModalHeader,
-} from "@chakra-ui/react";
-import React, { useCallback, useEffect, useState } from "react";
-import Link from "next/link";
-import { DarkModeSwitch } from "./default/DarkModeSwitch";
-import { useMeQuery, useLogoutMutation } from "../generated/graphql";
+import AppBar from "@material-ui/core/AppBar";
+import Button from "@material-ui/core/Button";
+import IconButton from "@material-ui/core/IconButton";
+import { createStyles, makeStyles, Theme } from "@material-ui/core/styles";
+import Toolbar from "@material-ui/core/Toolbar";
+import Typography from "@material-ui/core/Typography";
+import MenuIcon from "@material-ui/icons/Menu";
+import React, { useCallback, useState } from "react";
+import { useLogoutMutation, useMeQuery } from "../generated/graphql";
 import LoginRegisterModal from "./LoginRegisterModal";
-
 export enum MODAL_CONTENT {
   LOGIN = "Login",
   REGISTER = "Sign up",
   FORGOT_PASSWORD = "Reset your password",
 }
 
-export default function NavBar() {
-  const { colorMode } = useColorMode();
-  const bgColor = { light: "white", dark: "gray.800" };
-  const color = { light: "black", dark: "white" };
+const useStyles = makeStyles((theme: Theme) =>
+  createStyles({
+    menuButton: {
+      marginRight: theme.spacing(2),
+      borderRadius: "9999px",
+    },
+    title: {
+      flexGrow: 1,
+    },
+    username: {
+      marginRight: theme.spacing(2),
+    },
+  })
+);
 
+function useDisclosure() {
+  const [isOpen, setIsOpen] = useState(false);
+
+  const onOpen = useCallback(() => {
+    setIsOpen(true);
+  }, [setIsOpen]);
+
+  const onClose = useCallback(() => {
+    setIsOpen(false);
+  }, [setIsOpen]);
+
+  return { isOpen, onOpen, onClose };
+}
+
+export default function NavBar() {
   const { loading: meLoading, error, data: meResponse } = useMeQuery();
   const [logout, { loading: logoutLoading }] = useLogoutMutation({
     update(cache, { data: logoutResponse }) {
@@ -53,6 +65,8 @@ export default function NavBar() {
     MODAL_CONTENT.LOGIN
   );
 
+  const classes = useStyles();
+
   const showLoginModal = useCallback(() => {
     onOpen();
     setShowWhichContent(MODAL_CONTENT.LOGIN);
@@ -68,15 +82,16 @@ export default function NavBar() {
   if (!error && !meLoading && meResponse?.me) {
     body = (
       <>
-        <Box px="4">
-          <Heading size="sm">{meResponse.me.username}</Heading>
-        </Box>
+        <Typography variant="h6" className={classes.username}>
+          {meResponse.me.username}
+        </Typography>
         <Button
-          colorScheme="teal"
-          variant="outline"
-          size="sm"
-          isLoading={logoutLoading}
+          disableElevation
+          variant="outlined"
+          color="primary"
+          className={classes.menuButton}
           onClick={() => logout()}
+          disabled={logoutLoading}
         >
           Log Out
         </Button>
@@ -85,44 +100,50 @@ export default function NavBar() {
   } else {
     body = (
       <>
-        <ButtonGroup mtvariant="outline" spacing="6" size="sm">
-          <Button colorScheme="teal" variant="outline" onClick={showLoginModal}>
-            Login In
-          </Button>
-          <Button
-            colorScheme="teal"
-            variant="outline"
-            onClick={showRegisterModal}
-          >
-            Sign Up
-          </Button>
-        </ButtonGroup>
+        <Button
+          disableElevation
+          variant="outlined"
+          color="primary"
+          className={classes.menuButton}
+          onClick={showLoginModal}
+        >
+          Log In
+        </Button>
+        <Button
+          disableElevation
+          variant="contained"
+          color="primary"
+          className={classes.menuButton}
+          onClick={showRegisterModal}
+        >
+          Sign Up
+        </Button>
         <LoginRegisterModal
           isOpen={isOpen}
           onClose={onClose}
-          children={null}
           showWhichContent={showWhichContent}
           setShowWhichContent={setShowWhichContent}
         />
       </>
     );
   }
+
   return (
-    <Flex
-      w="100%"
-      h={12}
-      bg={bgColor[colorMode]}
-      color={color[colorMode]}
-      align="center"
-    >
-      <Box p="2">
-        <Heading size="md">Imreddit</Heading>
-      </Box>
-      <Spacer />
-      {body}
-      <Box mx={4}>
-        <DarkModeSwitch />
-      </Box>
-    </Flex>
+    <AppBar position="static" elevation={0} color="default">
+      <Toolbar>
+        <IconButton
+          edge="start"
+          className={classes.menuButton}
+          color="inherit"
+          aria-label="menu"
+        >
+          <MenuIcon />
+        </IconButton>
+        <Typography variant="h6" className={classes.title}>
+          Imreddit
+        </Typography>
+        {body}
+      </Toolbar>
+    </AppBar>
   );
 }
