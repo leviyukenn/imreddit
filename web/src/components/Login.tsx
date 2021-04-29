@@ -45,6 +45,7 @@ const Login = ({ onClose, setShowWhichContent }: LoginProps) => {
       cache.modify({
         fields: {
           me() {
+            console.log(loginResponse);
             if (!loginResponse?.login.user) {
               return null;
             }

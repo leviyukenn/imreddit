@@ -11,8 +11,8 @@ import {
 import CloseIcon from "@material-ui/icons/Close";
 import React, { Dispatch, SetStateAction } from "react";
 import ForgotPassword from "./ForgotPassword";
-import Login from "./Login";
-import { MODAL_CONTENT } from "./NavBar";
+import Login from "../Login";
+import { MODAL_CONTENT } from "../NavBar";
 import Register from "./Register";
 
 interface LoginRegisterModalProps {

@@ -1,0 +1,8 @@
+mutation CreatePost($title: String!, $text: String!) {
+  createPost(createPostInput: { title: $title, text: $text }) {
+    text
+    title
+    id
+    creatorId
+  }
+}

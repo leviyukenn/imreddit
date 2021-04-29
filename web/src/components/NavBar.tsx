@@ -5,9 +5,11 @@ import { createStyles, makeStyles, Theme } from "@material-ui/core/styles";
 import Toolbar from "@material-ui/core/Toolbar";
 import Typography from "@material-ui/core/Typography";
 import MenuIcon from "@material-ui/icons/Menu";
+import NextLink from "next/link";
 import React, { useCallback, useState } from "react";
 import { useLogoutMutation, useMeQuery } from "../generated/graphql";
-import LoginRegisterModal from "./LoginRegisterModal";
+import LoginRegisterModal from "./user/LoginRegisterModal";
+
 export enum MODAL_CONTENT {
   LOGIN = "Login",
   REGISTER = "Sign up",
@@ -16,6 +18,9 @@ export enum MODAL_CONTENT {
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
+    root: {
+      backgroundColor: theme.palette.background.paper,
+    },
     menuButton: {
       marginRight: theme.spacing(2),
       borderRadius: "9999px",
@@ -129,19 +134,27 @@ export default function NavBar() {
   }
 
   return (
-    <AppBar position="static" elevation={0} color="default">
+    <AppBar position="static" elevation={0} className={classes.root}>
       <Toolbar>
-        <IconButton
-          edge="start"
-          className={classes.menuButton}
-          color="inherit"
-          aria-label="menu"
-        >
-          <MenuIcon />
-        </IconButton>
-        <Typography variant="h6" className={classes.title}>
-          Imreddit
-        </Typography>
+        <NextLink href="/" passHref>
+          <IconButton
+            edge="start"
+            className={classes.menuButton}
+            color="default"
+            aria-label="menu"
+          >
+            <MenuIcon />
+          </IconButton>
+        </NextLink>
+        <NextLink href="/">
+          <Typography
+            variant="h6"
+            className={classes.title}
+            color="textPrimary"
+          >
+            Imreddit
+          </Typography>
+        </NextLink>
         {body}
       </Toolbar>
     </AppBar>

@@ -20,6 +20,22 @@ export const TextInputField = ({ children, ...props }: TextFieldProps) => {
   );
 };
 
+export const TextAreaField = ({ children, ...props }: TextFieldProps) => {
+  const classes = useStyles();
+
+  return (
+    <TextField
+      multiline
+      rows={10}
+      variant="outlined"
+      {...props}
+      className={classes.field}
+    >
+      {children}
+    </TextField>
+  );
+};
+
 // export const PasswordInputField = ({
 //   label,
 //   size: _,

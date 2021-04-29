@@ -1,3 +1,4 @@
+import { Reference } from "@apollo/client";
 import {
   Button,
   createStyles,
@@ -11,15 +12,15 @@ import { Field, Form, Formik, FormikHelpers } from "formik";
 import { useRouter } from "next/router";
 import React, { useCallback, useState } from "react";
 import * as Yup from "yup";
-import { TextInputField } from "../../components/InputField";
 import {
-  RegularUserFragmentDoc,
-  useChangePasswordMutation,
+  RegularPostFragmentDoc,
+  useCreatePostMutation,
 } from "../../generated/graphql";
-import { toErrorMap } from "../../utils/toErrorMap";
+import { TextAreaField, TextInputField } from "../InputField";
 
 interface FormData {
-  password: string;
+  title: string;
+  text: string;
 }
 
 const useStyles = makeStyles((theme: Theme) =>
@@ -34,73 +35,64 @@ const useStyles = makeStyles((theme: Theme) =>
   })
 );
 
-const ChangePassword = () => {
-  const [
-    changePassword,
-    { error: changePasswordError },
-  ] = useChangePasswordMutation({
-    update(cache, { data: changePasswordResponse }) {
+const CreatePost = () => {
+  const [CreatePost, { error: createPostError }] = useCreatePostMutation({
+    update(cache, { data: createPostResponse }) {
       cache.modify({
         fields: {
-          me() {
-            if (!changePasswordResponse?.changePassword.user) return null;
-            const loggedInUserRef = cache.writeFragment({
-              fragment: RegularUserFragmentDoc,
-              data: changePasswordResponse.changePassword.user,
+          posts(existingPostRefs: Reference[] = [], { readField }) {
+            const newPostRef = cache.writeFragment({
+              data: createPostResponse?.createPost,
+              fragment: RegularPostFragmentDoc,
             });
-            return loggedInUserRef;
+
+            if (
+              existingPostRefs.some(
+                (ref) =>
+                  readField("id", ref) === createPostResponse?.createPost.id
+              )
+            ) {
+              return existingPostRefs;
+            }
+
+            return [...existingPostRefs, newPostRef];
           },
         },
       });
     },
   });
-
   const [displayInnerError, setDisplayInnerError] = useState<boolean>(false);
-  const [tokenError, setTokenError] = useState("");
+
   const router = useRouter();
-  const classes = useStyles();
 
-  const onChangePassword = useCallback(
+  const onCreatePost = useCallback(
     async (values: FormData, actions: FormikHelpers<FormData>) => {
-      const token = router.query.token as string;
-      const changePasswordResult = await changePassword({
-        variables: { token, newPassword: values.password },
-      });
+      const result = await CreatePost({ variables: values });
 
-      if (changePasswordError || changePasswordResult.errors) {
+      if (createPostError || result.errors) {
         setDisplayInnerError(true);
         return;
       }
-
-      const fieldErrors = changePasswordResult.data?.changePassword.errors;
-      if (fieldErrors) {
-        actions.setErrors(toErrorMap(fieldErrors));
-        const tokenError = fieldErrors.find(
-          (fieldError) => fieldError.field === "token"
-        );
-        if (tokenError) {
-          setTokenError(tokenError.message);
-        }
-        return;
-      } else if (changePasswordResult.data?.changePassword.user) {
+      if (result.data?.createPost) {
         router.push("/");
       }
     },
-    [changePassword, setDisplayInnerError, router]
+    [CreatePost, setDisplayInnerError, router]
   );
+
+  // const goToLoginModal = useCallback(() => {
+  //   setShowWhichContent(MODAL_CONTENT.LOGIN);
+  // }, [setShowWhichContent]);
+
+  const classes = useStyles();
   return (
     <Formik
-      initialValues={{ password: "" }}
+      initialValues={{ title: "", text: "" }}
       validationSchema={Yup.object({
-        password: Yup.string()
-          .min(4, "Password must be at least 4 characters long")
-          .matches(
-            /^\w+$/,
-            "Letters, numbers, underscores only. Please try again without symbols."
-          )
-          .required("Required"),
+        title: Yup.string().required("Required"),
+        text: Yup.string().required("Required"),
       })}
-      onSubmit={onChangePassword}
+      onSubmit={onCreatePost}
     >
       {({ submitForm, isSubmitting }) => (
         <Form>
@@ -118,20 +110,22 @@ const ChangePassword = () => {
                   Inner error.Please try it again later.
                 </MuiAlert>
               ) : null}
-
-              {tokenError ? (
-                <MuiAlert elevation={6} variant="filled" severity="error">
-                  {tokenError}
-                </MuiAlert>
-              ) : null}
             </Grid>
 
             <Grid item className={classes.formItem}>
               <Field
                 component={TextInputField}
-                type="password"
-                label="PASSWORD"
-                name="password"
+                name="title"
+                type="text"
+                label="TITLE"
+              />
+            </Grid>
+            <Grid item className={classes.formItem}>
+              <Field
+                component={TextAreaField}
+                type="textarea"
+                label="TEXT"
+                name="text"
               />
             </Grid>
             {isSubmitting && <LinearProgress />}
@@ -143,7 +137,7 @@ const ChangePassword = () => {
                 disabled={isSubmitting}
                 onClick={submitForm}
               >
-                Change Password
+                Post
               </Button>
             </Grid>
           </Grid>
@@ -152,5 +146,4 @@ const ChangePassword = () => {
     </Formik>
   );
 };
-
-export default ChangePassword;
+export default CreatePost;

@@ -14,9 +14,9 @@ import MuiAlert from "@material-ui/lab/Alert";
 import { Field, Form, Formik, FormikHelpers } from "formik";
 import React, { Dispatch, SetStateAction, useCallback, useState } from "react";
 import * as Yup from "yup";
-import { TextInputField } from "../components/InputField";
-import { useForgotPasswordMutation } from "../generated/graphql";
-import { MODAL_CONTENT } from "./NavBar";
+import { TextInputField } from "../InputField";
+import { useForgotPasswordMutation } from "../../generated/graphql";
+import { MODAL_CONTENT } from "../NavBar";
 
 interface FormData {
   username: string;

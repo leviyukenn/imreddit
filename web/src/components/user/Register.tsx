@@ -15,10 +15,10 @@ import * as Yup from "yup";
 import {
   RegularUserFragmentDoc,
   useRegisterMutation,
-} from "../generated/graphql";
-import { toErrorMap } from "../utils/toErrorMap";
-import { TextInputField } from "./InputField";
-import { MODAL_CONTENT } from "./NavBar";
+} from "../../generated/graphql";
+import { toErrorMap } from "../../utils/toErrorMap";
+import { TextInputField } from "../InputField";
+import { MODAL_CONTENT } from "../NavBar";
 
 interface FormData {
   username: string;
