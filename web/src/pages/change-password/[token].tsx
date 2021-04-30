@@ -10,8 +10,8 @@ import MuiAlert from "@material-ui/lab/Alert";
 import { Field, Form, Formik, FormikHelpers } from "formik";
 import { useRouter } from "next/router";
 import React, { useCallback, useState } from "react";
-import * as Yup from "yup";
 import { TextInputField } from "../../components/InputField";
+import { changePasswordValidationSchema } from "../../fieldValidateSchema/fieldValidateSchema";
 import {
   RegularUserFragmentDoc,
   useChangePasswordMutation,
@@ -91,15 +91,7 @@ const ChangePassword = () => {
   return (
     <Formik
       initialValues={{ password: "" }}
-      validationSchema={Yup.object({
-        password: Yup.string()
-          .min(4, "Password must be at least 4 characters long")
-          .matches(
-            /^\w+$/,
-            "Letters, numbers, underscores only. Please try again without symbols."
-          )
-          .required("Required"),
-      })}
+      validationSchema={changePasswordValidationSchema}
       onSubmit={onChangePassword}
     >
       {({ submitForm, isSubmitting }) => (

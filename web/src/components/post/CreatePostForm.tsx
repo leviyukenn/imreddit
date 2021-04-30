@@ -80,9 +80,6 @@ const CreatePost = () => {
     [CreatePost, setDisplayInnerError, router]
   );
 
-  // const goToLoginModal = useCallback(() => {
-  //   setShowWhichContent(MODAL_CONTENT.LOGIN);
-  // }, [setShowWhichContent]);
 
   const classes = useStyles();
   return (

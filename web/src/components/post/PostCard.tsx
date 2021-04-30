@@ -11,7 +11,18 @@ import React from "react";
 import { Post } from "../../generated/graphql";
 
 interface PostCardProps extends CardProps {
-  post: Post;
+  post: {
+    __typename?: "Post" | undefined;
+  } & Pick<
+    Post,
+    | "id"
+    | "title"
+    | "createdAt"
+    | "updatedAt"
+    | "textSnippet"
+    | "points"
+    | "creatorId"
+  >;
 }
 
 const useStyles = makeStyles((theme: Theme) =>
@@ -31,7 +42,7 @@ const PostCard = ({ post, ...props }: PostCardProps) => {
           {post.title}
         </Typography>
         <Typography variant="body1" gutterBottom>
-          {post.text}
+          {post.textSnippet}
         </Typography>
       </CardContent>
     </Card>

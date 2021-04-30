@@ -11,7 +11,7 @@ import Typography from "@material-ui/core/Typography";
 import MuiAlert from "@material-ui/lab/Alert";
 import { Field, Form, Formik, FormikHelpers } from "formik";
 import React, { useCallback, useState } from "react";
-import * as Yup from "yup";
+import { registerValidationSchema } from "../../fieldValidateSchema/fieldValidateSchema";
 import {
   RegularUserFragmentDoc,
   useRegisterMutation,
@@ -82,25 +82,8 @@ const Register = () => {
   return (
     <Formik
       initialValues={{ username: "", password: "", email: "" }}
-      validationSchema={Yup.object({
-        username: Yup.string()
-          .min(3, "Username must be between 3 and 20 characters")
-          .max(20, "Username must be between 3 and 20 characters")
-          .matches(
-            /^\w+$/,
-            "Letters, numbers, underscores only. Please try again without symbols."
-          )
-          .required("Required"),
-        email: Yup.string().email("Must be a valid email").required("Required"),
-        password: Yup.string()
-          .min(4, "Password must be at least 4 characters long")
-          .matches(
-            /^\w+$/,
-            "Letters, numbers, underscores only. Please try again without symbols."
-          )
-          .required("Required"),
-      })}
-      onSubmit={onRegister}
+      validationSchema={registerValidationSchema}
+      onSubmit={onRegister}u
     >
       {({ submitForm, isSubmitting }) => (
         <Form>

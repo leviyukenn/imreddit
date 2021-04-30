@@ -15,7 +15,7 @@ export default function userModalReducer(
   action: Action<boolean | USER_MODAL_CONTENT>
 ): UserModalState {
   const { type, data } = action;
-  console.log(action);
+
   switch (type) {
     case ACTION_TYPES.OPEN_USER_MODAL:
       return {

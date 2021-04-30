@@ -13,7 +13,7 @@ import { Alert, AlertTitle } from "@material-ui/lab";
 import MuiAlert from "@material-ui/lab/Alert";
 import { Field, Form, Formik, FormikHelpers } from "formik";
 import React, { useCallback, useState } from "react";
-import * as Yup from "yup";
+import { forgotPasswordValidationSchema } from "../../fieldValidateSchema/fieldValidateSchema";
 import { useForgotPasswordMutation } from "../../generated/graphql";
 import { useUserModalState } from "../../redux/hooks/useUserModalState";
 import { TextInputField } from "../InputField";
@@ -64,17 +64,7 @@ const ForgotPassword = () => {
   return (
     <Formik
       initialValues={{ username: "", email: "" }}
-      validationSchema={Yup.object({
-        username: Yup.string()
-          .min(3, "Username must be between 3 and 20 characters")
-          .max(20, "Username must be between 3 and 20 characters")
-          .matches(
-            /^\w+$/,
-            "Letters, numbers, underscores only. Please try again without symbols."
-          )
-          .required("Required"),
-        email: Yup.string().email().required("Required"),
-      })}
+      validationSchema={forgotPasswordValidationSchema}
       onSubmit={onForgotPassword}
     >
       {({ submitForm, isSubmitting }) => (

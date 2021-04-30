@@ -95,6 +95,7 @@ export type Post = {
   text: Scalars['String'];
   points: Scalars['Int'];
   creatorId: Scalars['String'];
+  textSnippet: Scalars['String'];
 };
 
 export type Query = {
@@ -107,6 +108,11 @@ export type Query = {
 
 export type QueryAuthorArgs = {
   id: Scalars['Int'];
+};
+
+
+export type QueryPostsArgs = {
+  limit?: Maybe<Scalars['Int']>;
 };
 
 export type RegisterInput = {
@@ -138,7 +144,7 @@ export type RegularErrorsFragment = (
 
 export type RegularPostFragment = (
   { __typename?: 'Post' }
-  & Pick<Post, 'id' | 'createdAt' | 'updatedAt' | 'title' | 'text' | 'points' | 'creatorId'>
+  & Pick<Post, 'id' | 'createdAt' | 'updatedAt' | 'title' | 'textSnippet' | 'points' | 'creatorId'>
 );
 
 export type RegularUserFragment = (
@@ -256,7 +262,9 @@ export type MeQuery = (
   )> }
 );
 
-export type PostsQueryVariables = Exact<{ [key: string]: never; }>;
+export type PostsQueryVariables = Exact<{
+  limit?: Maybe<Scalars['Int']>;
+}>;
 
 
 export type PostsQuery = (
@@ -273,7 +281,7 @@ export const RegularPostFragmentDoc = gql`
   createdAt
   updatedAt
   title
-  text
+  textSnippet
   points
   creatorId
 }
@@ -550,8 +558,8 @@ export type MeQueryHookResult = ReturnType<typeof useMeQuery>;
 export type MeLazyQueryHookResult = ReturnType<typeof useMeLazyQuery>;
 export type MeQueryResult = Apollo.QueryResult<MeQuery, MeQueryVariables>;
 export const PostsDocument = gql`
-    query Posts {
-  posts {
+    query Posts($limit: Int) {
+  posts(limit: $limit) {
     ...RegularPost
   }
 }
@@ -569,6 +577,7 @@ export const PostsDocument = gql`
  * @example
  * const { data, loading, error } = usePostsQuery({
  *   variables: {
+ *      limit: // value for 'limit'
  *   },
  * });
  */
@@ -605,7 +614,7 @@ export type MutationFieldPolicy = {
 	createPost?: FieldPolicy<any> | FieldReadFunction<any>,
 	deletePost?: FieldPolicy<any> | FieldReadFunction<any>
 };
-export type PostKeySpecifier = ('id' | 'createdAt' | 'updatedAt' | 'title' | 'text' | 'points' | 'creatorId' | PostKeySpecifier)[];
+export type PostKeySpecifier = ('id' | 'createdAt' | 'updatedAt' | 'title' | 'text' | 'points' | 'creatorId' | 'textSnippet' | PostKeySpecifier)[];
 export type PostFieldPolicy = {
 	id?: FieldPolicy<any> | FieldReadFunction<any>,
 	createdAt?: FieldPolicy<any> | FieldReadFunction<any>,
@@ -613,7 +622,8 @@ export type PostFieldPolicy = {
 	title?: FieldPolicy<any> | FieldReadFunction<any>,
 	text?: FieldPolicy<any> | FieldReadFunction<any>,
 	points?: FieldPolicy<any> | FieldReadFunction<any>,
-	creatorId?: FieldPolicy<any> | FieldReadFunction<any>
+	creatorId?: FieldPolicy<any> | FieldReadFunction<any>,
+	textSnippet?: FieldPolicy<any> | FieldReadFunction<any>
 };
 export type QueryKeySpecifier = ('me' | 'author' | 'posts' | QueryKeySpecifier)[];
 export type QueryFieldPolicy = {

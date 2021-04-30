@@ -3,7 +3,7 @@ fragment RegularPost on Post {
   createdAt
   updatedAt
   title
-  text
+  textSnippet
   points
   creatorId
 }

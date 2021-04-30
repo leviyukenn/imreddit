@@ -30,6 +30,7 @@ const Index = () => {
   const classes = useStyles();
   const { loading: postsLoading, error, data: postsResponse } = usePostsQuery({
     skip: typeof window === "undefined",
+    variables: { limit: 10 },
   });
 
   return (

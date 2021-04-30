@@ -12,9 +12,9 @@ import CloseIcon from "@material-ui/icons/Close";
 import React from "react";
 import { useUserModalState } from "../../redux/hooks/useUserModalState";
 import { USER_MODAL_CONTENT } from "../../redux/types/types";
-import Login from "./Login";
-import ForgotPassword from "./ForgotPassword";
-import Register from "./Register";
+import ForgotPassword from "./ForgotPasswordForm";
+import Login from "./LoginForm";
+import Register from "./RegisterForm";
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({

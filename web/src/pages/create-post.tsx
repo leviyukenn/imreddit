@@ -10,6 +10,7 @@ import {
 import React from "react";
 import Container from "../components/Container";
 import CreatePostForm from "../components/post/CreatePostForm";
+import { useIsAuth } from "../utils/hooks/useIsAuth";
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -21,6 +22,7 @@ const useStyles = makeStyles((theme: Theme) =>
 
 const CreatePost = () => {
   const classes = useStyles();
+  useIsAuth();
   return (
     <Container>
       <Grid item className={classes.mainContentHeart}>

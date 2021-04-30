@@ -10,8 +10,9 @@ import {
 import Typography from "@material-ui/core/Typography";
 import MuiAlert from "@material-ui/lab/Alert";
 import { Field, Form, Formik, FormikHelpers } from "formik";
+import { useRouter } from "next/router";
 import React, { useCallback, useState } from "react";
-import * as Yup from "yup";
+import { loginValidationSchema } from "../../fieldValidateSchema/fieldValidateSchema";
 import {
   RegularUserFragmentDoc,
   useLoginMutation,
@@ -38,6 +39,7 @@ const useStyles = makeStyles((theme: Theme) =>
 );
 
 const Login = () => {
+  //post login mutation to graphql server and updtate the me query cache
   const [login, { error: loginError }] = useLoginMutation({
     update(cache, { data: loginResponse }) {
       cache.modify({
@@ -57,6 +59,7 @@ const Login = () => {
       });
     },
   });
+
   const {
     onClose,
     showRegisterModal,
@@ -64,7 +67,7 @@ const Login = () => {
   } = useUserModalState();
 
   const [displayInnerError, setDisplayInnerError] = useState<boolean>(false);
-
+  const router = useRouter();
   const onlogin = useCallback(
     async (values: FormData, actions: FormikHelpers<FormData>) => {
       const loginResult = await login({ variables: values });
@@ -76,8 +79,12 @@ const Login = () => {
       if (loginResult.data?.login.errors) {
         actions.setErrors(toErrorMap(loginResult.data?.login.errors));
         return;
-      } else if (loginResult.data?.login.user) {
+      }
+      if (loginResult.data?.login.user) {
         onClose();
+        if (typeof router.query.next === "string") {
+          router.push(router.query.next);
+        }
       }
     },
     [login, setDisplayInnerError]
@@ -87,23 +94,7 @@ const Login = () => {
   return (
     <Formik
       initialValues={{ username: "", password: "" }}
-      validationSchema={Yup.object({
-        username: Yup.string()
-          .min(3, "Username must be between 3 and 20 characters")
-          .max(20, "Username must be between 3 and 20 characters")
-          .matches(
-            /^\w+$/,
-            "Letters, numbers, underscores only. Please try again without symbols."
-          )
-          .required("Required"),
-        password: Yup.string()
-          .min(4, "Password must be at least 4 characters long")
-          .matches(
-            /^\w+$/,
-            "Letters, numbers, underscores only. Please try again without symbols."
-          )
-          .required("Required"),
-      })}
+      validationSchema={loginValidationSchema}
       onSubmit={onlogin}
     >
       {({ submitForm, isSubmitting }) => (
