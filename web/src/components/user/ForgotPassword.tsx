@@ -12,11 +12,11 @@ import Breadcrumbs from "@material-ui/core/Breadcrumbs";
 import { Alert, AlertTitle } from "@material-ui/lab";
 import MuiAlert from "@material-ui/lab/Alert";
 import { Field, Form, Formik, FormikHelpers } from "formik";
-import React, { Dispatch, SetStateAction, useCallback, useState } from "react";
+import React, { useCallback, useState } from "react";
 import * as Yup from "yup";
-import { TextInputField } from "../InputField";
 import { useForgotPasswordMutation } from "../../generated/graphql";
-import { MODAL_CONTENT } from "../NavBar";
+import { useUserModalState } from "../../redux/hooks/useUserModalState";
+import { TextInputField } from "../InputField";
 
 interface FormData {
   username: string;
@@ -35,17 +35,14 @@ const useStyles = makeStyles((theme: Theme) =>
   })
 );
 
-interface ForgotPasswordProps {
-  setShowWhichContent: Dispatch<SetStateAction<MODAL_CONTENT>>;
-}
-
-const ForgotPassword = ({ setShowWhichContent }: ForgotPasswordProps) => {
+const ForgotPassword = () => {
   const [
     forgotPassword,
     { error: forgotPasswordError },
   ] = useForgotPasswordMutation();
   const [displayInnerError, setDisplayInnerError] = useState<boolean>(false);
   const [completeSendingEmail, setCompleteSendingEmail] = useState(false);
+  const { showLoginModal, showRegisterModal } = useUserModalState();
 
   const classes = useStyles();
 
@@ -63,14 +60,6 @@ const ForgotPassword = ({ setShowWhichContent }: ForgotPasswordProps) => {
     },
     [forgotPassword, setDisplayInnerError, forgotPasswordError]
   );
-
-  const goToRegisterModal = useCallback(() => {
-    setShowWhichContent(MODAL_CONTENT.REGISTER);
-  }, [setShowWhichContent]);
-
-  const goToLoginModal = useCallback(() => {
-    setShowWhichContent(MODAL_CONTENT.LOGIN);
-  }, [setShowWhichContent]);
 
   return (
     <Formik
@@ -138,12 +127,12 @@ const ForgotPassword = ({ setShowWhichContent }: ForgotPasswordProps) => {
             <Grid item className={classes.formItem}>
               <Breadcrumbs separator="-" aria-label="breadcrumb">
                 <Typography variant="caption">
-                  <Link color="primary" href="#" onClick={goToLoginModal}>
+                  <Link color="primary" href="#" onClick={showLoginModal}>
                     LOG IN
                   </Link>
                 </Typography>
                 <Typography variant="caption">
-                  <Link color="primary" href="#" onClick={goToRegisterModal}>
+                  <Link color="primary" href="#" onClick={showRegisterModal}>
                     SIGN UP
                   </Link>
                 </Typography>

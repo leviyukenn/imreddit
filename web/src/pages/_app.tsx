@@ -3,7 +3,9 @@ import CssBaseline from "@material-ui/core/CssBaseline";
 import { ThemeProvider } from "@material-ui/core/styles";
 import { AppProps } from "next/app";
 import React, { useEffect } from "react";
+import { Provider } from "react-redux";
 import apolloClient from "../apollo-client/apollo-client";
+import store from "../redux/store";
 import theme from "../theme";
 
 function MyApp({ Component, pageProps }: AppProps) {
@@ -16,12 +18,14 @@ function MyApp({ Component, pageProps }: AppProps) {
   }, []);
 
   return (
-    <ApolloProvider client={apolloClient}>
-      <CssBaseline />
-      <ThemeProvider theme={theme}>
-        <Component {...pageProps} />
-      </ThemeProvider>
-    </ApolloProvider>
+    <Provider store={store}>
+      <ApolloProvider client={apolloClient}>
+        <CssBaseline />
+        <ThemeProvider theme={theme}>
+          <Component {...pageProps} />
+        </ThemeProvider>
+      </ApolloProvider>
+    </Provider>
   );
 }
 

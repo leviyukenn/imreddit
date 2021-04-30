@@ -10,21 +10,19 @@ import {
 import Typography from "@material-ui/core/Typography";
 import MuiAlert from "@material-ui/lab/Alert";
 import { Field, Form, Formik, FormikHelpers } from "formik";
-import React, { Dispatch, SetStateAction, useCallback, useState } from "react";
+import React, { useCallback, useState } from "react";
 import * as Yup from "yup";
-import { RegularUserFragmentDoc, useLoginMutation } from "../generated/graphql";
-import { toErrorMap } from "../utils/toErrorMap";
-import { TextInputField } from "./InputField";
-import { MODAL_CONTENT } from "./NavBar";
+import {
+  RegularUserFragmentDoc,
+  useLoginMutation,
+} from "../../generated/graphql";
+import { useUserModalState } from "../../redux/hooks/useUserModalState";
+import { toErrorMap } from "../../utils/toErrorMap";
+import { TextInputField } from "../InputField";
 
 interface FormData {
   username: string;
   password: string;
-}
-
-interface LoginProps {
-  onClose: () => void;
-  setShowWhichContent: Dispatch<SetStateAction<MODAL_CONTENT>>;
 }
 
 const useStyles = makeStyles((theme: Theme) =>
@@ -39,7 +37,7 @@ const useStyles = makeStyles((theme: Theme) =>
   })
 );
 
-const Login = ({ onClose, setShowWhichContent }: LoginProps) => {
+const Login = () => {
   const [login, { error: loginError }] = useLoginMutation({
     update(cache, { data: loginResponse }) {
       cache.modify({
@@ -59,6 +57,11 @@ const Login = ({ onClose, setShowWhichContent }: LoginProps) => {
       });
     },
   });
+  const {
+    onClose,
+    showRegisterModal,
+    showForgotPasswordModal,
+  } = useUserModalState();
 
   const [displayInnerError, setDisplayInnerError] = useState<boolean>(false);
 
@@ -79,14 +82,6 @@ const Login = ({ onClose, setShowWhichContent }: LoginProps) => {
     },
     [login, setDisplayInnerError]
   );
-
-  const goToRegisterModal = useCallback(() => {
-    setShowWhichContent(MODAL_CONTENT.REGISTER);
-  }, [setShowWhichContent]);
-
-  const goToForgotPasswordModal = useCallback(() => {
-    setShowWhichContent(MODAL_CONTENT.FORGOT_PASSWORD);
-  }, [setShowWhichContent]);
 
   const classes = useStyles();
   return (
@@ -160,13 +155,13 @@ const Login = ({ onClose, setShowWhichContent }: LoginProps) => {
             <Grid item className={classes.formItem}>
               <Typography variant="caption">
                 Forgot your{" "}
-                <Link onClick={goToForgotPasswordModal}>PASSWORD?</Link>
+                <Link onClick={showForgotPasswordModal}>PASSWORD?</Link>
               </Typography>
             </Grid>
             <Grid item className={classes.formItem}>
               <Typography variant="caption">
                 Don't have an account?{" "}
-                <Link onClick={goToRegisterModal}>SIGN UP</Link>
+                <Link onClick={showRegisterModal}>SIGN UP</Link>
               </Typography>
             </Grid>
           </Grid>

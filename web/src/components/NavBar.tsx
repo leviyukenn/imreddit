@@ -6,15 +6,10 @@ import Toolbar from "@material-ui/core/Toolbar";
 import Typography from "@material-ui/core/Typography";
 import MenuIcon from "@material-ui/icons/Menu";
 import NextLink from "next/link";
-import React, { useCallback, useState } from "react";
+import React from "react";
 import { useLogoutMutation, useMeQuery } from "../generated/graphql";
+import { useUserModalState } from "../redux/hooks/useUserModalState";
 import LoginRegisterModal from "./user/LoginRegisterModal";
-
-export enum MODAL_CONTENT {
-  LOGIN = "Login",
-  REGISTER = "Sign up",
-  FORGOT_PASSWORD = "Reset your password",
-}
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -34,20 +29,6 @@ const useStyles = makeStyles((theme: Theme) =>
   })
 );
 
-function useDisclosure() {
-  const [isOpen, setIsOpen] = useState(false);
-
-  const onOpen = useCallback(() => {
-    setIsOpen(true);
-  }, [setIsOpen]);
-
-  const onClose = useCallback(() => {
-    setIsOpen(false);
-  }, [setIsOpen]);
-
-  return { isOpen, onOpen, onClose };
-}
-
 export default function NavBar() {
   const { loading: meLoading, error, data: meResponse } = useMeQuery();
   const [logout, { loading: logoutLoading }] = useLogoutMutation({
@@ -65,22 +46,9 @@ export default function NavBar() {
     },
   });
 
-  const { isOpen, onOpen, onClose } = useDisclosure();
-  const [showWhichContent, setShowWhichContent] = useState<MODAL_CONTENT>(
-    MODAL_CONTENT.LOGIN
-  );
+  const { showLoginModal, showRegisterModal } = useUserModalState();
 
   const classes = useStyles();
-
-  const showLoginModal = useCallback(() => {
-    onOpen();
-    setShowWhichContent(MODAL_CONTENT.LOGIN);
-  }, [onOpen, setShowWhichContent]);
-
-  const showRegisterModal = useCallback(() => {
-    onOpen();
-    setShowWhichContent(MODAL_CONTENT.REGISTER);
-  }, [onOpen, setShowWhichContent]);
 
   let body = null;
 
@@ -123,12 +91,7 @@ export default function NavBar() {
         >
           Sign Up
         </Button>
-        <LoginRegisterModal
-          isOpen={isOpen}
-          onClose={onClose}
-          showWhichContent={showWhichContent}
-          setShowWhichContent={setShowWhichContent}
-        />
+        <LoginRegisterModal />
       </>
     );
   }

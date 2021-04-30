@@ -10,25 +10,20 @@ import {
 import Typography from "@material-ui/core/Typography";
 import MuiAlert from "@material-ui/lab/Alert";
 import { Field, Form, Formik, FormikHelpers } from "formik";
-import React, { Dispatch, SetStateAction, useCallback, useState } from "react";
+import React, { useCallback, useState } from "react";
 import * as Yup from "yup";
 import {
   RegularUserFragmentDoc,
   useRegisterMutation,
 } from "../../generated/graphql";
+import { useUserModalState } from "../../redux/hooks/useUserModalState";
 import { toErrorMap } from "../../utils/toErrorMap";
 import { TextInputField } from "../InputField";
-import { MODAL_CONTENT } from "../NavBar";
 
 interface FormData {
   username: string;
   email: string;
   password: string;
-}
-
-interface RegisterProps {
-  onClose: () => void;
-  setShowWhichContent: Dispatch<SetStateAction<MODAL_CONTENT>>;
 }
 
 const useStyles = makeStyles((theme: Theme) =>
@@ -43,7 +38,7 @@ const useStyles = makeStyles((theme: Theme) =>
   })
 );
 
-const Register = ({ onClose, setShowWhichContent }: RegisterProps) => {
+const Register = () => {
   const [register, { error: registerError }] = useRegisterMutation({
     update(cache, { data: registerResponse }) {
       cache.modify({
@@ -63,6 +58,7 @@ const Register = ({ onClose, setShowWhichContent }: RegisterProps) => {
     },
   });
   const [displayInnerError, setDisplayInnerError] = useState<boolean>(false);
+  const { onClose, showLoginModal } = useUserModalState();
 
   const onRegister = useCallback(
     async (values: FormData, actions: FormikHelpers<FormData>) => {
@@ -81,10 +77,6 @@ const Register = ({ onClose, setShowWhichContent }: RegisterProps) => {
     },
     [register, setDisplayInnerError]
   );
-
-  const goToLoginModal = useCallback(() => {
-    setShowWhichContent(MODAL_CONTENT.LOGIN);
-  }, [setShowWhichContent]);
 
   const classes = useStyles();
   return (
@@ -168,7 +160,7 @@ const Register = ({ onClose, setShowWhichContent }: RegisterProps) => {
             <Grid item className={classes.formItem}>
               <Typography variant="caption">
                 Already has a account?{" "}
-                <Link onClick={goToLoginModal}>LOG IN</Link>
+                <Link onClick={showLoginModal}>LOG IN</Link>
               </Typography>
             </Grid>
           </Grid>

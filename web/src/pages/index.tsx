@@ -32,8 +32,6 @@ const Index = () => {
     skip: typeof window === "undefined",
   });
 
-  console.log(postsResponse);
-
   return (
     <Container>
       <Grid item className={classes.mainContentHeart}>

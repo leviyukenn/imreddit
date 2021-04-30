@@ -9,19 +9,12 @@ import {
   Typography,
 } from "@material-ui/core";
 import CloseIcon from "@material-ui/icons/Close";
-import React, { Dispatch, SetStateAction } from "react";
+import React from "react";
+import { useUserModalState } from "../../redux/hooks/useUserModalState";
+import { USER_MODAL_CONTENT } from "../../redux/types/types";
+import Login from "./Login";
 import ForgotPassword from "./ForgotPassword";
-import Login from "../Login";
-import { MODAL_CONTENT } from "../NavBar";
 import Register from "./Register";
-
-interface LoginRegisterModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-
-  showWhichContent: MODAL_CONTENT;
-  setShowWhichContent: Dispatch<SetStateAction<MODAL_CONTENT>>;
-}
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -34,28 +27,18 @@ const useStyles = makeStyles((theme: Theme) =>
   })
 );
 
-const LoginRegisterModal = ({
-  isOpen,
-  onClose,
-  showWhichContent,
-  setShowWhichContent,
-}: LoginRegisterModalProps) => {
+const LoginRegisterModal = () => {
+  const { isOpen, onClose, showWhichContent } = useUserModalState();
   let modalContent = null;
   switch (showWhichContent) {
-    case MODAL_CONTENT.LOGIN:
-      modalContent = (
-        <Login onClose={onClose} setShowWhichContent={setShowWhichContent} />
-      );
+    case USER_MODAL_CONTENT.LOGIN:
+      modalContent = <Login />;
       break;
-    case MODAL_CONTENT.REGISTER:
-      modalContent = (
-        <Register onClose={onClose} setShowWhichContent={setShowWhichContent} />
-      );
+    case USER_MODAL_CONTENT.REGISTER:
+      modalContent = <Register />;
       break;
-    case MODAL_CONTENT.FORGOT_PASSWORD:
-      modalContent = (
-        <ForgotPassword setShowWhichContent={setShowWhichContent} />
-      );
+    case USER_MODAL_CONTENT.FORGOT_PASSWORD:
+      modalContent = <ForgotPassword />;
       break;
   }
 
