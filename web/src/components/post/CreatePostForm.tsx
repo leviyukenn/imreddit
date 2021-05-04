@@ -40,22 +40,24 @@ const CreatePost = () => {
     update(cache, { data: createPostResponse }) {
       cache.modify({
         fields: {
-          posts(existingPostRefs: Reference[] = [], { readField }) {
-            const newPostRef = cache.writeFragment({
-              data: createPostResponse?.createPost,
-              fragment: RegularPostFragmentDoc,
-            });
+          posts(
+            existingPostRefs: {
+              posts: { [key: string]: Reference };
+              hasMore: boolean;
+            } = { posts: {}, hasMore: false }
+          ) {
+            const merged = { ...existingPostRefs.posts };
 
-            if (
-              existingPostRefs.some(
-                (ref) =>
-                  readField("id", ref) === createPostResponse?.createPost.id
-              )
-            ) {
-              return existingPostRefs;
+            if (createPostResponse?.createPost) {
+              const newPostRef = cache.writeFragment({
+                data: createPostResponse.createPost,
+                fragment: RegularPostFragmentDoc,
+                fragmentName: "RegularPost",
+              });
+
+              merged[createPostResponse.createPost.id] = newPostRef!;
             }
-
-            return [...existingPostRefs, newPostRef];
+            return { posts: merged, hasMore: existingPostRefs.hasMore };
           },
         },
       });
@@ -79,7 +81,6 @@ const CreatePost = () => {
     },
     [CreatePost, setDisplayInnerError, router]
   );
-
 
   const classes = useStyles();
   return (

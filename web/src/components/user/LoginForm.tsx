@@ -45,7 +45,6 @@ const Login = () => {
       cache.modify({
         fields: {
           me() {
-            console.log(loginResponse);
             if (!loginResponse?.login.user) {
               return null;
             }

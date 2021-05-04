@@ -15,6 +15,9 @@ const useStyles = makeStyles((theme: Theme) =>
   createStyles({
     root: {
       backgroundColor: theme.palette.background.paper,
+      position: "sticky",
+      top: 0,
+      zIndex: 10000,
     },
     menuButton: {
       marginRight: theme.spacing(2),
@@ -55,7 +58,11 @@ export default function NavBar() {
   if (!error && !meLoading && meResponse?.me) {
     body = (
       <>
-        <Typography variant="h6" className={classes.username}>
+        <Typography
+          variant="h6"
+          className={classes.username}
+          color="textPrimary"
+        >
           {meResponse.me.username}
         </Typography>
         <Button

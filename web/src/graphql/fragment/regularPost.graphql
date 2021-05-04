@@ -5,5 +5,7 @@ fragment RegularPost on Post {
   title
   textSnippet
   points
-  creatorId
+  creator {
+    ...RegularUser
+  }
 }

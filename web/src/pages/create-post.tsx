@@ -7,7 +7,7 @@ import {
   Theme,
   Typography,
 } from "@material-ui/core";
-import React from "react";
+import React, { useEffect } from "react";
 import Container from "../components/Container";
 import CreatePostForm from "../components/post/CreatePostForm";
 import { useIsAuth } from "../utils/hooks/useIsAuth";
@@ -22,7 +22,12 @@ const useStyles = makeStyles((theme: Theme) =>
 
 const CreatePost = () => {
   const classes = useStyles();
-  useIsAuth();
+  const { checkIsAuth } = useIsAuth();
+
+  useEffect(() => {
+    checkIsAuth();
+  }, [checkIsAuth]);
+
   return (
     <Container>
       <Grid item className={classes.mainContentHeart}>

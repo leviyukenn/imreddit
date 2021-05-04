@@ -27,7 +27,12 @@ const Container = ({ children }: BoxProps) => {
   return (
     <Box className={classes.root}>
       <NavBar />
-      <Grid container justify="center" className={classes.mainContentBox}>
+      <Grid
+        container
+        justify="center"
+        className={classes.mainContentBox}
+        spacing={4}
+      >
         {children}
       </Grid>
     </Box>

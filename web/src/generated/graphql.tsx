@@ -53,6 +53,7 @@ export type Mutation = {
   logout: Scalars['Boolean'];
   createPost: Post;
   deletePost: Scalars['Boolean'];
+  vote: Scalars['Int'];
 };
 
 
@@ -86,6 +87,17 @@ export type MutationDeletePostArgs = {
   id: Scalars['String'];
 };
 
+
+export type MutationVoteArgs = {
+  voteInput: VoteInput;
+};
+
+export type PaginatedPosts = {
+  __typename?: 'PaginatedPosts';
+  posts: Array<Post>;
+  hasMore: Scalars['Boolean'];
+};
+
 export type Post = {
   __typename?: 'Post';
   id: Scalars['String'];
@@ -95,6 +107,7 @@ export type Post = {
   text: Scalars['String'];
   points: Scalars['Int'];
   creatorId: Scalars['String'];
+  creator: User;
   textSnippet: Scalars['String'];
 };
 
@@ -102,7 +115,7 @@ export type Query = {
   __typename?: 'Query';
   me?: Maybe<User>;
   author: Author;
-  posts: Array<Post>;
+  posts: PaginatedPosts;
 };
 
 
@@ -112,6 +125,7 @@ export type QueryAuthorArgs = {
 
 
 export type QueryPostsArgs = {
+  cursor?: Maybe<Scalars['String']>;
   limit?: Maybe<Scalars['Int']>;
 };
 
@@ -128,13 +142,17 @@ export type User = {
   updatedAt: Scalars['String'];
   username: Scalars['String'];
   email: Scalars['String'];
-  password: Scalars['String'];
 };
 
 export type UserResponse = {
   __typename?: 'UserResponse';
   errors?: Maybe<Array<FieldError>>;
   user?: Maybe<User>;
+};
+
+export type VoteInput = {
+  postId: Scalars['String'];
+  value: Scalars['Int'];
 };
 
 export type RegularErrorsFragment = (
@@ -144,12 +162,16 @@ export type RegularErrorsFragment = (
 
 export type RegularPostFragment = (
   { __typename?: 'Post' }
-  & Pick<Post, 'id' | 'createdAt' | 'updatedAt' | 'title' | 'textSnippet' | 'points' | 'creatorId'>
+  & Pick<Post, 'id' | 'createdAt' | 'updatedAt' | 'title' | 'textSnippet' | 'points'>
+  & { creator: (
+    { __typename?: 'User' }
+    & RegularUserFragment
+  ) }
 );
 
 export type RegularUserFragment = (
   { __typename?: 'User' }
-  & Pick<User, 'id' | 'username'>
+  & Pick<User, 'id' | 'username' | 'email'>
 );
 
 export type RegularUserResponseFragment = (
@@ -187,7 +209,7 @@ export type CreatePostMutation = (
   { __typename?: 'Mutation' }
   & { createPost: (
     { __typename?: 'Post' }
-    & Pick<Post, 'text' | 'title' | 'id' | 'creatorId'>
+    & RegularPostFragment
   ) }
 );
 
@@ -251,6 +273,17 @@ export type RegisterMutation = (
   ) }
 );
 
+export type VoteMutationVariables = Exact<{
+  postId: Scalars['String'];
+  value: Scalars['Int'];
+}>;
+
+
+export type VoteMutation = (
+  { __typename?: 'Mutation' }
+  & Pick<Mutation, 'vote'>
+);
+
 export type MeQueryVariables = Exact<{ [key: string]: never; }>;
 
 
@@ -264,17 +297,29 @@ export type MeQuery = (
 
 export type PostsQueryVariables = Exact<{
   limit?: Maybe<Scalars['Int']>;
+  cursor?: Maybe<Scalars['String']>;
 }>;
 
 
 export type PostsQuery = (
   { __typename?: 'Query' }
-  & { posts: Array<(
-    { __typename?: 'Post' }
-    & RegularPostFragment
-  )> }
+  & { posts: (
+    { __typename?: 'PaginatedPosts' }
+    & Pick<PaginatedPosts, 'hasMore'>
+    & { posts: Array<(
+      { __typename?: 'Post' }
+      & RegularPostFragment
+    )> }
+  ) }
 );
 
+export const RegularUserFragmentDoc = gql`
+    fragment RegularUser on User {
+  id
+  username
+  email
+}
+    `;
 export const RegularPostFragmentDoc = gql`
     fragment RegularPost on Post {
   id
@@ -283,19 +328,15 @@ export const RegularPostFragmentDoc = gql`
   title
   textSnippet
   points
-  creatorId
+  creator {
+    ...RegularUser
+  }
 }
-    `;
+    ${RegularUserFragmentDoc}`;
 export const RegularErrorsFragmentDoc = gql`
     fragment RegularErrors on FieldError {
   field
   message
-}
-    `;
-export const RegularUserFragmentDoc = gql`
-    fragment RegularUser on User {
-  id
-  username
 }
     `;
 export const RegularUserResponseFragmentDoc = gql`
@@ -346,13 +387,10 @@ export type ChangePasswordMutationOptions = Apollo.BaseMutationOptions<ChangePas
 export const CreatePostDocument = gql`
     mutation CreatePost($title: String!, $text: String!) {
   createPost(createPostInput: {title: $title, text: $text}) {
-    text
-    title
-    id
-    creatorId
+    ...RegularPost
   }
 }
-    `;
+    ${RegularPostFragmentDoc}`;
 export type CreatePostMutationFn = Apollo.MutationFunction<CreatePostMutation, CreatePostMutationVariables>;
 
 /**
@@ -523,6 +561,38 @@ export function useRegisterMutation(baseOptions?: Apollo.MutationHookOptions<Reg
 export type RegisterMutationHookResult = ReturnType<typeof useRegisterMutation>;
 export type RegisterMutationResult = Apollo.MutationResult<RegisterMutation>;
 export type RegisterMutationOptions = Apollo.BaseMutationOptions<RegisterMutation, RegisterMutationVariables>;
+export const VoteDocument = gql`
+    mutation Vote($postId: String!, $value: Int!) {
+  vote(voteInput: {postId: $postId, value: $value})
+}
+    `;
+export type VoteMutationFn = Apollo.MutationFunction<VoteMutation, VoteMutationVariables>;
+
+/**
+ * __useVoteMutation__
+ *
+ * To run a mutation, you first call `useVoteMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useVoteMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [voteMutation, { data, loading, error }] = useVoteMutation({
+ *   variables: {
+ *      postId: // value for 'postId'
+ *      value: // value for 'value'
+ *   },
+ * });
+ */
+export function useVoteMutation(baseOptions?: Apollo.MutationHookOptions<VoteMutation, VoteMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<VoteMutation, VoteMutationVariables>(VoteDocument, options);
+      }
+export type VoteMutationHookResult = ReturnType<typeof useVoteMutation>;
+export type VoteMutationResult = Apollo.MutationResult<VoteMutation>;
+export type VoteMutationOptions = Apollo.BaseMutationOptions<VoteMutation, VoteMutationVariables>;
 export const MeDocument = gql`
     query Me {
   me {
@@ -558,9 +628,12 @@ export type MeQueryHookResult = ReturnType<typeof useMeQuery>;
 export type MeLazyQueryHookResult = ReturnType<typeof useMeLazyQuery>;
 export type MeQueryResult = Apollo.QueryResult<MeQuery, MeQueryVariables>;
 export const PostsDocument = gql`
-    query Posts($limit: Int) {
-  posts(limit: $limit) {
-    ...RegularPost
+    query Posts($limit: Int, $cursor: String) {
+  posts(limit: $limit, cursor: $cursor) {
+    hasMore
+    posts {
+      ...RegularPost
+    }
   }
 }
     ${RegularPostFragmentDoc}`;
@@ -578,6 +651,7 @@ export const PostsDocument = gql`
  * const { data, loading, error } = usePostsQuery({
  *   variables: {
  *      limit: // value for 'limit'
+ *      cursor: // value for 'cursor'
  *   },
  * });
  */
@@ -604,7 +678,7 @@ export type FieldErrorFieldPolicy = {
 	field?: FieldPolicy<any> | FieldReadFunction<any>,
 	message?: FieldPolicy<any> | FieldReadFunction<any>
 };
-export type MutationKeySpecifier = ('changePassword' | 'forgotPassword' | 'register' | 'login' | 'logout' | 'createPost' | 'deletePost' | MutationKeySpecifier)[];
+export type MutationKeySpecifier = ('changePassword' | 'forgotPassword' | 'register' | 'login' | 'logout' | 'createPost' | 'deletePost' | 'vote' | MutationKeySpecifier)[];
 export type MutationFieldPolicy = {
 	changePassword?: FieldPolicy<any> | FieldReadFunction<any>,
 	forgotPassword?: FieldPolicy<any> | FieldReadFunction<any>,
@@ -612,9 +686,15 @@ export type MutationFieldPolicy = {
 	login?: FieldPolicy<any> | FieldReadFunction<any>,
 	logout?: FieldPolicy<any> | FieldReadFunction<any>,
 	createPost?: FieldPolicy<any> | FieldReadFunction<any>,
-	deletePost?: FieldPolicy<any> | FieldReadFunction<any>
+	deletePost?: FieldPolicy<any> | FieldReadFunction<any>,
+	vote?: FieldPolicy<any> | FieldReadFunction<any>
 };
-export type PostKeySpecifier = ('id' | 'createdAt' | 'updatedAt' | 'title' | 'text' | 'points' | 'creatorId' | 'textSnippet' | PostKeySpecifier)[];
+export type PaginatedPostsKeySpecifier = ('posts' | 'hasMore' | PaginatedPostsKeySpecifier)[];
+export type PaginatedPostsFieldPolicy = {
+	posts?: FieldPolicy<any> | FieldReadFunction<any>,
+	hasMore?: FieldPolicy<any> | FieldReadFunction<any>
+};
+export type PostKeySpecifier = ('id' | 'createdAt' | 'updatedAt' | 'title' | 'text' | 'points' | 'creatorId' | 'creator' | 'textSnippet' | PostKeySpecifier)[];
 export type PostFieldPolicy = {
 	id?: FieldPolicy<any> | FieldReadFunction<any>,
 	createdAt?: FieldPolicy<any> | FieldReadFunction<any>,
@@ -623,6 +703,7 @@ export type PostFieldPolicy = {
 	text?: FieldPolicy<any> | FieldReadFunction<any>,
 	points?: FieldPolicy<any> | FieldReadFunction<any>,
 	creatorId?: FieldPolicy<any> | FieldReadFunction<any>,
+	creator?: FieldPolicy<any> | FieldReadFunction<any>,
 	textSnippet?: FieldPolicy<any> | FieldReadFunction<any>
 };
 export type QueryKeySpecifier = ('me' | 'author' | 'posts' | QueryKeySpecifier)[];
@@ -631,14 +712,13 @@ export type QueryFieldPolicy = {
 	author?: FieldPolicy<any> | FieldReadFunction<any>,
 	posts?: FieldPolicy<any> | FieldReadFunction<any>
 };
-export type UserKeySpecifier = ('id' | 'createdAt' | 'updatedAt' | 'username' | 'email' | 'password' | UserKeySpecifier)[];
+export type UserKeySpecifier = ('id' | 'createdAt' | 'updatedAt' | 'username' | 'email' | UserKeySpecifier)[];
 export type UserFieldPolicy = {
 	id?: FieldPolicy<any> | FieldReadFunction<any>,
 	createdAt?: FieldPolicy<any> | FieldReadFunction<any>,
 	updatedAt?: FieldPolicy<any> | FieldReadFunction<any>,
 	username?: FieldPolicy<any> | FieldReadFunction<any>,
-	email?: FieldPolicy<any> | FieldReadFunction<any>,
-	password?: FieldPolicy<any> | FieldReadFunction<any>
+	email?: FieldPolicy<any> | FieldReadFunction<any>
 };
 export type UserResponseKeySpecifier = ('errors' | 'user' | UserResponseKeySpecifier)[];
 export type UserResponseFieldPolicy = {
@@ -657,6 +737,10 @@ export type TypedTypePolicies = TypePolicies & {
 	Mutation?: Omit<TypePolicy, "fields" | "keyFields"> & {
 		keyFields?: false | MutationKeySpecifier | (() => undefined | MutationKeySpecifier),
 		fields?: MutationFieldPolicy,
+	},
+	PaginatedPosts?: Omit<TypePolicy, "fields" | "keyFields"> & {
+		keyFields?: false | PaginatedPostsKeySpecifier | (() => undefined | PaginatedPostsKeySpecifier),
+		fields?: PaginatedPostsFieldPolicy,
 	},
 	Post?: Omit<TypePolicy, "fields" | "keyFields"> & {
 		keyFields?: false | PostKeySpecifier | (() => undefined | PostKeySpecifier),
