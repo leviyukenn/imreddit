@@ -116,6 +116,7 @@ export type Query = {
   me?: Maybe<User>;
   author: Author;
   posts: PaginatedPosts;
+  postDetail?: Maybe<Post>;
 };
 
 
@@ -127,6 +128,11 @@ export type QueryAuthorArgs = {
 export type QueryPostsArgs = {
   cursor?: Maybe<Scalars['String']>;
   limit?: Maybe<Scalars['Int']>;
+};
+
+
+export type QueryPostDetailArgs = {
+  postId: Scalars['String'];
 };
 
 export type RegisterInput = {
@@ -163,6 +169,15 @@ export type RegularErrorsFragment = (
 export type RegularPostFragment = (
   { __typename?: 'Post' }
   & Pick<Post, 'id' | 'createdAt' | 'updatedAt' | 'title' | 'textSnippet' | 'points'>
+  & { creator: (
+    { __typename?: 'User' }
+    & RegularUserFragment
+  ) }
+);
+
+export type RegularPostDetailFragment = (
+  { __typename?: 'Post' }
+  & Pick<Post, 'id' | 'createdAt' | 'updatedAt' | 'title' | 'text' | 'points'>
   & { creator: (
     { __typename?: 'User' }
     & RegularUserFragment
@@ -295,6 +310,19 @@ export type MeQuery = (
   )> }
 );
 
+export type PostDetailQueryVariables = Exact<{
+  postId: Scalars['String'];
+}>;
+
+
+export type PostDetailQuery = (
+  { __typename?: 'Query' }
+  & { postDetail?: Maybe<(
+    { __typename?: 'Post' }
+    & RegularPostDetailFragment
+  )> }
+);
+
 export type PostsQueryVariables = Exact<{
   limit?: Maybe<Scalars['Int']>;
   cursor?: Maybe<Scalars['String']>;
@@ -327,6 +355,19 @@ export const RegularPostFragmentDoc = gql`
   updatedAt
   title
   textSnippet
+  points
+  creator {
+    ...RegularUser
+  }
+}
+    ${RegularUserFragmentDoc}`;
+export const RegularPostDetailFragmentDoc = gql`
+    fragment RegularPostDetail on Post {
+  id
+  createdAt
+  updatedAt
+  title
+  text
   points
   creator {
     ...RegularUser
@@ -627,6 +668,41 @@ export function useMeLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<MeQuery
 export type MeQueryHookResult = ReturnType<typeof useMeQuery>;
 export type MeLazyQueryHookResult = ReturnType<typeof useMeLazyQuery>;
 export type MeQueryResult = Apollo.QueryResult<MeQuery, MeQueryVariables>;
+export const PostDetailDocument = gql`
+    query PostDetail($postId: String!) {
+  postDetail(postId: $postId) {
+    ...RegularPostDetail
+  }
+}
+    ${RegularPostDetailFragmentDoc}`;
+
+/**
+ * __usePostDetailQuery__
+ *
+ * To run a query within a React component, call `usePostDetailQuery` and pass it any options that fit your needs.
+ * When your component renders, `usePostDetailQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = usePostDetailQuery({
+ *   variables: {
+ *      postId: // value for 'postId'
+ *   },
+ * });
+ */
+export function usePostDetailQuery(baseOptions: Apollo.QueryHookOptions<PostDetailQuery, PostDetailQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<PostDetailQuery, PostDetailQueryVariables>(PostDetailDocument, options);
+      }
+export function usePostDetailLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<PostDetailQuery, PostDetailQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<PostDetailQuery, PostDetailQueryVariables>(PostDetailDocument, options);
+        }
+export type PostDetailQueryHookResult = ReturnType<typeof usePostDetailQuery>;
+export type PostDetailLazyQueryHookResult = ReturnType<typeof usePostDetailLazyQuery>;
+export type PostDetailQueryResult = Apollo.QueryResult<PostDetailQuery, PostDetailQueryVariables>;
 export const PostsDocument = gql`
     query Posts($limit: Int, $cursor: String) {
   posts(limit: $limit, cursor: $cursor) {
@@ -706,11 +782,12 @@ export type PostFieldPolicy = {
 	creator?: FieldPolicy<any> | FieldReadFunction<any>,
 	textSnippet?: FieldPolicy<any> | FieldReadFunction<any>
 };
-export type QueryKeySpecifier = ('me' | 'author' | 'posts' | QueryKeySpecifier)[];
+export type QueryKeySpecifier = ('me' | 'author' | 'posts' | 'postDetail' | QueryKeySpecifier)[];
 export type QueryFieldPolicy = {
 	me?: FieldPolicy<any> | FieldReadFunction<any>,
 	author?: FieldPolicy<any> | FieldReadFunction<any>,
-	posts?: FieldPolicy<any> | FieldReadFunction<any>
+	posts?: FieldPolicy<any> | FieldReadFunction<any>,
+	postDetail?: FieldPolicy<any> | FieldReadFunction<any>
 };
 export type UserKeySpecifier = ('id' | 'createdAt' | 'updatedAt' | 'username' | 'email' | UserKeySpecifier)[];
 export type UserFieldPolicy = {

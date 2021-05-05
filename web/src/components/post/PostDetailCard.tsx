@@ -16,32 +16,23 @@ import ArrowDownwardRoundedIcon from "@material-ui/icons/ArrowDownwardRounded";
 import ArrowUpwardRoundedIcon from "@material-ui/icons/ArrowUpwardRounded";
 import MoreVertIcon from "@material-ui/icons/MoreVert";
 import { Skeleton } from "@material-ui/lab";
-import NextLink from "next/link";
 import numeral from "numeral";
 import React, { useMemo } from "react";
 import { format } from "timeago.js";
-import { RegularPostFragment } from "../../generated/graphql";
+import { RegularPostDetailFragment } from "../../generated/graphql";
 import { useVote } from "../hooks/hooks";
 import { VoteStatus } from "../types/types";
-
-interface PostCardProps extends CardProps {
-  post: RegularPostFragment;
+interface PostDetailProps extends CardProps {
+  post: RegularPostDetailFragment;
 }
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
     root: {
       position: "relative",
-    },
-    card: {
       paddingLeft: theme.spacing(5),
       marginBottom: theme.spacing(2),
       backgroundColor: "#F7F9FA",
-      border: "1px solid #CCCCCC",
-      cursor: "pointer",
-      "&:hover": {
-        border: "1px solid #818181",
-      },
     },
     upvoteBox: {
       position: "absolute",
@@ -78,20 +69,24 @@ const useStyles = makeStyles((theme: Theme) =>
   })
 );
 
-export const PostCard = ({ post, ...props }: PostCardProps) => {
+export const PostDetailCard = ({ post, ...props }: PostDetailProps) => {
   const classes = useStyles();
 
-  const { voteStatus, loading, onUpvote, onDownvote } = useVote(post);
-
   const points = useMemo(
-    () => numeral(post.points).format(post.points >= 1100 ? "0.0a" : "0a"),
+    () => numeral(post?.points).format(post.points >= 1100 ? "0.0a" : "0a"),
     [post]
   );
 
   const timeago = useMemo(() => format(parseInt(post.createdAt)), [post]);
 
+  const { voteStatus, loading, onUpvote, onDownvote } = useVote(post);
+
+  if (!post) {
+    return <LoadingPostDetailCard />;
+  }
+
   return (
-    <Box className={classes.root}>
+    <Card className={classes.root} {...props}>
       <Box className={classes.upvoteBox}>
         <IconButton
           aria-label="upvote"
@@ -125,45 +120,38 @@ export const PostCard = ({ post, ...props }: PostCardProps) => {
           />
         </IconButton>
       </Box>
-      <NextLink
-        href={`/?postId=${post.id}`}
-        as={`/post-detail/${post.id}`}
-        shallow
-      >
-        <Card className={classes.card} {...props}>
-          <CardHeader
-            avatar={
-              <Avatar aria-label="recipe" className={classes.avatar}>
-                R
-              </Avatar>
-            }
-            action={
-              <IconButton aria-label="settings">
-                <MoreVertIcon />
-              </IconButton>
-            }
-            subheader={`Posted by ${post.creator.username} ${timeago}`}
-            className={classes.header}
-          />
-          <CardContent className={classes.content}>
-            <Typography variant="h6" gutterBottom>
-              {post.title}
-            </Typography>
-            <Typography variant="body1" gutterBottom>
-              {post.textSnippet}
-            </Typography>
-          </CardContent>
-        </Card>
-      </NextLink>
-    </Box>
+
+      <CardHeader
+        avatar={
+          <Avatar aria-label="recipe" className={classes.avatar}>
+            R
+          </Avatar>
+        }
+        action={
+          <IconButton aria-label="settings">
+            <MoreVertIcon />
+          </IconButton>
+        }
+        subheader={`Posted by ${post.creator.username} ${timeago}`}
+        className={classes.header}
+      />
+      <CardContent className={classes.content}>
+        <Typography variant="h6" gutterBottom>
+          {post.title}
+        </Typography>
+        <Typography variant="body1" gutterBottom>
+          {post.text}
+        </Typography>
+      </CardContent>
+    </Card>
   );
 };
 
-export const LoadingPostCard = () => {
+export const LoadingPostDetailCard = () => {
   const classes = useStyles();
 
   return (
-    <Card className={classes.card}>
+    <Card className={classes.root}>
       <Box className={classes.upvoteBox}>
         <IconButton aria-label="upvote" size="small">
           <Skeleton />

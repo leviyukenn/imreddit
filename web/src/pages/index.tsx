@@ -6,6 +6,7 @@ import InfiniteScroll from "react-infinite-scroll-component";
 import Container from "../components/Container";
 import CreatePostCard from "../components/post/CreatePostCard";
 import { LoadingPostCard, PostCard } from "../components/post/PostCard";
+import PostDetailModal from "../components/post/PostDetailModal";
 import { RegularPostFragment, usePostsQuery } from "../generated/graphql";
 
 // export async function getServerSideProps() {
@@ -23,7 +24,8 @@ import { RegularPostFragment, usePostsQuery } from "../generated/graphql";
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
     mainContentHeart: {
-      width: theme.spacing(80),
+      maxWidth: "740px",
+      width: "calc(100% - 32px)",
     },
     backToTopButton: {
       position: "sticky",
@@ -33,7 +35,6 @@ const useStyles = makeStyles((theme: Theme) =>
   })
 );
 
-// { posts }: { posts: Post[] }
 const Index = () => {
   const classes = useStyles();
   const {
@@ -67,7 +68,6 @@ const Index = () => {
         <InfiniteScroll
           dataLength={posts.length || 0}
           next={() => {
-            console.log("fetchMore");
             fetchMore({
               variables: {
                 limit: 10,
@@ -79,7 +79,7 @@ const Index = () => {
           loader={<LoadingPostCard />}
         >
           {posts.map((post) => {
-            return <PostCard post={post} key={post.id}></PostCard>;
+            return <PostCard post={post} key={post.id} />;
           })}
         </InfiniteScroll>
       </Grid>
@@ -92,6 +92,7 @@ const Index = () => {
         <NavigationIcon />
         Back to Top
       </Fab>
+      <PostDetailModal />
     </Container>
   );
 };
