@@ -20,6 +20,21 @@ export const TextInputField = ({ children, ...props }: TextFieldProps) => {
   );
 };
 
+export const SmallTextInputField = ({ children, ...props }: TextFieldProps) => {
+  const classes = useStyles();
+
+  return (
+    <TextField
+      size="small"
+      variant="outlined"
+      {...props}
+      className={classes.field}
+    >
+      {children}
+    </TextField>
+  );
+};
+
 export const TextAreaField = ({ children, ...props }: TextFieldProps) => {
   const classes = useStyles();
 

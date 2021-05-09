@@ -8,6 +8,7 @@ export function useIsAuth() {
   const router = useRouter();
   const { showLoginModal } = useUserModalState();
   const checkIsAuth = useCallback(() => {
+    if (meLoading) return false;
     if (meResponse?.me) return true;
     router.replace("/?next=" + router.pathname);
     showLoginModal();

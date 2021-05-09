@@ -8,6 +8,7 @@ import {
   Theme,
 } from "@material-ui/core";
 import MuiAlert from "@material-ui/lab/Alert";
+import { EditorState } from "draft-js";
 import { Field, Form, Formik, FormikHelpers } from "formik";
 import { useRouter } from "next/router";
 import React, { useCallback, useState } from "react";
@@ -17,6 +18,7 @@ import {
   useCreatePostMutation,
 } from "../../generated/graphql";
 import { TextAreaField, TextInputField } from "../InputField";
+import PostRichEditor from "./post-editor/PostRichEditor";
 
 interface FormData {
   title: string;
@@ -25,9 +27,13 @@ interface FormData {
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
+    form: {
+      display: "flex",
+      justifyContent: "center",
+      width: "100%",
+    },
     formContainer: {
-      width: theme.spacing(45),
-      margin: "20px auto",
+      width: "calc(100% - 16px)",
     },
     formItem: {
       width: "100%",
@@ -67,6 +73,7 @@ const CreatePost = () => {
 
   const router = useRouter();
 
+  const [editorState, setEditorState] = useState(EditorState.createEmpty());
   const onCreatePost = useCallback(
     async (values: FormData, actions: FormikHelpers<FormData>) => {
       const result = await CreatePost({ variables: values });
@@ -88,12 +95,12 @@ const CreatePost = () => {
       initialValues={{ title: "", text: "" }}
       validationSchema={Yup.object({
         title: Yup.string().required("Required"),
-        text: Yup.string().required("Required"),
+        // t: Yup.string().required("Required"),
       })}
       onSubmit={onCreatePost}
     >
       {({ submitForm, isSubmitting }) => (
-        <Form>
+        <Form className={classes.form}>
           <Grid
             container
             direction="column"
@@ -125,6 +132,9 @@ const CreatePost = () => {
                 label="TEXT"
                 name="text"
               />
+            </Grid>
+            <Grid item className={classes.formItem}>
+              <PostRichEditor {...{ editorState, setEditorState }} />
             </Grid>
             {isSubmitting && <LinearProgress />}
             <br />

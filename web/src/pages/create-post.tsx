@@ -15,7 +15,8 @@ import { useIsAuth } from "../utils/hooks/useIsAuth";
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
     mainContentHeart: {
-      width: theme.spacing(80),
+      maxWidth: "740px",
+      width: "100%",
     },
   })
 );
@@ -36,7 +37,7 @@ const CreatePost = () => {
             <Typography variant="h6" gutterBottom>
               create post
             </Typography>
-            <CreatePostForm></CreatePostForm>
+            <CreatePostForm />
           </CardContent>
         </Card>
       </Grid>
