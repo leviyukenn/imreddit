@@ -1,4 +1,5 @@
 import { BlockTypeButtons } from "./post-editor-toolbar-components/BlockComponent";
+import ImageComponent from "./post-editor-toolbar-components/ImageComponent";
 import { InlineButtons } from "./post-editor-toolbar-components/InlineComponent";
 import LinkComponent from "./post-editor-toolbar-components/LinkComponent";
 import { ListButtons } from "./post-editor-toolbar-components/ListComponents";
@@ -39,11 +40,11 @@ export const toolbar = {
   },
   image: {
     className: undefined,
-    component: undefined,
+    component: ImageComponent,
     popupClassName: undefined,
-    urlEnabled: true,
+    urlEnabled: false,
     uploadEnabled: true,
-    alignmentEnabled: true,
+    alignmentEnabled: false,
     uploadCallback: () => console.log("hello"),
     previewImage: true,
     inputAccept: "image/gif,image/jpeg,image/jpg,image/png,image/svg",

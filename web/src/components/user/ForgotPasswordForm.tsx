@@ -68,7 +68,11 @@ const ForgotPassword = () => {
       onSubmit={onForgotPassword}
     >
       {({ submitForm, isSubmitting }) => (
-        <Form>
+        <Form
+          onKeyPress={(event) => {
+            if (event.key === "Enter") submitForm();
+          }}
+        >
           <Grid
             container
             direction="column"

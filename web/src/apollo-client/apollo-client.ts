@@ -1,4 +1,10 @@
-import { ApolloClient, InMemoryCache, Reference } from "@apollo/client";
+import {
+  ApolloClient,
+  ApolloLink,
+  InMemoryCache,
+  Reference,
+} from "@apollo/client";
+import { createUploadLink } from "apollo-upload-client";
 import { GRAPHQL_SERVER_URL } from "../const/const";
 
 const cache = new InMemoryCache({
@@ -60,10 +66,14 @@ const cache = new InMemoryCache({
   },
 });
 
-const client = new ApolloClient({
+const uploadLink = createUploadLink({
   uri: GRAPHQL_SERVER_URL,
-  cache: cache,
   credentials: "include",
+});
+
+const client = new ApolloClient({
+  link: (uploadLink as unknown) as ApolloLink,
+  cache: cache,
 });
 
 export default client;

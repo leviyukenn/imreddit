@@ -142,7 +142,7 @@ interface LinkComponentProps {
     link?: { title: string; target: string };
     selectionText: string;
   };
-  expanded: boolean;
+  expanded?: boolean;
 }
 
 const LinkComponent = (props: LinkComponentProps) => {
@@ -176,7 +176,7 @@ const LinkComponent = (props: LinkComponentProps) => {
       </IconButton>
       <Popover
         classes={{ paper: classes.popover }}
-        open={expanded && showModal}
+        open={!!expanded && showModal}
         anchorEl={anchorRef.current}
         anchorOrigin={{
           vertical: "bottom",

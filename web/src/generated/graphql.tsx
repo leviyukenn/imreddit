@@ -13,6 +13,8 @@ export type Scalars = {
   Boolean: boolean;
   Int: number;
   Float: number;
+  /** The `Upload` scalar type represents a file upload. */
+  Upload: any;
 };
 
 export type Author = {
@@ -53,6 +55,7 @@ export type Mutation = {
   logout: Scalars['Boolean'];
   createPost: Post;
   deletePost: Scalars['Boolean'];
+  uploadImage: UploadResponse;
   vote: Scalars['Int'];
 };
 
@@ -85,6 +88,11 @@ export type MutationCreatePostArgs = {
 
 export type MutationDeletePostArgs = {
   id: Scalars['String'];
+};
+
+
+export type MutationUploadImageArgs = {
+  image: Scalars['Upload'];
 };
 
 
@@ -139,6 +147,13 @@ export type RegisterInput = {
   username: Scalars['String'];
   email: Scalars['String'];
   password: Scalars['String'];
+};
+
+
+export type UploadResponse = {
+  __typename?: 'UploadResponse';
+  errors?: Maybe<Array<FieldError>>;
+  url?: Maybe<Scalars['String']>;
 };
 
 export type User = {
@@ -285,6 +300,23 @@ export type RegisterMutation = (
       { __typename?: 'User' }
       & RegularUserFragment
     )> }
+  ) }
+);
+
+export type UploadImageMutationVariables = Exact<{
+  file: Scalars['Upload'];
+}>;
+
+
+export type UploadImageMutation = (
+  { __typename?: 'Mutation' }
+  & { uploadImage: (
+    { __typename?: 'UploadResponse' }
+    & Pick<UploadResponse, 'url'>
+    & { errors?: Maybe<Array<(
+      { __typename?: 'FieldError' }
+      & Pick<FieldError, 'field' | 'message'>
+    )>> }
   ) }
 );
 
@@ -602,6 +634,43 @@ export function useRegisterMutation(baseOptions?: Apollo.MutationHookOptions<Reg
 export type RegisterMutationHookResult = ReturnType<typeof useRegisterMutation>;
 export type RegisterMutationResult = Apollo.MutationResult<RegisterMutation>;
 export type RegisterMutationOptions = Apollo.BaseMutationOptions<RegisterMutation, RegisterMutationVariables>;
+export const UploadImageDocument = gql`
+    mutation UploadImage($file: Upload!) {
+  uploadImage(image: $file) {
+    errors {
+      field
+      message
+    }
+    url
+  }
+}
+    `;
+export type UploadImageMutationFn = Apollo.MutationFunction<UploadImageMutation, UploadImageMutationVariables>;
+
+/**
+ * __useUploadImageMutation__
+ *
+ * To run a mutation, you first call `useUploadImageMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useUploadImageMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [uploadImageMutation, { data, loading, error }] = useUploadImageMutation({
+ *   variables: {
+ *      file: // value for 'file'
+ *   },
+ * });
+ */
+export function useUploadImageMutation(baseOptions?: Apollo.MutationHookOptions<UploadImageMutation, UploadImageMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<UploadImageMutation, UploadImageMutationVariables>(UploadImageDocument, options);
+      }
+export type UploadImageMutationHookResult = ReturnType<typeof useUploadImageMutation>;
+export type UploadImageMutationResult = Apollo.MutationResult<UploadImageMutation>;
+export type UploadImageMutationOptions = Apollo.BaseMutationOptions<UploadImageMutation, UploadImageMutationVariables>;
 export const VoteDocument = gql`
     mutation Vote($postId: String!, $value: Int!) {
   vote(voteInput: {postId: $postId, value: $value})
@@ -754,7 +823,7 @@ export type FieldErrorFieldPolicy = {
 	field?: FieldPolicy<any> | FieldReadFunction<any>,
 	message?: FieldPolicy<any> | FieldReadFunction<any>
 };
-export type MutationKeySpecifier = ('changePassword' | 'forgotPassword' | 'register' | 'login' | 'logout' | 'createPost' | 'deletePost' | 'vote' | MutationKeySpecifier)[];
+export type MutationKeySpecifier = ('changePassword' | 'forgotPassword' | 'register' | 'login' | 'logout' | 'createPost' | 'deletePost' | 'uploadImage' | 'vote' | MutationKeySpecifier)[];
 export type MutationFieldPolicy = {
 	changePassword?: FieldPolicy<any> | FieldReadFunction<any>,
 	forgotPassword?: FieldPolicy<any> | FieldReadFunction<any>,
@@ -763,6 +832,7 @@ export type MutationFieldPolicy = {
 	logout?: FieldPolicy<any> | FieldReadFunction<any>,
 	createPost?: FieldPolicy<any> | FieldReadFunction<any>,
 	deletePost?: FieldPolicy<any> | FieldReadFunction<any>,
+	uploadImage?: FieldPolicy<any> | FieldReadFunction<any>,
 	vote?: FieldPolicy<any> | FieldReadFunction<any>
 };
 export type PaginatedPostsKeySpecifier = ('posts' | 'hasMore' | PaginatedPostsKeySpecifier)[];
@@ -788,6 +858,11 @@ export type QueryFieldPolicy = {
 	author?: FieldPolicy<any> | FieldReadFunction<any>,
 	posts?: FieldPolicy<any> | FieldReadFunction<any>,
 	postDetail?: FieldPolicy<any> | FieldReadFunction<any>
+};
+export type UploadResponseKeySpecifier = ('errors' | 'url' | UploadResponseKeySpecifier)[];
+export type UploadResponseFieldPolicy = {
+	errors?: FieldPolicy<any> | FieldReadFunction<any>,
+	url?: FieldPolicy<any> | FieldReadFunction<any>
 };
 export type UserKeySpecifier = ('id' | 'createdAt' | 'updatedAt' | 'username' | 'email' | UserKeySpecifier)[];
 export type UserFieldPolicy = {
@@ -826,6 +901,10 @@ export type TypedTypePolicies = TypePolicies & {
 	Query?: Omit<TypePolicy, "fields" | "keyFields"> & {
 		keyFields?: false | QueryKeySpecifier | (() => undefined | QueryKeySpecifier),
 		fields?: QueryFieldPolicy,
+	},
+	UploadResponse?: Omit<TypePolicy, "fields" | "keyFields"> & {
+		keyFields?: false | UploadResponseKeySpecifier | (() => undefined | UploadResponseKeySpecifier),
+		fields?: UploadResponseFieldPolicy,
 	},
 	User?: Omit<TypePolicy, "fields" | "keyFields"> & {
 		keyFields?: false | UserKeySpecifier | (() => undefined | UserKeySpecifier),

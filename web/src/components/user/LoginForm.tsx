@@ -97,7 +97,11 @@ const Login = () => {
       onSubmit={onlogin}
     >
       {({ submitForm, isSubmitting }) => (
-        <Form>
+        <Form
+          onKeyPress={(event) => {
+            if (event.key === "Enter") submitForm();
+          }}
+        >
           <Grid
             container
             direction="column"

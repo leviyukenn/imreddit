@@ -83,10 +83,15 @@ const Register = () => {
     <Formik
       initialValues={{ username: "", password: "", email: "" }}
       validationSchema={registerValidationSchema}
-      onSubmit={onRegister}u
+      onSubmit={onRegister}
+      u
     >
       {({ submitForm, isSubmitting }) => (
-        <Form>
+        <Form
+          onKeyPress={(event) => {
+            if (event.key === "Enter") submitForm();
+          }}
+        >
           <Grid
             container
             direction="column"
