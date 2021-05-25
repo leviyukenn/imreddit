@@ -5,7 +5,6 @@ import PostDetail from "../../components/post/PostDetail";
 
 const PostDetailPage = () => {
   const router = useRouter();
-  console.log(router);
   return (
     <Container>
       <PostDetail postId={router.query.postId as string} />

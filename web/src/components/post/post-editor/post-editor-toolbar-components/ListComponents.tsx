@@ -1,4 +1,10 @@
-import { createStyles, IconButton, makeStyles, Theme } from "@material-ui/core";
+import {
+  createStyles,
+  IconButton,
+  makeStyles,
+  Theme,
+  Tooltip,
+} from "@material-ui/core";
 import FormatListBulletedIcon from "@material-ui/icons/FormatListBulleted";
 import FormatListNumberedIcon from "@material-ui/icons/FormatListNumbered";
 import { useCallback } from "react";
@@ -27,24 +33,28 @@ export const ListButtons = (props: {
 
   return (
     <>
-      <IconButton onClick={toggleBlockType("ordered")}>
-        <FormatListNumberedIcon
-          className={
-            currentState["listType"] === "ordered"
-              ? classes.pressed
-              : classes.notPressed
-          }
-        />
-      </IconButton>
-      <IconButton onClick={toggleBlockType("unordered")}>
-        <FormatListBulletedIcon
-          className={
-            currentState["listType"] === "unordered"
-              ? classes.pressed
-              : classes.notPressed
-          }
-        />
-      </IconButton>
+      <Tooltip title="Numbered List">
+        <IconButton onClick={toggleBlockType("ordered")}>
+          <FormatListNumberedIcon
+            className={
+              currentState["listType"] === "ordered"
+                ? classes.pressed
+                : classes.notPressed
+            }
+          />
+        </IconButton>
+      </Tooltip>
+      <Tooltip title="Bulleted List">
+        <IconButton onClick={toggleBlockType("unordered")}>
+          <FormatListBulletedIcon
+            className={
+              currentState["listType"] === "unordered"
+                ? classes.pressed
+                : classes.notPressed
+            }
+          />
+        </IconButton>
+      </Tooltip>
     </>
   );
 };

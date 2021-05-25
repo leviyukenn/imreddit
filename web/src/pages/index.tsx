@@ -7,7 +7,7 @@ import Container from "../components/Container";
 import CreatePostCard from "../components/post/CreatePostCard";
 import { LoadingPostCard, PostCard } from "../components/post/PostCard";
 import PostDetailModal from "../components/post/PostDetailModal";
-import { RegularPostFragment, usePostsQuery } from "../generated/graphql";
+import { RegularPostDetailFragment, usePostsQuery } from "../generated/graphql";
 
 // export async function getServerSideProps() {
 //   const { data } = await apolloClient.query<PostsQuery, PostsQueryVariables>({
@@ -51,7 +51,7 @@ const Index = () => {
     window.scrollTo({ top: 0, behavior: "smooth" });
   }, []);
 
-  const posts: RegularPostFragment[] = useMemo(
+  const posts: RegularPostDetailFragment[] = useMemo(
     () => (postsResponse ? postsResponse.posts.posts : []),
     [postsResponse]
   );

@@ -1,4 +1,10 @@
-import { createStyles, IconButton, makeStyles, Theme } from "@material-ui/core";
+import {
+  createStyles,
+  IconButton,
+  makeStyles,
+  Theme,
+  Tooltip,
+} from "@material-ui/core";
 import CodeIcon from "@material-ui/icons/Code";
 import FormatQuoteIcon from "@material-ui/icons/FormatQuote";
 import TitleIcon from "@material-ui/icons/Title";
@@ -27,33 +33,39 @@ export const BlockTypeButtons = (props: {
   const classes = useStyles();
   return (
     <>
-      <IconButton onClick={toggleBlockType("Blockquote")}>
-        <FormatQuoteIcon
-          className={
-            currentState["blockType"] === "Blockquote"
-              ? classes.pressed
-              : classes.notPressed
-          }
-        />
-      </IconButton>
-      <IconButton onClick={toggleBlockType("H1")}>
-        <TitleIcon
-          className={
-            currentState["blockType"] === "H1"
-              ? classes.pressed
-              : classes.notPressed
-          }
-        />
-      </IconButton>
-      <IconButton onClick={toggleBlockType("Code")}>
-        <CodeIcon
-          className={
-            currentState["blockType"] === "Code"
-              ? classes.pressed
-              : classes.notPressed
-          }
-        />
-      </IconButton>
+      <Tooltip title="Heading">
+        <IconButton onClick={toggleBlockType("H1")}>
+          <TitleIcon
+            className={
+              currentState["blockType"] === "H1"
+                ? classes.pressed
+                : classes.notPressed
+            }
+          />
+        </IconButton>
+      </Tooltip>
+      <Tooltip title="Quote Block">
+        <IconButton onClick={toggleBlockType("Blockquote")}>
+          <FormatQuoteIcon
+            className={
+              currentState["blockType"] === "Blockquote"
+                ? classes.pressed
+                : classes.notPressed
+            }
+          />
+        </IconButton>
+      </Tooltip>
+      <Tooltip title="Code Block">
+        <IconButton onClick={toggleBlockType("Code")}>
+          <CodeIcon
+            className={
+              currentState["blockType"] === "Code"
+                ? classes.pressed
+                : classes.notPressed
+            }
+          />
+        </IconButton>
+      </Tooltip>
     </>
   );
 };

@@ -4,6 +4,7 @@ import {
   makeStyles,
   SvgIcon,
   Theme,
+  Tooltip,
 } from "@material-ui/core";
 import FormatBoldIcon from "@material-ui/icons/FormatBold";
 import FormatItalicIcon from "@material-ui/icons/FormatItalic";
@@ -35,36 +36,46 @@ export const InlineButtons = (props: {
   const classes = useStyles();
   return (
     <>
-      <IconButton onClick={toggleInline("bold")}>
-        <FormatBoldIcon
-          className={
-            currentState["bold"] ? classes.pressed : classes.notPressed
-          }
-        />
-      </IconButton>
-      <IconButton onClick={toggleInline("italic")}>
-        <FormatItalicIcon
-          className={
-            currentState["italic"] ? classes.pressed : classes.notPressed
-          }
-        />
-      </IconButton>
-      <IconButton onClick={toggleInline("strikethrough")}>
-        <StrikethroughSIcon
-          className={
-            currentState["strikethrough"] ? classes.pressed : classes.notPressed
-          }
-        />
-      </IconButton>
-      <IconButton onClick={toggleInline("superscript")}>
-        <SvgIcon
-          className={
-            currentState["superscript"] ? classes.pressed : classes.notPressed
-          }
-        >
-          <SuperscriptIcon />{" "}
-        </SvgIcon>
-      </IconButton>
+      <Tooltip title="Bold">
+        <IconButton onClick={toggleInline("bold")}>
+          <FormatBoldIcon
+            className={
+              currentState["bold"] ? classes.pressed : classes.notPressed
+            }
+          />
+        </IconButton>
+      </Tooltip>
+      <Tooltip title="Italics">
+        <IconButton onClick={toggleInline("italic")}>
+          <FormatItalicIcon
+            className={
+              currentState["italic"] ? classes.pressed : classes.notPressed
+            }
+          />
+        </IconButton>
+      </Tooltip>
+      <Tooltip title="Strikethrough">
+        <IconButton onClick={toggleInline("strikethrough")}>
+          <StrikethroughSIcon
+            className={
+              currentState["strikethrough"]
+                ? classes.pressed
+                : classes.notPressed
+            }
+          />
+        </IconButton>
+      </Tooltip>
+      <Tooltip title="Superscript">
+        <IconButton onClick={toggleInline("superscript")}>
+          <SvgIcon
+            className={
+              currentState["superscript"] ? classes.pressed : classes.notPressed
+            }
+          >
+            <SuperscriptIcon />{" "}
+          </SvgIcon>
+        </IconButton>
+      </Tooltip>
     </>
   );
 };

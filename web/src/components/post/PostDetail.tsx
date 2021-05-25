@@ -1,6 +1,10 @@
 import { Box, createStyles, makeStyles, Theme } from "@material-ui/core";
 import React from "react";
-import { usePostDetailQuery } from "../../generated/graphql";
+import {
+  RegularPostDetailFragment,
+  usePostDetailQuery,
+} from "../../generated/graphql";
+import { CommentCard } from "./CommentCard";
 import { LoadingPostDetailCard, PostDetailCard } from "./PostDetailCard";
 
 interface PostDetailProps {
@@ -17,6 +21,7 @@ const useStyles = makeStyles((theme: Theme) =>
       maxWidth: "740px",
       width: "calc(100% - 32px)",
       margin: "32px",
+      backgroundColor: theme.palette.background.paper,
     },
   })
 );
@@ -36,10 +41,17 @@ const PostDetail = ({ postId }: PostDetailProps) => {
   if (!postDetailResponse?.postDetail) {
     return <LoadingPostDetailCard />;
   }
+  console.log(postDetailResponse.postDetail);
   return (
     <Box display="flex" justifyContent="center" className={classes.container}>
       <Box className={classes.heart}>
         <PostDetailCard post={postDetailResponse.postDetail} />
+        {postDetailResponse.postDetail.children.map((child) => (
+          <CommentCard
+            key={child?.id}
+            post={child as RegularPostDetailFragment}
+          />
+        ))}
       </Box>
     </Box>
   );

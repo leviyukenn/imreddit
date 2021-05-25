@@ -32,7 +32,7 @@ const useStyles = makeStyles((theme: Theme) =>
       position: "relative",
       paddingLeft: theme.spacing(5),
       marginBottom: theme.spacing(2),
-      backgroundColor: "#F7F9FA",
+      backgroundColor: theme.palette.background.paper,
     },
     upvoteBox: {
       position: "absolute",
@@ -56,12 +56,8 @@ const useStyles = makeStyles((theme: Theme) =>
       color: "#728EFE",
     },
 
-    header: {
-      backgroundColor: theme.palette.background.paper,
-    },
     content: {
       paddingTop: 0,
-      backgroundColor: theme.palette.background.paper,
     },
     avatar: {
       backgroundColor: red[500],
@@ -73,17 +69,13 @@ export const PostDetailCard = ({ post, ...props }: PostDetailProps) => {
   const classes = useStyles();
 
   const points = useMemo(
-    () => numeral(post?.points).format(post.points >= 1100 ? "0.0a" : "0a"),
+    () => numeral(post.points).format(post.points >= 1100 ? "0.0a" : "0a"),
     [post]
   );
 
   const timeago = useMemo(() => format(parseInt(post.createdAt)), [post]);
 
   const { voteStatus, loading, onUpvote, onDownvote } = useVote(post);
-
-  if (!post) {
-    return <LoadingPostDetailCard />;
-  }
 
   return (
     <Card className={classes.root} {...props}>
@@ -133,15 +125,12 @@ export const PostDetailCard = ({ post, ...props }: PostDetailProps) => {
           </IconButton>
         }
         subheader={`Posted by ${post.creator.username} ${timeago}`}
-        className={classes.header}
       />
       <CardContent className={classes.content}>
         <Typography variant="h6" gutterBottom>
           {post.title}
         </Typography>
-        <Typography variant="body1" gutterBottom>
-          {post.text}
-        </Typography>
+        <Box dangerouslySetInnerHTML={{ __html: post.text }}></Box>
       </CardContent>
     </Card>
   );
@@ -173,7 +162,6 @@ export const LoadingPostDetailCard = () => {
           </IconButton>
         }
         subheader={<Skeleton />}
-        className={classes.header}
       />
       <CardContent className={classes.content}>
         <Typography variant="h6" gutterBottom>

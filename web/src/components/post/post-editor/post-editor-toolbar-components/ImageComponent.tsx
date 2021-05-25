@@ -6,6 +6,7 @@ import {
   makeStyles,
   Popover,
   Theme,
+  Tooltip,
 } from "@material-ui/core";
 import Snackbar from "@material-ui/core/Snackbar";
 import ImageIcon from "@material-ui/icons/Image";
@@ -34,7 +35,6 @@ interface ImageDropZoneProps {
     width?: string,
     alt?: string
   ) => void;
-  doCollapse: () => void;
 }
 
 const useStyles = makeStyles((theme: Theme) =>
@@ -46,7 +46,7 @@ const useStyles = makeStyles((theme: Theme) =>
   })
 );
 
-const ImageDropZone = ({ onChange, doCollapse }: ImageDropZoneProps) => {
+const ImageDropZone = ({ onChange }: ImageDropZoneProps) => {
   const [uploadImage, { error }] = useUploadImageMutation();
   const [uploading, setUploading] = useState(false);
   const [message, setMessage] = useState<{
@@ -82,7 +82,6 @@ const ImageDropZone = ({ onChange, doCollapse }: ImageDropZoneProps) => {
         }
       });
       setUploading(false);
-      // doCollapse();
     },
     [uploadImage]
   );
@@ -144,14 +143,16 @@ const ImageComponent = ({
 
   return (
     <>
-      <IconButton
-        onClick={onExpandEvent}
-        aria-haspopup="true"
-        aria-expanded={!!expanded}
-        buttonRef={anchorRef}
-      >
-        <ImageIcon />
-      </IconButton>
+      <Tooltip title="Add an image">
+        <IconButton
+          onClick={onExpandEvent}
+          aria-haspopup="true"
+          aria-expanded={!!expanded}
+          buttonRef={anchorRef}
+        >
+          <ImageIcon />
+        </IconButton>
+      </Tooltip>
       <Popover
         classes={{ paper: classes.popover }}
         open={!!expanded}
@@ -165,7 +166,7 @@ const ImageComponent = ({
           horizontal: "center",
         }}
       >
-        <ImageDropZone onChange={onChange} doCollapse={doCollapse} />
+        <ImageDropZone onChange={onChange} />
       </Popover>
     </>
   );

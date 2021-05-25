@@ -6,6 +6,7 @@ import {
   makeStyles,
   Popover,
   Theme,
+  Tooltip,
 } from "@material-ui/core";
 import LinkIcon from "@material-ui/icons/Link";
 import { Field, Form, Formik } from "formik";
@@ -166,14 +167,16 @@ const LinkComponent = (props: LinkComponentProps) => {
 
   return (
     <>
-      <IconButton
-        onClick={signalExpandShowModal}
-        aria-haspopup="true"
-        aria-expanded={showModal}
-        buttonRef={anchorRef}
-      >
-        <LinkIcon />
-      </IconButton>
+      <Tooltip title="Link">
+        <IconButton
+          onClick={signalExpandShowModal}
+          aria-haspopup="true"
+          aria-expanded={showModal}
+          buttonRef={anchorRef}
+        >
+          <LinkIcon />
+        </IconButton>
+      </Tooltip>
       <Popover
         classes={{ paper: classes.popover }}
         open={!!expanded && showModal}

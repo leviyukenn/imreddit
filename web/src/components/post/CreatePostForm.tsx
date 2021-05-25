@@ -8,21 +8,22 @@ import {
   Theme,
 } from "@material-ui/core";
 import MuiAlert from "@material-ui/lab/Alert";
-import { EditorState } from "draft-js";
+import { convertToRaw, EditorState } from "draft-js";
+import draftToHtml from "draftjs-to-html";
 import { Field, Form, Formik, FormikHelpers } from "formik";
 import { useRouter } from "next/router";
 import React, { useCallback, useState } from "react";
 import * as Yup from "yup";
 import {
-  RegularPostFragmentDoc,
+  RegularPostDetailFragmentDoc,
   useCreatePostMutation,
 } from "../../generated/graphql";
-import { TextAreaField, TextInputField } from "../InputField";
+import { useIsAuth } from "../../utils/hooks/useIsAuth";
+import { TextInputField } from "../InputField";
 import PostRichEditor from "./post-editor/PostRichEditor";
 
 interface FormData {
   title: string;
-  text: string;
 }
 
 const useStyles = makeStyles((theme: Theme) =>
@@ -42,7 +43,7 @@ const useStyles = makeStyles((theme: Theme) =>
 );
 
 const CreatePost = () => {
-  const [CreatePost, { error: createPostError }] = useCreatePostMutation({
+  const [createPost, { error: createPostError }] = useCreatePostMutation({
     update(cache, { data: createPostResponse }) {
       cache.modify({
         fields: {
@@ -57,8 +58,8 @@ const CreatePost = () => {
             if (createPostResponse?.createPost) {
               const newPostRef = cache.writeFragment({
                 data: createPostResponse.createPost,
-                fragment: RegularPostFragmentDoc,
-                fragmentName: "RegularPost",
+                fragment: RegularPostDetailFragmentDoc,
+                fragmentName: "RegularPostDetail",
               });
 
               merged[createPostResponse.createPost.id] = newPostRef!;
@@ -72,11 +73,22 @@ const CreatePost = () => {
   const [displayInnerError, setDisplayInnerError] = useState<boolean>(false);
 
   const router = useRouter();
+  const { checkIsAuth } = useIsAuth();
 
   const [editorState, setEditorState] = useState(EditorState.createEmpty());
+
   const onCreatePost = useCallback(
-    async (values: FormData, actions: FormikHelpers<FormData>) => {
-      const result = await CreatePost({ variables: values });
+    async ({ title }: FormData, actions: FormikHelpers<FormData>) => {
+      if (!checkIsAuth()) return;
+      const postDetail = draftToHtml(
+        convertToRaw(editorState.getCurrentContent())
+      );
+
+      console.log(postDetail);
+      const result = await createPost({
+        variables: { title, text: postDetail },
+      });
+      console.log(result);
 
       if (createPostError || result.errors) {
         setDisplayInnerError(true);
@@ -86,13 +98,13 @@ const CreatePost = () => {
         router.push("/");
       }
     },
-    [CreatePost, setDisplayInnerError, router]
+    [createPost, setDisplayInnerError, router, editorState, checkIsAuth]
   );
 
   const classes = useStyles();
   return (
     <Formik
-      initialValues={{ title: "", text: "" }}
+      initialValues={{ title: "" }}
       validationSchema={Yup.object({
         title: Yup.string().required("Required"),
         // t: Yup.string().required("Required"),
@@ -123,14 +135,6 @@ const CreatePost = () => {
                 name="title"
                 type="text"
                 label="TITLE"
-              />
-            </Grid>
-            <Grid item className={classes.formItem}>
-              <Field
-                component={TextAreaField}
-                type="textarea"
-                label="TEXT"
-                name="text"
               />
             </Grid>
             <Grid item className={classes.formItem}>

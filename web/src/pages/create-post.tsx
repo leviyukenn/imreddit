@@ -18,6 +18,9 @@ const useStyles = makeStyles((theme: Theme) =>
       maxWidth: "740px",
       width: "100%",
     },
+    createPostCard: {
+      overflow: "visible",
+    },
   })
 );
 
@@ -32,7 +35,7 @@ const CreatePost = () => {
   return (
     <Container>
       <Grid item className={classes.mainContentHeart}>
-        <Card>
+        <Card className={classes.createPostCard}>
           <CardContent>
             <Typography variant="h6" gutterBottom>
               create post

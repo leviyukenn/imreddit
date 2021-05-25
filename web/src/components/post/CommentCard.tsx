@@ -16,15 +16,17 @@ import ArrowDownwardRoundedIcon from "@material-ui/icons/ArrowDownwardRounded";
 import ArrowUpwardRoundedIcon from "@material-ui/icons/ArrowUpwardRounded";
 import MoreVertIcon from "@material-ui/icons/MoreVert";
 import { Skeleton } from "@material-ui/lab";
-import NextLink from "next/link";
 import numeral from "numeral";
 import React, { useMemo } from "react";
 import { format } from "timeago.js";
-import { RegularPostDetailFragment } from "../../generated/graphql";
+import {
+  RegularPostDetailFragment,
+  usePostDetailQuery,
+} from "../../generated/graphql";
 import { useVote } from "../hooks/hooks";
 import { VoteStatus } from "../types/types";
 
-interface PostCardProps extends CardProps {
+interface PostDetailProps extends CardProps {
   post: RegularPostDetailFragment;
 }
 
@@ -32,16 +34,8 @@ const useStyles = makeStyles((theme: Theme) =>
   createStyles({
     root: {
       position: "relative",
-    },
-    card: {
       paddingLeft: theme.spacing(5),
       marginBottom: theme.spacing(2),
-      backgroundColor: "#F7F9FA",
-      border: "1px solid #CCCCCC",
-      cursor: "pointer",
-      "&:hover": {
-        border: "1px solid #818181",
-      },
     },
     upvoteBox: {
       position: "absolute",
@@ -65,23 +59,8 @@ const useStyles = makeStyles((theme: Theme) =>
       color: "#728EFE",
     },
 
-    header: {
-      backgroundColor: theme.palette.background.paper,
-    },
     content: {
       paddingTop: 0,
-      backgroundColor: theme.palette.background.paper,
-      maxHeight: "300px",
-      overflow: "hidden",
-      "&::after": {
-        content: '""',
-        // display: "block",
-        background: " linear-gradient(rgba(255, 255, 255, 0.001),white)",
-        position: "absolute",
-        bottom: "1px",
-        height: "60px",
-        width: "calc(100% - 58px)",
-      },
     },
     avatar: {
       backgroundColor: red[500],
@@ -89,10 +68,20 @@ const useStyles = makeStyles((theme: Theme) =>
   })
 );
 
-export const PostCard = ({ post, ...props }: PostCardProps) => {
+export const CommentCard = ({ post, ...props }: PostDetailProps) => {
   const classes = useStyles();
 
-  const { voteStatus, loading, onUpvote, onDownvote } = useVote(post);
+  const {
+    data: postDetailResponse,
+    loading: postDetailLoading,
+    error,
+  } = usePostDetailQuery({
+    skip: !post.id,
+    variables: { postId: post.id },
+  });
+  const children = useMemo(() => postDetailResponse?.postDetail?.children, [
+    postDetailResponse,
+  ]);
 
   const points = useMemo(
     () => numeral(post.points).format(post.points >= 1100 ? "0.0a" : "0a"),
@@ -101,8 +90,10 @@ export const PostCard = ({ post, ...props }: PostCardProps) => {
 
   const timeago = useMemo(() => format(parseInt(post.createdAt)), [post]);
 
+  const { voteStatus, loading, onUpvote, onDownvote } = useVote(post);
+
   return (
-    <Box className={classes.root}>
+    <Box className={classes.root} {...props}>
       <Box className={classes.upvoteBox}>
         <IconButton
           aria-label="upvote"
@@ -136,43 +127,45 @@ export const PostCard = ({ post, ...props }: PostCardProps) => {
           />
         </IconButton>
       </Box>
-      <NextLink
-        href={`/?postId=${post.id}`}
-        as={`/post-detail/${post.id}`}
-        shallow
-      >
-        <Card className={classes.card} {...props}>
-          <CardHeader
-            avatar={
-              <Avatar aria-label="recipe" className={classes.avatar}>
-                R
-              </Avatar>
-            }
-            action={
-              <IconButton aria-label="settings">
-                <MoreVertIcon />
-              </IconButton>
-            }
-            subheader={`Posted by ${post.creator.username} ${timeago}`}
-            className={classes.header}
-          />
-          <CardContent className={classes.content}>
-            <Typography variant="h6" gutterBottom>
-              {post.title}
-            </Typography>
-            <Box dangerouslySetInnerHTML={{ __html: post.text }}></Box>
-          </CardContent>
-        </Card>
-      </NextLink>
+
+      <CardHeader
+        avatar={
+          <Avatar aria-label="recipe" className={classes.avatar}>
+            R
+          </Avatar>
+        }
+        action={
+          <IconButton aria-label="settings">
+            <MoreVertIcon />
+          </IconButton>
+        }
+        subheader={`${post.creator.username} · ${timeago}`}
+      />
+      <CardContent className={classes.content}>
+        {/* <Typography variant="h6" gutterBottom>
+          {post.title}
+        </Typography> */}
+        <Box dangerouslySetInnerHTML={{ __html: post.text }}></Box>
+        {children ? (
+          children.map((child) => (
+            <CommentCard
+              key={child?.id}
+              post={child as RegularPostDetailFragment}
+            />
+          ))
+        ) : (
+          <LoadingCommentCard />
+        )}
+      </CardContent>
     </Box>
   );
 };
 
-export const LoadingPostCard = () => {
+export const LoadingCommentCard = () => {
   const classes = useStyles();
 
   return (
-    <Card className={classes.card}>
+    <Card className={classes.root}>
       <Box className={classes.upvoteBox}>
         <IconButton aria-label="upvote" size="small">
           <Skeleton />
@@ -194,7 +187,6 @@ export const LoadingPostCard = () => {
           </IconButton>
         }
         subheader={<Skeleton />}
-        className={classes.header}
       />
       <CardContent className={classes.content}>
         <Typography variant="h6" gutterBottom>

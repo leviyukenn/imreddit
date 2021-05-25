@@ -13,10 +13,21 @@ const Editor = dynamic<EditorProps>(
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
+    wrapper: {
+      border: "1px solid #EDEFF1",
+
+      borderRadius: "4px",
+    },
     editor: {
-      border: "1px solid black",
       paddingLeft: "10px",
       minHeight: "200px",
+    },
+    toolbar: {
+      backgroundColor: "#F6F7F8",
+      position: "sticky",
+      top: "64px",
+      zIndex: 1000,
+      marginBottom: 0,
     },
   })
 );
@@ -42,8 +53,11 @@ export default function RichTextEditor({
         <Editor
           editorState={editorState}
           editorClassName={classes.editor}
+          wrapperClassName={classes.wrapper}
+          toolbarClassName={classes.toolbar}
           onEditorStateChange={onEditorStateChange}
           toolbar={toolbar}
+          placeholder="Text(optional)"
         />
       ) : null}
     </div>

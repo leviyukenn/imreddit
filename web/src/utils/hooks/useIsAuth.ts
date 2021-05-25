@@ -10,7 +10,7 @@ export function useIsAuth() {
   const checkIsAuth = useCallback(() => {
     if (meLoading) return false;
     if (meResponse?.me) return true;
-    router.replace("/?next=" + router.pathname);
+    // router.replace("/?next=" + router.pathname);
     showLoginModal();
     return false;
   }, [router, showLoginModal, meResponse]);

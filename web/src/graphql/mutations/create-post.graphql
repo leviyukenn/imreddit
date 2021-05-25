@@ -1,5 +1,5 @@
 mutation CreatePost($title: String!, $text: String!) {
   createPost(createPostInput: { title: $title, text: $text }) {
-    ...RegularPost
+    ...RegularPostDetail
   }
 }

@@ -28,6 +28,7 @@ export type Author = {
 export type CreatePostInput = {
   title: Scalars['String'];
   text: Scalars['String'];
+  parentId?: Maybe<Scalars['String']>;
 };
 
 export type FieldError = {
@@ -114,9 +115,8 @@ export type Post = {
   title: Scalars['String'];
   text: Scalars['String'];
   points: Scalars['Int'];
-  creatorId: Scalars['String'];
   creator: User;
-  textSnippet: Scalars['String'];
+  children: Array<Maybe<Post>>;
 };
 
 export type Query = {
@@ -181,15 +181,6 @@ export type RegularErrorsFragment = (
   & Pick<FieldError, 'field' | 'message'>
 );
 
-export type RegularPostFragment = (
-  { __typename?: 'Post' }
-  & Pick<Post, 'id' | 'createdAt' | 'updatedAt' | 'title' | 'textSnippet' | 'points'>
-  & { creator: (
-    { __typename?: 'User' }
-    & RegularUserFragment
-  ) }
-);
-
 export type RegularPostDetailFragment = (
   { __typename?: 'Post' }
   & Pick<Post, 'id' | 'createdAt' | 'updatedAt' | 'title' | 'text' | 'points'>
@@ -239,7 +230,7 @@ export type CreatePostMutation = (
   { __typename?: 'Mutation' }
   & { createPost: (
     { __typename?: 'Post' }
-    & RegularPostFragment
+    & RegularPostDetailFragment
   ) }
 );
 
@@ -351,6 +342,10 @@ export type PostDetailQuery = (
   { __typename?: 'Query' }
   & { postDetail?: Maybe<(
     { __typename?: 'Post' }
+    & { children: Array<Maybe<(
+      { __typename?: 'Post' }
+      & RegularPostDetailFragment
+    )>> }
     & RegularPostDetailFragment
   )> }
 );
@@ -368,7 +363,7 @@ export type PostsQuery = (
     & Pick<PaginatedPosts, 'hasMore'>
     & { posts: Array<(
       { __typename?: 'Post' }
-      & RegularPostFragment
+      & RegularPostDetailFragment
     )> }
   ) }
 );
@@ -380,19 +375,6 @@ export const RegularUserFragmentDoc = gql`
   email
 }
     `;
-export const RegularPostFragmentDoc = gql`
-    fragment RegularPost on Post {
-  id
-  createdAt
-  updatedAt
-  title
-  textSnippet
-  points
-  creator {
-    ...RegularUser
-  }
-}
-    ${RegularUserFragmentDoc}`;
 export const RegularPostDetailFragmentDoc = gql`
     fragment RegularPostDetail on Post {
   id
@@ -460,10 +442,10 @@ export type ChangePasswordMutationOptions = Apollo.BaseMutationOptions<ChangePas
 export const CreatePostDocument = gql`
     mutation CreatePost($title: String!, $text: String!) {
   createPost(createPostInput: {title: $title, text: $text}) {
-    ...RegularPost
+    ...RegularPostDetail
   }
 }
-    ${RegularPostFragmentDoc}`;
+    ${RegularPostDetailFragmentDoc}`;
 export type CreatePostMutationFn = Apollo.MutationFunction<CreatePostMutation, CreatePostMutationVariables>;
 
 /**
@@ -741,6 +723,9 @@ export const PostDetailDocument = gql`
     query PostDetail($postId: String!) {
   postDetail(postId: $postId) {
     ...RegularPostDetail
+    children {
+      ...RegularPostDetail
+    }
   }
 }
     ${RegularPostDetailFragmentDoc}`;
@@ -777,11 +762,11 @@ export const PostsDocument = gql`
   posts(limit: $limit, cursor: $cursor) {
     hasMore
     posts {
-      ...RegularPost
+      ...RegularPostDetail
     }
   }
 }
-    ${RegularPostFragmentDoc}`;
+    ${RegularPostDetailFragmentDoc}`;
 
 /**
  * __usePostsQuery__
@@ -840,7 +825,7 @@ export type PaginatedPostsFieldPolicy = {
 	posts?: FieldPolicy<any> | FieldReadFunction<any>,
 	hasMore?: FieldPolicy<any> | FieldReadFunction<any>
 };
-export type PostKeySpecifier = ('id' | 'createdAt' | 'updatedAt' | 'title' | 'text' | 'points' | 'creatorId' | 'creator' | 'textSnippet' | PostKeySpecifier)[];
+export type PostKeySpecifier = ('id' | 'createdAt' | 'updatedAt' | 'title' | 'text' | 'points' | 'creator' | 'children' | PostKeySpecifier)[];
 export type PostFieldPolicy = {
 	id?: FieldPolicy<any> | FieldReadFunction<any>,
 	createdAt?: FieldPolicy<any> | FieldReadFunction<any>,
@@ -848,9 +833,8 @@ export type PostFieldPolicy = {
 	title?: FieldPolicy<any> | FieldReadFunction<any>,
 	text?: FieldPolicy<any> | FieldReadFunction<any>,
 	points?: FieldPolicy<any> | FieldReadFunction<any>,
-	creatorId?: FieldPolicy<any> | FieldReadFunction<any>,
 	creator?: FieldPolicy<any> | FieldReadFunction<any>,
-	textSnippet?: FieldPolicy<any> | FieldReadFunction<any>
+	children?: FieldPolicy<any> | FieldReadFunction<any>
 };
 export type QueryKeySpecifier = ('me' | 'author' | 'posts' | 'postDetail' | QueryKeySpecifier)[];
 export type QueryFieldPolicy = {
