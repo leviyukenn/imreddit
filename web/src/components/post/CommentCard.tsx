@@ -1,30 +1,22 @@
 import {
   Avatar,
   Box,
-  Card,
-  CardContent,
-  CardHeader,
   CardProps,
   createStyles,
-  IconButton,
   makeStyles,
   Theme,
   Typography,
 } from "@material-ui/core";
-import { red } from "@material-ui/core/colors";
-import ArrowDownwardRoundedIcon from "@material-ui/icons/ArrowDownwardRounded";
-import ArrowUpwardRoundedIcon from "@material-ui/icons/ArrowUpwardRounded";
-import MoreVertIcon from "@material-ui/icons/MoreVert";
+import { blue, red } from "@material-ui/core/colors";
+import ControlPointIcon from "@material-ui/icons/ControlPoint";
 import { Skeleton } from "@material-ui/lab";
-import numeral from "numeral";
-import React, { useMemo } from "react";
+import React, { useCallback, useMemo, useState } from "react";
 import { format } from "timeago.js";
 import {
   RegularPostDetailFragment,
   usePostDetailQuery,
 } from "../../generated/graphql";
-import { useVote } from "../hooks/hooks";
-import { VoteStatus } from "../types/types";
+import { HorizontalUpvoteBox } from "./upvote/HorizontalUpvoteBox";
 
 interface PostDetailProps extends CardProps {
   post: RegularPostDetailFragment;
@@ -34,41 +26,51 @@ const useStyles = makeStyles((theme: Theme) =>
   createStyles({
     root: {
       position: "relative",
-      paddingLeft: theme.spacing(5),
-      marginBottom: theme.spacing(2),
+      paddingLeft: theme.spacing(1),
+      paddingTop: theme.spacing(1),
+      minHeight: "72px",
+      // marginBottom: theme.spacing(2),
     },
-    upvoteBox: {
-      position: "absolute",
-      top: 0,
-      left: 0,
-      display: "flex",
-      flexDirection: "column",
-      justifyContent: "center",
-      alignItems: "center",
-      width: theme.spacing(5),
-      height: theme.spacing(10),
-      padding: "8px 4px",
+    threadLineBox: {
+      cursor: "pointer",
+      "&:hover": {
+        "& $threadLine": {
+          borderRightColor: blue[500],
+        },
+      },
     },
-    notvoted: {
-      color: "#878A8C",
+    threadLine: {
+      height: "100%",
+      width: "50%",
+      borderRight: "2px solid #edeff1",
+      // padding: "8px 0",
     },
-    upvoted: {
-      color: "#FC3A05",
+    expandThreadIcon: {
+      margin: "0 8px",
+      cursor: "pointer",
     },
-    downvoted: {
-      color: "#728EFE",
+    commentBox: {
+      marginLeft: "6px",
     },
 
+    header: {
+      margin: "12px 0",
+    },
     content: {
       paddingTop: 0,
     },
-    avatar: {
+    smallAvatar: {
+      width: "28px",
+      height: "28px",
       backgroundColor: red[500],
+      marginTop: theme.spacing(1),
+      marginBottom: theme.spacing(1),
     },
   })
 );
 
 export const CommentCard = ({ post, ...props }: PostDetailProps) => {
+  const [showThread, setShowThread] = useState(true);
   const classes = useStyles();
 
   const {
@@ -83,80 +85,65 @@ export const CommentCard = ({ post, ...props }: PostDetailProps) => {
     postDetailResponse,
   ]);
 
-  const points = useMemo(
-    () => numeral(post.points).format(post.points >= 1100 ? "0.0a" : "0a"),
-    [post]
-  );
-
   const timeago = useMemo(() => format(parseInt(post.createdAt)), [post]);
 
-  const { voteStatus, loading, onUpvote, onDownvote } = useVote(post);
+  const toggleShowThread = useCallback(() => {
+    setShowThread((prevState) => !prevState);
+  }, [setShowThread]);
 
   return (
-    <Box className={classes.root} {...props}>
-      <Box className={classes.upvoteBox}>
-        <IconButton
-          aria-label="upvote"
-          size="small"
-          onClick={onUpvote}
-          disabled={loading}
-        >
-          <ArrowUpwardRoundedIcon
-            className={
-              voteStatus === VoteStatus.UPVOTED
-                ? classes.upvoted
-                : classes.notvoted
-            }
-          />
-        </IconButton>
-        <Typography variant="caption" className={classes[voteStatus]}>
-          {points}
-        </Typography>
-        <IconButton
-          aria-label="downvote"
-          size="small"
-          onClick={onDownvote}
-          disabled={loading}
-        >
-          <ArrowDownwardRoundedIcon
-            className={
-              voteStatus === VoteStatus.DOWNVOTED
-                ? classes.downvoted
-                : classes.notvoted
-            }
-          />
-        </IconButton>
-      </Box>
-
-      <CardHeader
-        avatar={
-          <Avatar aria-label="recipe" className={classes.avatar}>
-            R
-          </Avatar>
-        }
-        action={
-          <IconButton aria-label="settings">
-            <MoreVertIcon />
-          </IconButton>
-        }
-        subheader={`${post.creator.username} · ${timeago}`}
-      />
-      <CardContent className={classes.content}>
-        {/* <Typography variant="h6" gutterBottom>
-          {post.title}
-        </Typography> */}
-        <Box dangerouslySetInnerHTML={{ __html: post.text }}></Box>
-        {children ? (
-          children.map((child) => (
-            <CommentCard
-              key={child?.id}
-              post={child as RegularPostDetailFragment}
+    <Box display="flex" className={classes.root} {...props}>
+      <Box display="flex" flexDirection="column">
+        <Box display="flex" alignItems="center">
+          {!showThread ? (
+            <ControlPointIcon
+              fontSize="inherit"
+              color="primary"
+              className={classes.expandThreadIcon}
+              onClick={toggleShowThread}
             />
-          ))
-        ) : (
-          <LoadingCommentCard />
-        )}
-      </CardContent>
+          ) : null}
+          <Avatar className={classes.smallAvatar}>R</Avatar>
+        </Box>
+        {showThread ? (
+          <Box
+            flexGrow={1}
+            className={classes.threadLineBox}
+            onClick={toggleShowThread}
+          >
+            <Box className={classes.threadLine}></Box>
+          </Box>
+        ) : null}
+      </Box>
+      <Box className={classes.commentBox}>
+        <Box display="flex" alignItems="center" className={classes.header}>
+          <Typography variant="caption">
+            {`${post.creator.username} `}
+          </Typography>
+          &nbsp;&#183;&nbsp;
+          <Typography
+            variant="caption"
+            style={{ color: "#7C7C7C" }}
+          >{`${timeago}`}</Typography>
+        </Box>
+
+        {showThread ? (
+          <Box className={classes.content}>
+            <Box dangerouslySetInnerHTML={{ __html: post.text }}></Box>
+            <HorizontalUpvoteBox post={post} />
+            {children ? (
+              children.map((child) => (
+                <CommentCard
+                  key={child?.id}
+                  post={child as RegularPostDetailFragment}
+                />
+              ))
+            ) : (
+              <LoadingCommentCard />
+            )}
+          </Box>
+        ) : null}
+      </Box>
     </Box>
   );
 };
@@ -165,37 +152,25 @@ export const LoadingCommentCard = () => {
   const classes = useStyles();
 
   return (
-    <Card className={classes.root}>
-      <Box className={classes.upvoteBox}>
-        <IconButton aria-label="upvote" size="small">
-          <Skeleton />
-        </IconButton>
-        <Skeleton />
-        <IconButton aria-label="downvote" size="small">
-          <Skeleton />
-        </IconButton>
-      </Box>
-      <CardHeader
-        avatar={
-          <Avatar aria-label="recipe" className={classes.avatar}>
+    <Box display="flex" className={classes.root}>
+      <Box display="flex" flexDirection="column">
+        <Box display="flex" alignItems="center">
+          <Avatar className={classes.smallAvatar}>
             <Skeleton />
           </Avatar>
-        }
-        action={
-          <IconButton aria-label="settings">
+        </Box>
+      </Box>
+      <Box className={classes.commentBox}>
+        <Box display="flex" alignItems="center" className={classes.header}>
+          <Typography variant="caption">
             <Skeleton />
-          </IconButton>
-        }
-        subheader={<Skeleton />}
-      />
-      <CardContent className={classes.content}>
-        <Typography variant="h6" gutterBottom>
+          </Typography>
+        </Box>
+
+        <Box className={classes.content}>
           <Skeleton />
-        </Typography>
-        <Typography variant="body1" gutterBottom>
-          <Skeleton />
-        </Typography>
-      </CardContent>
-    </Card>
+        </Box>
+      </Box>
+    </Box>
   );
 };
