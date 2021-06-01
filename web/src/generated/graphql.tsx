@@ -26,7 +26,7 @@ export type Author = {
 };
 
 export type CreatePostInput = {
-  title: Scalars['String'];
+  title?: Maybe<Scalars['String']>;
   text: Scalars['String'];
   parentId?: Maybe<Scalars['String']>;
 };
@@ -221,8 +221,9 @@ export type ChangePasswordMutation = (
 );
 
 export type CreatePostMutationVariables = Exact<{
-  title: Scalars['String'];
   text: Scalars['String'];
+  title?: Maybe<Scalars['String']>;
+  parentId?: Maybe<Scalars['String']>;
 }>;
 
 
@@ -440,8 +441,8 @@ export type ChangePasswordMutationHookResult = ReturnType<typeof useChangePasswo
 export type ChangePasswordMutationResult = Apollo.MutationResult<ChangePasswordMutation>;
 export type ChangePasswordMutationOptions = Apollo.BaseMutationOptions<ChangePasswordMutation, ChangePasswordMutationVariables>;
 export const CreatePostDocument = gql`
-    mutation CreatePost($title: String!, $text: String!) {
-  createPost(createPostInput: {title: $title, text: $text}) {
+    mutation CreatePost($text: String!, $title: String, $parentId: String) {
+  createPost(createPostInput: {title: $title, text: $text, parentId: $parentId}) {
     ...RegularPostDetail
   }
 }
@@ -461,8 +462,9 @@ export type CreatePostMutationFn = Apollo.MutationFunction<CreatePostMutation, C
  * @example
  * const [createPostMutation, { data, loading, error }] = useCreatePostMutation({
  *   variables: {
- *      title: // value for 'title'
  *      text: // value for 'text'
+ *      title: // value for 'title'
+ *      parentId: // value for 'parentId'
  *   },
  * });
  */

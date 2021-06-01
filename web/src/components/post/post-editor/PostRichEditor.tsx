@@ -4,7 +4,7 @@ import dynamic from "next/dynamic";
 import React, { useCallback } from "react";
 import { EditorProps } from "react-draft-wysiwyg";
 import "react-draft-wysiwyg/dist/react-draft-wysiwyg.css";
-import { createPostToolbarConfig } from "./ToolbarComponents";
+import { createCommentToolbarConfig } from "./ToolbarComponents";
 
 const Editor = dynamic<EditorProps>(
   () => import("react-draft-wysiwyg").then((mod) => mod.Editor),
@@ -28,6 +28,7 @@ const useStyles = makeStyles((theme: Theme) =>
       top: "64px",
       zIndex: 1000,
       marginBottom: 0,
+      padding: 0,
     },
   })
 );
@@ -56,10 +57,17 @@ export default function RichTextEditor({
           wrapperClassName={classes.wrapper}
           toolbarClassName={classes.toolbar}
           onEditorStateChange={onEditorStateChange}
-          toolbar={createPostToolbarConfig}
+          toolbar={createCommentToolbarConfig}
           placeholder="Text(optional)"
         />
       ) : null}
+      {/* <TextField
+        multiline
+        fullWidth
+        rows={10}
+        value={markdownString}
+        onChange={onMarkdownStringChange}
+      /> */}
     </div>
   );
 }

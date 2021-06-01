@@ -1,6 +1,7 @@
 import {
   Avatar,
   Box,
+  Button,
   CardProps,
   createStyles,
   makeStyles,
@@ -8,6 +9,7 @@ import {
   Typography,
 } from "@material-ui/core";
 import { blue, red } from "@material-ui/core/colors";
+import ChatBubbleOutlineIcon from "@material-ui/icons/ChatBubbleOutline";
 import ControlPointIcon from "@material-ui/icons/ControlPoint";
 import { Skeleton } from "@material-ui/lab";
 import React, { useCallback, useMemo, useState } from "react";
@@ -16,6 +18,7 @@ import {
   RegularPostDetailFragment,
   usePostDetailQuery,
 } from "../../generated/graphql";
+import CommentRichEditor from "./post-editor/CommentRichEditor";
 import { HorizontalUpvoteBox } from "./upvote/HorizontalUpvoteBox";
 
 interface PostDetailProps extends CardProps {
@@ -71,6 +74,7 @@ const useStyles = makeStyles((theme: Theme) =>
 
 export const CommentCard = ({ post, ...props }: PostDetailProps) => {
   const [showThread, setShowThread] = useState(true);
+  const [showCommentEditor, setShowCommentEditor] = useState(false);
   const classes = useStyles();
 
   const {
@@ -89,6 +93,10 @@ export const CommentCard = ({ post, ...props }: PostDetailProps) => {
 
   const toggleShowThread = useCallback(() => {
     setShowThread((prevState) => !prevState);
+  }, [setShowThread]);
+
+  const toggleShowCommentEditor = useCallback(() => {
+    setShowCommentEditor((prevState) => !prevState);
   }, [setShowThread]);
 
   return (
@@ -130,7 +138,17 @@ export const CommentCard = ({ post, ...props }: PostDetailProps) => {
         {showThread ? (
           <Box className={classes.content}>
             <Box dangerouslySetInnerHTML={{ __html: post.text }}></Box>
-            <HorizontalUpvoteBox post={post} />
+            <Box display="flex">
+              <HorizontalUpvoteBox post={post} />
+              <Button
+                size="small"
+                startIcon={<ChatBubbleOutlineIcon />}
+                onClick={toggleShowCommentEditor}
+              >
+                Reply
+              </Button>
+            </Box>
+            {showCommentEditor ? <CommentRichEditor replyTo={post} /> : null}
             {children ? (
               children.map((child) => (
                 <CommentCard
