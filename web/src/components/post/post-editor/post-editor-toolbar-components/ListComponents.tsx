@@ -13,9 +13,11 @@ const useStyles = makeStyles((theme: Theme) =>
   createStyles({
     notPressed: {
       color: "#878A8C!important",
+      fontSize: "26px",
     },
     pressed: {
       color: "#1A1A1B!important",
+      fontSize: "26px",
     },
   })
 );
@@ -34,7 +36,7 @@ export const ListButtons = (props: {
   return (
     <>
       <Tooltip title="Numbered List">
-        <IconButton onClick={toggleBlockType("ordered")}>
+        <IconButton size="small" onClick={toggleBlockType("ordered")}>
           <FormatListNumberedIcon
             className={
               currentState["listType"] === "ordered"
@@ -45,7 +47,7 @@ export const ListButtons = (props: {
         </IconButton>
       </Tooltip>
       <Tooltip title="Bulleted List">
-        <IconButton onClick={toggleBlockType("unordered")}>
+        <IconButton size="small" onClick={toggleBlockType("unordered")}>
           <FormatListBulletedIcon
             className={
               currentState["listType"] === "unordered"

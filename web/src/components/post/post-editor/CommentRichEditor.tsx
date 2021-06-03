@@ -1,18 +1,9 @@
-import { Reference } from "@apollo/client";
 import { Button, createStyles, makeStyles, Theme } from "@material-ui/core";
-import { convertToRaw, EditorState } from "draft-js";
-import draftToHtml from "draftjs-to-html";
+import { EditorState } from "draft-js";
 import dynamic from "next/dynamic";
-import { useRouter } from "next/router";
-import { Dispatch, SetStateAction, useCallback, useState } from "react";
+import { Dispatch, SetStateAction } from "react";
 import { EditorProps } from "react-draft-wysiwyg";
 import "react-draft-wysiwyg/dist/react-draft-wysiwyg.css";
-import {
-  RegularPostDetailFragment,
-  RegularPostDetailFragmentDoc,
-  useCreatePostMutation,
-} from "../../../generated/graphql";
-import { useIsAuth } from "../../../utils/hooks/useIsAuth";
 import { createCommentToolbarConfig } from "./ToolbarComponents";
 const Editor = dynamic<EditorProps>(
   () => import("react-draft-wysiwyg").then((mod) => mod.Editor),
@@ -36,6 +27,7 @@ const useStyles = makeStyles((theme: Theme) =>
       backgroundColor: "#F6F7F8",
       position: "sticky",
       display: "flex",
+      height: "38px",
       alignItems: "center",
       padding: 0,
       top: "64px",
@@ -43,105 +35,59 @@ const useStyles = makeStyles((theme: Theme) =>
       marginBottom: 0,
     },
     commentButton: {
-      //   position: "absolute",
       borderRadius: "9999px",
-      marginLeft: "auto",
       marginRight: "20px",
       height: "24px",
-      //   right: "20px",
-      //   bottom: "10px",
-      //   zIndex: 1000,
+      textTransform: "none",
+    },
+    switchEditorButton: {
+      marginLeft: "auto",
+      marginRight: "16px",
+      textTransform: "none",
     },
   })
 );
 
-const CommentButton = ({
-  replyTo,
-  editorState,
-  setEditorState,
-}: {
-  replyTo: RegularPostDetailFragment;
+interface CommentRichEditorProps {
   editorState: EditorState;
   setEditorState: Dispatch<SetStateAction<EditorState>>;
-}) => {
-  const [createPost, { error: createPostError }] = useCreatePostMutation({
-    update(cache, { data: createPostResponse }) {
-      cache.modify({
-        id: cache.identify(replyTo),
-        fields: {
-          children(existingPostRefs: Reference[]) {
-            const commentRef = cache.writeFragment({
-              fragment: RegularPostDetailFragmentDoc,
-              data: createPostResponse?.createPost,
-              fragmentName: "RegularPostDetail",
-            });
-
-            return [commentRef, ...existingPostRefs];
-          },
-        },
-      });
-    },
-  });
-  const [displayInnerError, setDisplayInnerError] = useState<boolean>(false);
-
-  const router = useRouter();
-  const { checkIsAuth } = useIsAuth();
-
-  const [isSubmitting, setIsSubmitting] = useState(false);
-
-  const onCreatePost = useCallback(async () => {
-    try {
-      setIsSubmitting(true);
-      if (!checkIsAuth()) return;
-      const postDetail = draftToHtml(
-        convertToRaw(editorState.getCurrentContent())
-      );
-
-      const result = await createPost({
-        variables: { text: postDetail, parentId: replyTo.id },
-      });
-
-      if (createPostError || result.errors) {
-        setDisplayInnerError(true);
-        return;
-      }
-    } catch (err) {
-      alert(err);
-    } finally {
-      setEditorState(EditorState.createEmpty());
-      setIsSubmitting(false);
-    }
-  }, [
-    createPost,
-    setDisplayInnerError,
-    router,
-    editorState,
-    checkIsAuth,
-    replyTo,
-  ]);
-
-  const classes = useStyles();
-  return (
-    <Button
-      variant="contained"
-      color="primary"
-      size="small"
-      onClick={onCreatePost}
-      className={classes.commentButton}
-      disabled={isSubmitting || !editorState.getCurrentContent().hasText()}
-    >
-      Comment
-    </Button>
-  );
-};
+  onCreatePost: () => void;
+  isSubmitting: boolean;
+  switchEditor: () => void;
+}
 
 export default function RichTextEditor({
-  replyTo,
-}: {
-  replyTo: RegularPostDetailFragment;
-}) {
+  editorState,
+  setEditorState,
+  onCreatePost,
+  isSubmitting,
+  switchEditor,
+}: CommentRichEditorProps) {
   const classes = useStyles();
-  const [editorState, setEditorState] = useState(EditorState.createEmpty());
+  const CommentButton = () => {
+    return (
+      <Button
+        variant="contained"
+        color="primary"
+        size="small"
+        onClick={onCreatePost}
+        className={classes.commentButton}
+        disabled={isSubmitting || !editorState.getCurrentContent().hasText()}
+      >
+        Comment
+      </Button>
+    );
+  };
+
+  const SwitchEditorButton = () => (
+    <Button
+      onClick={switchEditor}
+      color="primary"
+      className={classes.switchEditorButton}
+    >
+      Markdown
+    </Button>
+  );
 
   return (
     <div>
@@ -154,13 +100,7 @@ export default function RichTextEditor({
           onEditorStateChange={setEditorState}
           toolbar={createCommentToolbarConfig}
           placeholder="What are your thoughts?"
-          toolbarCustomButtons={[
-            <CommentButton
-              replyTo={replyTo}
-              editorState={editorState}
-              setEditorState={setEditorState}
-            />,
-          ]}
+          toolbarCustomButtons={[<SwitchEditorButton />, <CommentButton />]}
         />
       ) : null}
     </div>

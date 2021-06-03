@@ -18,7 +18,7 @@ import {
   RegularPostDetailFragment,
   usePostDetailQuery,
 } from "../../generated/graphql";
-import CommentRichEditor from "./post-editor/CommentRichEditor";
+import CommentEditor from "./post-editor/CommentEditor";
 import { HorizontalUpvoteBox } from "./upvote/HorizontalUpvoteBox";
 
 interface PostDetailProps extends CardProps {
@@ -148,7 +148,7 @@ export const CommentCard = ({ post, ...props }: PostDetailProps) => {
                 Reply
               </Button>
             </Box>
-            {showCommentEditor ? <CommentRichEditor replyTo={post} /> : null}
+            {showCommentEditor ? <CommentEditor replyTo={post} /> : null}
             {children ? (
               children.map((child) => (
                 <CommentCard

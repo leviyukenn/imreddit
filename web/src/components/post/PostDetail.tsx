@@ -5,7 +5,7 @@ import {
   usePostDetailQuery,
 } from "../../generated/graphql";
 import { CommentCard } from "./CommentCard";
-import CommentRichEditor from "./post-editor/CommentRichEditor";
+import CommentEditor from "./post-editor/CommentEditor";
 import { LoadingPostDetailCard, PostDetailCard } from "./PostDetailCard";
 
 interface PostDetailProps {
@@ -22,13 +22,9 @@ const useStyles = makeStyles((theme: Theme) =>
       maxWidth: "740px",
       width: "calc(100% - 32px)",
       margin: "32px",
-      // backgroundColor: theme.palette.background.paper,
     },
     comments: {
       borderRadius: "4px",
-      // display: "flex",
-      // flexDirection: "column",
-      // alignItems: "center",
       padding: "48px 0",
       backgroundColor: theme.palette.background.paper,
     },
@@ -61,7 +57,7 @@ const PostDetail = ({ postId }: PostDetailProps) => {
         <PostDetailCard post={postDetailResponse.postDetail} />
         <Box className={classes.comments}>
           <Box className={classes.commentForm}>
-            <CommentRichEditor replyTo={postDetailResponse.postDetail} />
+            <CommentEditor replyTo={postDetailResponse.postDetail} />
           </Box>
 
           {postDetailResponse.postDetail.children.map((child) => (

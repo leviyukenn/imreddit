@@ -8,10 +8,7 @@ import {
   Theme,
 } from "@material-ui/core";
 import MuiAlert from "@material-ui/lab/Alert";
-import { convertFromRaw, convertToRaw, EditorState } from "draft-js";
-import draftToHtml from "draftjs-to-html";
 import { Field, Form, Formik, FormikHelpers } from "formik";
-import { draftToMarkdown, markdownToDraft } from "markdown-draft-js";
 import { useRouter } from "next/router";
 import React, { useCallback, useState } from "react";
 import * as Yup from "yup";
@@ -21,16 +18,10 @@ import {
 } from "../../generated/graphql";
 import { useIsAuth } from "../../utils/hooks/useIsAuth";
 import { TextInputField } from "../InputField";
-import PostMarkdownEditor from "./post-editor/PostMarkdownEditor";
-import PostRichEditor from "./post-editor/PostRichEditor";
+import PostEditor from "./post-editor/PostEditor";
 
 interface FormData {
   title: string;
-}
-
-enum EditorType {
-  richText = "rich-text",
-  markdown = "markdown",
 }
 
 const useStyles = makeStyles((theme: Theme) =>
@@ -82,34 +73,14 @@ const CreatePost = () => {
   const router = useRouter();
   const { checkIsAuth } = useIsAuth();
 
-  const [editorState, setEditorState] = useState(EditorState.createEmpty());
-  const [markdownString, setMarkdownString] = useState("");
-  const [editorType, setEditorType] = useState<EditorType>(EditorType.richText);
-
-  const switchEditor = useCallback(() => {
-    if (editorType === EditorType.richText) {
-      const markdownContent = draftToMarkdown(
-        convertToRaw(editorState.getCurrentContent())
-      );
-      setMarkdownString(markdownContent);
-      setEditorType(EditorType.markdown);
-    } else if (editorType === EditorType.markdown) {
-      const rawData = markdownToDraft(markdownString);
-      const contentState = convertFromRaw(rawData);
-      const newEditorState = EditorState.createWithContent(contentState);
-      setEditorState(newEditorState);
-      setEditorType(EditorType.richText);
-    }
-  }, [editorType, editorState, markdownString]);
+  const [getPostDetailCallback, setGetPostDetailCallback] = useState<
+    () => string
+  >(() => () => "");
 
   const onCreatePost = useCallback(
     async ({ title }: FormData, actions: FormikHelpers<FormData>) => {
       if (!checkIsAuth()) return;
-      let rawData = convertToRaw(editorState.getCurrentContent());
-      if (editorType === EditorType.markdown) {
-        rawData = markdownToDraft(markdownString);
-      }
-      const postDetail = draftToHtml(rawData);
+      const postDetail = getPostDetailCallback();
 
       const result = await createPost({
         variables: { title, text: postDetail },
@@ -127,10 +98,8 @@ const CreatePost = () => {
       createPost,
       setDisplayInnerError,
       router,
-      editorState,
       checkIsAuth,
-      editorType,
-      markdownString,
+      getPostDetailCallback,
     ]
   );
 
@@ -140,7 +109,6 @@ const CreatePost = () => {
       initialValues={{ title: "" }}
       validationSchema={Yup.object({
         title: Yup.string().required("Required"),
-        // t: Yup.string().required("Required"),
       })}
       onSubmit={onCreatePost}
     >
@@ -171,15 +139,7 @@ const CreatePost = () => {
               />
             </Grid>
             <Grid item className={classes.formItem}>
-              {editorType === EditorType.richText ? (
-                <PostRichEditor {...{ editorState, setEditorState }} />
-              ) : editorType === EditorType.markdown ? (
-                <PostMarkdownEditor
-                  {...{ markdownString, setMarkdownString }}
-                />
-              ) : null}
-
-              <Button onClick={switchEditor}>{editorType}</Button>
+              <PostEditor setGetPostDetailCallback={setGetPostDetailCallback} />
             </Grid>
             {isSubmitting && <LinearProgress />}
             <br />

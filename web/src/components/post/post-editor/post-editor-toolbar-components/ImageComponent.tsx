@@ -43,6 +43,9 @@ const useStyles = makeStyles((theme: Theme) =>
       width: "370px",
       padding: "16px",
     },
+    icon: {
+      fontSize: "26px",
+    },
   })
 );
 
@@ -145,12 +148,13 @@ const ImageComponent = ({
     <>
       <Tooltip title="Add an image">
         <IconButton
+          size="small"
           onClick={onExpandEvent}
           aria-haspopup="true"
           aria-expanded={!!expanded}
           buttonRef={anchorRef}
         >
-          <ImageIcon />
+          <ImageIcon className={classes.icon} />
         </IconButton>
       </Tooltip>
       <Popover

@@ -16,9 +16,11 @@ const useStyles = makeStyles((theme: Theme) =>
   createStyles({
     notPressed: {
       color: "#878A8C!important",
+      fontSize: "26px",
     },
     pressed: {
       color: "#1A1A1B!important",
+      fontSize: "26px",
     },
   })
 );
@@ -37,7 +39,7 @@ export const InlineButtons = (props: {
   return (
     <>
       <Tooltip title="Bold">
-        <IconButton onClick={toggleInline("bold")}>
+        <IconButton size="small" onClick={toggleInline("bold")}>
           <FormatBoldIcon
             className={
               currentState["bold"] ? classes.pressed : classes.notPressed
@@ -46,7 +48,7 @@ export const InlineButtons = (props: {
         </IconButton>
       </Tooltip>
       <Tooltip title="Italics">
-        <IconButton onClick={toggleInline("italic")}>
+        <IconButton size="small" onClick={toggleInline("italic")}>
           <FormatItalicIcon
             className={
               currentState["italic"] ? classes.pressed : classes.notPressed
@@ -55,7 +57,7 @@ export const InlineButtons = (props: {
         </IconButton>
       </Tooltip>
       <Tooltip title="Strikethrough">
-        <IconButton onClick={toggleInline("strikethrough")}>
+        <IconButton size="small" onClick={toggleInline("strikethrough")}>
           <StrikethroughSIcon
             className={
               currentState["strikethrough"]
@@ -66,7 +68,7 @@ export const InlineButtons = (props: {
         </IconButton>
       </Tooltip>
       <Tooltip title="Superscript">
-        <IconButton onClick={toggleInline("superscript")}>
+        <IconButton size="small" onClick={toggleInline("superscript")}>
           <SvgIcon
             className={
               currentState["superscript"] ? classes.pressed : classes.notPressed

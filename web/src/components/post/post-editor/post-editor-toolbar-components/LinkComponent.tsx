@@ -34,6 +34,9 @@ const useStyles = makeStyles((theme: Theme) =>
     formButton: {
       borderRadius: "9999px",
     },
+    icon: {
+      fontSize: "26px",
+    },
   })
 );
 
@@ -169,12 +172,13 @@ const LinkComponent = (props: LinkComponentProps) => {
     <>
       <Tooltip title="Link">
         <IconButton
+          size="small"
           onClick={signalExpandShowModal}
           aria-haspopup="true"
           aria-expanded={showModal}
           buttonRef={anchorRef}
         >
-          <LinkIcon />
+          <LinkIcon className={classes.icon} />
         </IconButton>
       </Tooltip>
       <Popover

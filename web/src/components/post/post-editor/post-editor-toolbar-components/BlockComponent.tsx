@@ -14,9 +14,11 @@ const useStyles = makeStyles((theme: Theme) =>
   createStyles({
     notPressed: {
       color: "#878A8C!important",
+      fontSize: "26px",
     },
     pressed: {
       color: "#1A1A1B!important",
+      fontSize: "26px",
     },
   })
 );
@@ -34,7 +36,7 @@ export const BlockTypeButtons = (props: {
   return (
     <>
       <Tooltip title="Heading">
-        <IconButton onClick={toggleBlockType("H1")}>
+        <IconButton size="small" onClick={toggleBlockType("H1")}>
           <TitleIcon
             className={
               currentState["blockType"] === "H1"
@@ -45,7 +47,7 @@ export const BlockTypeButtons = (props: {
         </IconButton>
       </Tooltip>
       <Tooltip title="Quote Block">
-        <IconButton onClick={toggleBlockType("Blockquote")}>
+        <IconButton size="small" onClick={toggleBlockType("Blockquote")}>
           <FormatQuoteIcon
             className={
               currentState["blockType"] === "Blockquote"
@@ -56,7 +58,7 @@ export const BlockTypeButtons = (props: {
         </IconButton>
       </Tooltip>
       <Tooltip title="Code Block">
-        <IconButton onClick={toggleBlockType("Code")}>
+        <IconButton size="small" onClick={toggleBlockType("Code")}>
           <CodeIcon
             className={
               currentState["blockType"] === "Code"
