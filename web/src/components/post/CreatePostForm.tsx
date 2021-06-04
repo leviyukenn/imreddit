@@ -18,6 +18,8 @@ import {
 } from "../../generated/graphql";
 import { useIsAuth } from "../../utils/hooks/useIsAuth";
 import { TextInputField } from "../InputField";
+import { PostType } from "../types/types";
+import ImagePostEditor from "./post-editor/ImagePostEditor";
 import PostEditor from "./post-editor/PostEditor";
 
 interface FormData {
@@ -40,7 +42,7 @@ const useStyles = makeStyles((theme: Theme) =>
   })
 );
 
-const CreatePost = () => {
+const CreatePost = ({ postType }: { postType: PostType }) => {
   const [createPost, { error: createPostError }] = useCreatePostMutation({
     update(cache, { data: createPostResponse }) {
       cache.modify({
@@ -139,7 +141,13 @@ const CreatePost = () => {
               />
             </Grid>
             <Grid item className={classes.formItem}>
-              <PostEditor setGetPostDetailCallback={setGetPostDetailCallback} />
+              {postType === PostType.TEXT_POST ? (
+                <PostEditor
+                  setGetPostDetailCallback={setGetPostDetailCallback}
+                />
+              ) : postType === PostType.IMAGE_POST ? (
+                <ImagePostEditor />
+              ) : null}
             </Grid>
             {isSubmitting && <LinearProgress />}
             <br />

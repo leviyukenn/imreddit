@@ -1,12 +1,11 @@
 import {
   Box,
+  Button,
   createStyles,
-  Link,
   makeStyles,
   TextField,
   Theme,
   Typography,
-  Button,
 } from "@material-ui/core";
 import React, { ChangeEvent, useCallback } from "react";
 
@@ -25,7 +24,9 @@ const useStyles = makeStyles((theme: Theme) =>
     },
     editor: {
       paddingLeft: "10px",
+      paddingTop: "8px",
       minHeight: "200px",
+      fontSize: "0.875rem",
     },
     toolbar: {
       height: "38px",
@@ -39,7 +40,7 @@ const useStyles = makeStyles((theme: Theme) =>
     switchEditorButton: {
       marginLeft: "auto",
       marginRight: "16px",
-      textTransform: 'none'
+      textTransform: "none",
     },
   })
 );

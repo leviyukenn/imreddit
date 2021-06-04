@@ -3,3 +3,8 @@ export enum VoteStatus {
   DOWNVOTED = "downvoted",
   NOTVOTED = "notvoted",
 }
+
+export enum PostType {
+  TEXT_POST = "textPost",
+  IMAGE_POST = "imagePost",
+}

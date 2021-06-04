@@ -30,6 +30,7 @@ const useStyles = makeStyles((theme: Theme) =>
       paddingLeft: "10px",
       minHeight: "200px",
       fontSize: "0.875rem",
+      paddingTop: "8px",
     },
     toolbar: {
       height: "38px",
@@ -44,7 +45,7 @@ const useStyles = makeStyles((theme: Theme) =>
       borderRadius: "9999px",
       marginRight: "20px",
       height: "24px",
-      textTransform: 'none'
+      textTransform: "none",
     },
     switchEditorButton: {
       marginLeft: "auto",
