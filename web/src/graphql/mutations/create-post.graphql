@@ -1,6 +1,16 @@
-mutation CreatePost($text: String!, $title: String, $parentId: String) {
+mutation CreatePost(
+  $text: String
+  $title: String
+  $parentId: String
+  $images: [ImageInput!]
+) {
   createPost(
-    createPostInput: { title: $title, text: $text, parentId: $parentId }
+    createPostInput: {
+      title: $title
+      text: $text
+      parentId: $parentId
+      images: $images
+    }
   ) {
     ...RegularPostDetail
   }

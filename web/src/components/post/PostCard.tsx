@@ -1,16 +1,4 @@
-import {
-  Avatar,
-  Box,
-  Card,
-  CardContent,
-  CardHeader,
-  CardProps,
-  createStyles,
-  IconButton,
-  makeStyles,
-  Theme,
-  Typography,
-} from "@material-ui/core";
+import { Avatar, Box, Card, CardContent, CardHeader, CardProps, createStyles, IconButton, makeStyles, Theme, Typography } from "@material-ui/core";
 import { red } from "@material-ui/core/colors";
 import ArrowDownwardRoundedIcon from "@material-ui/icons/ArrowDownwardRounded";
 import ArrowUpwardRoundedIcon from "@material-ui/icons/ArrowUpwardRounded";
@@ -160,7 +148,7 @@ export const PostCard = ({ post, ...props }: PostCardProps) => {
             <Typography variant="h6" gutterBottom>
               {post.title}
             </Typography>
-            <Box dangerouslySetInnerHTML={{ __html: post.text }}></Box>
+            <div dangerouslySetInnerHTML={{ __html: post.text }}></div>
           </CardContent>
         </Card>
       </NextLink>

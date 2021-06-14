@@ -6,18 +6,19 @@ import {
   IconButton,
   makeStyles,
   Snackbar,
+  TextField,
   Theme,
   Typography,
 } from "@material-ui/core";
 import AddOutlinedIcon from "@material-ui/icons/AddOutlined";
 import HighlightOffTwoToneIcon from "@material-ui/icons/HighlightOffTwoTone";
 import MuiAlert from "@material-ui/lab/Alert";
-import React, { useCallback, useMemo, useState } from "react";
+import React, { ChangeEvent, useCallback, useMemo, useState } from "react";
 import { useDropzone } from "react-dropzone";
 import { SERVER_URL } from "../../../const/const";
 import { useUploadImageMutation } from "../../../generated/graphql";
+import { UploadedImage } from "../../types/types";
 
-interface ImagePostEditorProps {}
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
     dropzone: {
@@ -83,8 +84,7 @@ const useStyles = makeStyles((theme: Theme) =>
       position: "absolute",
       top: "4px",
       right: "4px",
-      color: "#FFFFFF",
-      backgroudColor: "black",
+      color: "black",
     },
 
     imageInnerBox: {
@@ -118,7 +118,7 @@ const useStyles = makeStyles((theme: Theme) =>
       borderRadius: "4px",
       border: "1px dashed #d6d6d6",
     },
-    addInfoSection: {
+    previewSection: {
       width: "100%",
     },
 
@@ -136,18 +136,26 @@ const useStyles = makeStyles((theme: Theme) =>
       maxWidth: "100%",
       maxHeight: "100%",
     },
+    addImageInfoBox: {
+      margin: "12px 0",
+    },
+    inputField: {
+      marginBottom: "12px",
+    },
   })
 );
 
-interface UploadedImage {
-  name: string;
-  url: string;
+interface ImagePostEditorProps {
+  uploadedImages: UploadedImage[];
+  setUploadedImages: React.Dispatch<React.SetStateAction<UploadedImage[]>>;
 }
 
-const ImagePostEditor = ({}: ImagePostEditorProps) => {
+const ImagePostEditor = ({
+  uploadedImages,
+  setUploadedImages,
+}: ImagePostEditorProps) => {
   const [uploadImage] = useUploadImageMutation();
   const [uploading, setUploading] = useState(false);
-  const [uploadedImages, setUploadedImages] = useState<UploadedImage[]>([]);
   const noImageUploded = useMemo(() => uploadedImages.length === 0, [
     uploadedImages,
   ]);
@@ -177,14 +185,15 @@ const ImagePostEditor = ({}: ImagePostEditorProps) => {
           return;
         }
 
-        if (response.data?.uploadImage.url) {
-          setUploadedImages((prevState) => [
-            ...prevState,
-            {
-              url: SERVER_URL + response.data!.uploadImage.url,
-              name: response.data!.uploadImage.url!,
-            },
-          ]);
+        if (response.data?.uploadImage.path) {
+          const uploadedImage = {
+            path: response.data!.uploadImage.path!,
+            caption: "",
+            link: "",
+          };
+          setUploadedImages((prevState) => [...prevState, uploadedImage]);
+          setSelectedImage(uploadedImage.path);
+
           setMessage({
             severity: "success",
             message: "Image successfully uploaded.",
@@ -200,16 +209,48 @@ const ImagePostEditor = ({}: ImagePostEditorProps) => {
     setMessage(null);
   }, [setMessage]);
 
-  const onImageSelected = useCallback((name: string) => {
-    return () => setSelectedImage(name);
+  const onImageSelected = useCallback((path: string) => {
+    return () => setSelectedImage(path);
   }, []);
 
-  const onImageDeleted = useCallback((name: string) => {
-    return () =>
+  const onImageDeleted = useCallback(
+    (path: string) => {
+      return () =>
+        setUploadedImages((prevState) =>
+          prevState.filter((img) => img.path !== path)
+        );
+    },
+    [selectedImage]
+  );
+
+  const onCaptionChange = useCallback(
+    (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
       setUploadedImages((prevState) =>
-        prevState.filter((img) => img.name !== name)
+        prevState.map((img) => {
+          if (img.path === selectedImage) {
+            img.caption = event.target.value;
+          }
+          return img;
+        })
       );
-  }, []);
+    },
+    [selectedImage]
+  );
+
+  const onLinkChange = useCallback(
+    (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+      setUploadedImages((prevState) =>
+        prevState.map((img) => {
+          if (img.path === selectedImage) {
+            img.link = event.target.value;
+          }
+          return img;
+        })
+      );
+    },
+    [selectedImage]
+  );
+  console.log(uploadedImages);
 
   const {
     acceptedFiles,
@@ -259,27 +300,31 @@ const ImagePostEditor = ({}: ImagePostEditorProps) => {
           <Grid container spacing={1} className={classes.previewGridContainer}>
             {uploadedImages.map((uploadedImage) => {
               return (
-                <Grid item key={uploadedImage.name}>
+                <Grid item key={uploadedImage.path}>
                   <Box
                     className={
-                      selectedImage === uploadedImage.name
+                      selectedImage === uploadedImage.path
                         ? classes.selectedImageOutterBox
                         : classes.imageOutterBox
                     }
                   >
                     <Box
-                      style={{ backgroundImage: `url(${uploadedImage.url})` }}
+                      style={{
+                        backgroundImage: `url(${
+                          SERVER_URL + uploadedImage.path
+                        })`,
+                      }}
                       className={
-                        selectedImage === uploadedImage.name
+                        selectedImage === uploadedImage.path
                           ? classes.selectedImageInnerBox
                           : classes.imageInnerBox
                       }
-                      onClick={onImageSelected(uploadedImage.name)}
+                      onClick={onImageSelected(uploadedImage.path)}
                     >
                       <IconButton
                         size="small"
                         className={classes.deleteButton}
-                        onClick={onImageDeleted(uploadedImage.name)}
+                        onClick={onImageDeleted(uploadedImage.path)}
                       >
                         <HighlightOffTwoToneIcon />
                       </IconButton>
@@ -297,17 +342,45 @@ const ImagePostEditor = ({}: ImagePostEditorProps) => {
             </Grid>
           </Grid>
         ) : null}
-        {selectedImage ? (
-          <Box display="flex" className={classes.addInfoSection}>
+        {selectedImage &&
+        uploadedImages.find((img) => img.path === selectedImage) ? (
+          <Box display="flex" className={classes.previewSection}>
             <Box className={classes.previewImageBox}>
               <img
                 src={
-                  uploadedImages.find((img) => img.name === selectedImage)?.url
+                  SERVER_URL +
+                  uploadedImages.find((img) => img.path === selectedImage)?.path
                 }
                 className={classes.previewImage}
               />
             </Box>
-            <Box></Box>
+            <Box className={classes.addImageInfoBox}>
+              <TextField
+                size="small"
+                variant="outlined"
+                label="Caption"
+                placeholder="Add a caption..."
+                fullWidth
+                className={classes.inputField}
+                value={
+                  uploadedImages.find((img) => img.path === selectedImage)
+                    ?.caption
+                }
+                onChange={onCaptionChange}
+              />
+              <TextField
+                size="small"
+                variant="outlined"
+                label="Link"
+                placeholder="Add a link..."
+                fullWidth
+                className={classes.inputField}
+                value={
+                  uploadedImages.find((img) => img.path === selectedImage)?.link
+                }
+                onChange={onLinkChange}
+              />
+            </Box>
           </Box>
         ) : null}
       </Box>

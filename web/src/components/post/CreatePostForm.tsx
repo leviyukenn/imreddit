@@ -8,17 +8,19 @@ import {
   Theme,
 } from "@material-ui/core";
 import MuiAlert from "@material-ui/lab/Alert";
+import { EditorState } from "draft-js";
 import { Field, Form, Formik, FormikHelpers } from "formik";
 import { useRouter } from "next/router";
 import React, { useCallback, useState } from "react";
 import * as Yup from "yup";
 import {
+  CreatePostMutationVariables,
   RegularPostDetailFragmentDoc,
   useCreatePostMutation,
 } from "../../generated/graphql";
 import { useIsAuth } from "../../utils/hooks/useIsAuth";
 import { TextInputField } from "../InputField";
-import { PostType } from "../types/types";
+import { PostType, UploadedImage } from "../types/types";
 import ImagePostEditor from "./post-editor/ImagePostEditor";
 import PostEditor from "./post-editor/PostEditor";
 
@@ -78,14 +80,23 @@ const CreatePost = ({ postType }: { postType: PostType }) => {
   const [getPostDetailCallback, setGetPostDetailCallback] = useState<
     () => string
   >(() => () => "");
+  const [editorState, setEditorState] = useState(EditorState.createEmpty());
+  const [uploadedImages, setUploadedImages] = useState<UploadedImage[]>([]);
 
   const onCreatePost = useCallback(
     async ({ title }: FormData, actions: FormikHelpers<FormData>) => {
       if (!checkIsAuth()) return;
-      const postDetail = getPostDetailCallback();
+      let inputVariable: CreatePostMutationVariables;
+
+      if (postType === PostType.TEXT_POST) {
+        const postDetail = getPostDetailCallback();
+        inputVariable = { title, text: postDetail };
+      } else {
+        inputVariable = { title, images: uploadedImages };
+      }
 
       const result = await createPost({
-        variables: { title, text: postDetail },
+        variables: inputVariable,
       });
 
       if (createPostError || result.errors) {
@@ -93,7 +104,7 @@ const CreatePost = ({ postType }: { postType: PostType }) => {
         return;
       }
       if (result.data?.createPost) {
-        router.push("/");
+        router.push(`/post-detail/${result.data.createPost.id}`);
       }
     },
     [
@@ -102,6 +113,8 @@ const CreatePost = ({ postType }: { postType: PostType }) => {
       router,
       checkIsAuth,
       getPostDetailCallback,
+      postType,
+      uploadedImages,
     ]
   );
 
@@ -143,10 +156,10 @@ const CreatePost = ({ postType }: { postType: PostType }) => {
             <Grid item className={classes.formItem}>
               {postType === PostType.TEXT_POST ? (
                 <PostEditor
-                  setGetPostDetailCallback={setGetPostDetailCallback}
+                  {...{ setGetPostDetailCallback, setEditorState, editorState }}
                 />
               ) : postType === PostType.IMAGE_POST ? (
-                <ImagePostEditor />
+                <ImagePostEditor {...{ uploadedImages, setUploadedImages }} />
               ) : null}
             </Grid>
             {isSubmitting && <LinearProgress />}

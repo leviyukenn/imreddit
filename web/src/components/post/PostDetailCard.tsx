@@ -22,6 +22,8 @@ import { format } from "timeago.js";
 import { RegularPostDetailFragment } from "../../generated/graphql";
 import { useVote } from "../hooks/hooks";
 import { VoteStatus } from "../types/types";
+import ImagePostSwiper from "./ImgaePostSwiper";
+
 interface PostDetailProps extends CardProps {
   post: RegularPostDetailFragment;
 }
@@ -130,7 +132,10 @@ export const PostDetailCard = ({ post, ...props }: PostDetailProps) => {
         <Typography variant="h6" gutterBottom>
           {post.title}
         </Typography>
-        <Box dangerouslySetInnerHTML={{ __html: post.text }}></Box>
+        {post.images.length === 0 ? (
+          <Box dangerouslySetInnerHTML={{ __html: post.text || "" }}></Box>
+        ) : null}
+        <ImagePostSwiper images={post.images} />
       </CardContent>
     </Card>
   );

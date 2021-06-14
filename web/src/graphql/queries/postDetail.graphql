@@ -2,7 +2,7 @@ query PostDetail($postId: String!) {
   postDetail(postId: $postId) {
     ...RegularPostDetail
     children {
-      ...RegularPostDetail
+      id
     }
   }
 }

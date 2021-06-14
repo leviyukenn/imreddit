@@ -13,16 +13,15 @@ import ChatBubbleOutlineIcon from "@material-ui/icons/ChatBubbleOutline";
 import ControlPointIcon from "@material-ui/icons/ControlPoint";
 import { Skeleton } from "@material-ui/lab";
 import React, { useCallback, useMemo, useState } from "react";
+// Import Swiper styles
+// import "swiper/swiper.scss";
 import { format } from "timeago.js";
-import {
-  RegularPostDetailFragment,
-  usePostDetailQuery,
-} from "../../generated/graphql";
+import { usePostDetailQuery } from "../../generated/graphql";
 import CommentEditor from "./post-editor/CommentEditor";
 import { HorizontalUpvoteBox } from "./upvote/HorizontalUpvoteBox";
 
 interface PostDetailProps extends CardProps {
-  post: RegularPostDetailFragment;
+  postId: string;
 }
 
 const useStyles = makeStyles((theme: Theme) =>
@@ -72,7 +71,7 @@ const useStyles = makeStyles((theme: Theme) =>
   })
 );
 
-export const CommentCard = ({ post, ...props }: PostDetailProps) => {
+export const CommentCard = ({ postId, ...props }: PostDetailProps) => {
   const [showThread, setShowThread] = useState(true);
   const [showCommentEditor, setShowCommentEditor] = useState(false);
   const classes = useStyles();
@@ -82,14 +81,17 @@ export const CommentCard = ({ post, ...props }: PostDetailProps) => {
     loading: postDetailLoading,
     error,
   } = usePostDetailQuery({
-    skip: !post.id,
-    variables: { postId: post.id },
+    skip: !postId,
+    variables: { postId },
   });
-  const children = useMemo(() => postDetailResponse?.postDetail?.children, [
+  const post = useMemo(() => postDetailResponse?.postDetail, [
     postDetailResponse,
   ]);
 
-  const timeago = useMemo(() => format(parseInt(post.createdAt)), [post]);
+  const timeago = useMemo(
+    () => post?.createdAt && format(parseInt(post.createdAt)),
+    [post]
+  );
 
   const toggleShowThread = useCallback(() => {
     setShowThread((prevState) => !prevState);
@@ -98,6 +100,8 @@ export const CommentCard = ({ post, ...props }: PostDetailProps) => {
   const toggleShowCommentEditor = useCallback(() => {
     setShowCommentEditor((prevState) => !prevState);
   }, [setShowThread]);
+
+  if (!post) return <LoadingCommentCard />;
 
   return (
     <Box display="flex" className={classes.root} {...props}>
@@ -137,7 +141,7 @@ export const CommentCard = ({ post, ...props }: PostDetailProps) => {
 
         {showThread ? (
           <Box className={classes.content}>
-            <Box dangerouslySetInnerHTML={{ __html: post.text }}></Box>
+            <Box dangerouslySetInnerHTML={{ __html: post.text || "" }}></Box>
             <Box display="flex">
               <HorizontalUpvoteBox post={post} />
               <Button
@@ -149,16 +153,9 @@ export const CommentCard = ({ post, ...props }: PostDetailProps) => {
               </Button>
             </Box>
             {showCommentEditor ? <CommentEditor replyTo={post} /> : null}
-            {children ? (
-              children.map((child) => (
-                <CommentCard
-                  key={child?.id}
-                  post={child as RegularPostDetailFragment}
-                />
-              ))
-            ) : (
-              <LoadingCommentCard />
-            )}
+            {post.children.map((child) => (
+              <CommentCard key={child.id} postId={child.id} />
+            ))}
           </Box>
         ) : null}
       </Box>

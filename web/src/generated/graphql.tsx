@@ -17,18 +17,11 @@ export type Scalars = {
   Upload: any;
 };
 
-export type Author = {
-  __typename?: 'Author';
-  id: Scalars['Int'];
-  firstName?: Maybe<Scalars['String']>;
-  lastName?: Maybe<Scalars['String']>;
-  posts: Array<Post>;
-};
-
 export type CreatePostInput = {
   title?: Maybe<Scalars['String']>;
-  text: Scalars['String'];
+  text?: Maybe<Scalars['String']>;
   parentId?: Maybe<Scalars['String']>;
+  images?: Maybe<Array<ImageInput>>;
 };
 
 export type FieldError = {
@@ -40,6 +33,20 @@ export type FieldError = {
 export type ForgotPasswordInput = {
   username: Scalars['String'];
   email: Scalars['String'];
+};
+
+export type Image = {
+  __typename?: 'Image';
+  id: Scalars['String'];
+  path: Scalars['String'];
+  caption?: Maybe<Scalars['String']>;
+  link?: Maybe<Scalars['String']>;
+};
+
+export type ImageInput = {
+  path: Scalars['String'];
+  caption?: Maybe<Scalars['String']>;
+  link?: Maybe<Scalars['String']>;
 };
 
 export type LoginInput = {
@@ -112,24 +119,19 @@ export type Post = {
   id: Scalars['String'];
   createdAt: Scalars['String'];
   updatedAt: Scalars['String'];
-  title: Scalars['String'];
-  text: Scalars['String'];
+  title?: Maybe<Scalars['String']>;
+  text?: Maybe<Scalars['String']>;
   points: Scalars['Int'];
   creator: User;
-  children: Array<Maybe<Post>>;
+  children: Array<Post>;
+  images: Array<Image>;
 };
 
 export type Query = {
   __typename?: 'Query';
   me?: Maybe<User>;
-  author: Author;
   posts: PaginatedPosts;
   postDetail?: Maybe<Post>;
-};
-
-
-export type QueryAuthorArgs = {
-  id: Scalars['Int'];
 };
 
 
@@ -153,7 +155,7 @@ export type RegisterInput = {
 export type UploadResponse = {
   __typename?: 'UploadResponse';
   errors?: Maybe<Array<FieldError>>;
-  url?: Maybe<Scalars['String']>;
+  path?: Maybe<Scalars['String']>;
 };
 
 export type User = {
@@ -181,13 +183,21 @@ export type RegularErrorsFragment = (
   & Pick<FieldError, 'field' | 'message'>
 );
 
+export type RegularImageFragment = (
+  { __typename?: 'Image' }
+  & Pick<Image, 'id' | 'path' | 'caption' | 'link'>
+);
+
 export type RegularPostDetailFragment = (
   { __typename?: 'Post' }
   & Pick<Post, 'id' | 'createdAt' | 'updatedAt' | 'title' | 'text' | 'points'>
   & { creator: (
     { __typename?: 'User' }
     & RegularUserFragment
-  ) }
+  ), images: Array<(
+    { __typename?: 'Image' }
+    & RegularImageFragment
+  )> }
 );
 
 export type RegularUserFragment = (
@@ -221,9 +231,10 @@ export type ChangePasswordMutation = (
 );
 
 export type CreatePostMutationVariables = Exact<{
-  text: Scalars['String'];
+  text?: Maybe<Scalars['String']>;
   title?: Maybe<Scalars['String']>;
   parentId?: Maybe<Scalars['String']>;
+  images?: Maybe<Array<ImageInput> | ImageInput>;
 }>;
 
 
@@ -304,7 +315,7 @@ export type UploadImageMutation = (
   { __typename?: 'Mutation' }
   & { uploadImage: (
     { __typename?: 'UploadResponse' }
-    & Pick<UploadResponse, 'url'>
+    & Pick<UploadResponse, 'path'>
     & { errors?: Maybe<Array<(
       { __typename?: 'FieldError' }
       & Pick<FieldError, 'field' | 'message'>
@@ -343,10 +354,10 @@ export type PostDetailQuery = (
   { __typename?: 'Query' }
   & { postDetail?: Maybe<(
     { __typename?: 'Post' }
-    & { children: Array<Maybe<(
+    & { children: Array<(
       { __typename?: 'Post' }
-      & RegularPostDetailFragment
-    )>> }
+      & Pick<Post, 'id'>
+    )> }
     & RegularPostDetailFragment
   )> }
 );
@@ -376,6 +387,14 @@ export const RegularUserFragmentDoc = gql`
   email
 }
     `;
+export const RegularImageFragmentDoc = gql`
+    fragment RegularImage on Image {
+  id
+  path
+  caption
+  link
+}
+    `;
 export const RegularPostDetailFragmentDoc = gql`
     fragment RegularPostDetail on Post {
   id
@@ -387,8 +406,12 @@ export const RegularPostDetailFragmentDoc = gql`
   creator {
     ...RegularUser
   }
+  images {
+    ...RegularImage
+  }
 }
-    ${RegularUserFragmentDoc}`;
+    ${RegularUserFragmentDoc}
+${RegularImageFragmentDoc}`;
 export const RegularErrorsFragmentDoc = gql`
     fragment RegularErrors on FieldError {
   field
@@ -441,8 +464,10 @@ export type ChangePasswordMutationHookResult = ReturnType<typeof useChangePasswo
 export type ChangePasswordMutationResult = Apollo.MutationResult<ChangePasswordMutation>;
 export type ChangePasswordMutationOptions = Apollo.BaseMutationOptions<ChangePasswordMutation, ChangePasswordMutationVariables>;
 export const CreatePostDocument = gql`
-    mutation CreatePost($text: String!, $title: String, $parentId: String) {
-  createPost(createPostInput: {title: $title, text: $text, parentId: $parentId}) {
+    mutation CreatePost($text: String, $title: String, $parentId: String, $images: [ImageInput!]) {
+  createPost(
+    createPostInput: {title: $title, text: $text, parentId: $parentId, images: $images}
+  ) {
     ...RegularPostDetail
   }
 }
@@ -465,6 +490,7 @@ export type CreatePostMutationFn = Apollo.MutationFunction<CreatePostMutation, C
  *      text: // value for 'text'
  *      title: // value for 'title'
  *      parentId: // value for 'parentId'
+ *      images: // value for 'images'
  *   },
  * });
  */
@@ -625,7 +651,7 @@ export const UploadImageDocument = gql`
       field
       message
     }
-    url
+    path
   }
 }
     `;
@@ -726,7 +752,7 @@ export const PostDetailDocument = gql`
   postDetail(postId: $postId) {
     ...RegularPostDetail
     children {
-      ...RegularPostDetail
+      id
     }
   }
 }
@@ -798,17 +824,17 @@ export function usePostsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<Post
 export type PostsQueryHookResult = ReturnType<typeof usePostsQuery>;
 export type PostsLazyQueryHookResult = ReturnType<typeof usePostsLazyQuery>;
 export type PostsQueryResult = Apollo.QueryResult<PostsQuery, PostsQueryVariables>;
-export type AuthorKeySpecifier = ('id' | 'firstName' | 'lastName' | 'posts' | AuthorKeySpecifier)[];
-export type AuthorFieldPolicy = {
-	id?: FieldPolicy<any> | FieldReadFunction<any>,
-	firstName?: FieldPolicy<any> | FieldReadFunction<any>,
-	lastName?: FieldPolicy<any> | FieldReadFunction<any>,
-	posts?: FieldPolicy<any> | FieldReadFunction<any>
-};
 export type FieldErrorKeySpecifier = ('field' | 'message' | FieldErrorKeySpecifier)[];
 export type FieldErrorFieldPolicy = {
 	field?: FieldPolicy<any> | FieldReadFunction<any>,
 	message?: FieldPolicy<any> | FieldReadFunction<any>
+};
+export type ImageKeySpecifier = ('id' | 'path' | 'caption' | 'link' | ImageKeySpecifier)[];
+export type ImageFieldPolicy = {
+	id?: FieldPolicy<any> | FieldReadFunction<any>,
+	path?: FieldPolicy<any> | FieldReadFunction<any>,
+	caption?: FieldPolicy<any> | FieldReadFunction<any>,
+	link?: FieldPolicy<any> | FieldReadFunction<any>
 };
 export type MutationKeySpecifier = ('changePassword' | 'forgotPassword' | 'register' | 'login' | 'logout' | 'createPost' | 'deletePost' | 'uploadImage' | 'vote' | MutationKeySpecifier)[];
 export type MutationFieldPolicy = {
@@ -827,7 +853,7 @@ export type PaginatedPostsFieldPolicy = {
 	posts?: FieldPolicy<any> | FieldReadFunction<any>,
 	hasMore?: FieldPolicy<any> | FieldReadFunction<any>
 };
-export type PostKeySpecifier = ('id' | 'createdAt' | 'updatedAt' | 'title' | 'text' | 'points' | 'creator' | 'children' | PostKeySpecifier)[];
+export type PostKeySpecifier = ('id' | 'createdAt' | 'updatedAt' | 'title' | 'text' | 'points' | 'creator' | 'children' | 'images' | PostKeySpecifier)[];
 export type PostFieldPolicy = {
 	id?: FieldPolicy<any> | FieldReadFunction<any>,
 	createdAt?: FieldPolicy<any> | FieldReadFunction<any>,
@@ -836,19 +862,19 @@ export type PostFieldPolicy = {
 	text?: FieldPolicy<any> | FieldReadFunction<any>,
 	points?: FieldPolicy<any> | FieldReadFunction<any>,
 	creator?: FieldPolicy<any> | FieldReadFunction<any>,
-	children?: FieldPolicy<any> | FieldReadFunction<any>
+	children?: FieldPolicy<any> | FieldReadFunction<any>,
+	images?: FieldPolicy<any> | FieldReadFunction<any>
 };
-export type QueryKeySpecifier = ('me' | 'author' | 'posts' | 'postDetail' | QueryKeySpecifier)[];
+export type QueryKeySpecifier = ('me' | 'posts' | 'postDetail' | QueryKeySpecifier)[];
 export type QueryFieldPolicy = {
 	me?: FieldPolicy<any> | FieldReadFunction<any>,
-	author?: FieldPolicy<any> | FieldReadFunction<any>,
 	posts?: FieldPolicy<any> | FieldReadFunction<any>,
 	postDetail?: FieldPolicy<any> | FieldReadFunction<any>
 };
-export type UploadResponseKeySpecifier = ('errors' | 'url' | UploadResponseKeySpecifier)[];
+export type UploadResponseKeySpecifier = ('errors' | 'path' | UploadResponseKeySpecifier)[];
 export type UploadResponseFieldPolicy = {
 	errors?: FieldPolicy<any> | FieldReadFunction<any>,
-	url?: FieldPolicy<any> | FieldReadFunction<any>
+	path?: FieldPolicy<any> | FieldReadFunction<any>
 };
 export type UserKeySpecifier = ('id' | 'createdAt' | 'updatedAt' | 'username' | 'email' | UserKeySpecifier)[];
 export type UserFieldPolicy = {
@@ -864,13 +890,13 @@ export type UserResponseFieldPolicy = {
 	user?: FieldPolicy<any> | FieldReadFunction<any>
 };
 export type TypedTypePolicies = TypePolicies & {
-	Author?: Omit<TypePolicy, "fields" | "keyFields"> & {
-		keyFields?: false | AuthorKeySpecifier | (() => undefined | AuthorKeySpecifier),
-		fields?: AuthorFieldPolicy,
-	},
 	FieldError?: Omit<TypePolicy, "fields" | "keyFields"> & {
 		keyFields?: false | FieldErrorKeySpecifier | (() => undefined | FieldErrorKeySpecifier),
 		fields?: FieldErrorFieldPolicy,
+	},
+	Image?: Omit<TypePolicy, "fields" | "keyFields"> & {
+		keyFields?: false | ImageKeySpecifier | (() => undefined | ImageKeySpecifier),
+		fields?: ImageFieldPolicy,
 	},
 	Mutation?: Omit<TypePolicy, "fields" | "keyFields"> & {
 		keyFields?: false | MutationKeySpecifier | (() => undefined | MutationKeySpecifier),

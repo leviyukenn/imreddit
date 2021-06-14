@@ -8,4 +8,7 @@ fragment RegularPostDetail on Post {
   creator {
     ...RegularUser
   }
+  images {
+    ...RegularImage
+  }
 }

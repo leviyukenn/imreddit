@@ -4,6 +4,6 @@ mutation UploadImage($file: Upload!) {
       field
       message
     }
-    url
+    path
   }
 }

@@ -76,8 +76,8 @@ const ImageDropZone = ({ onChange }: ImageDropZoneProps) => {
           return;
         }
 
-        if (response.data?.uploadImage.url) {
-          onChange(SERVER_URL + response.data.uploadImage.url, "auto", "100%");
+        if (response.data?.uploadImage.path) {
+          onChange(SERVER_URL + response.data.uploadImage.path, "auto", "100%");
           setMessage({
             severity: "success",
             message: "Image successfully uploaded.",

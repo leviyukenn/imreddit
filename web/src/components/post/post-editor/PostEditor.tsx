@@ -6,6 +6,8 @@ import PostMarkdownEditor from "./PostMarkdownEditor";
 import PostRichEditor from "./PostRichEditor";
 
 interface PostEditorProps {
+  editorState: EditorState;
+  setEditorState: React.Dispatch<React.SetStateAction<EditorState>>;
   setGetPostDetailCallback: React.Dispatch<React.SetStateAction<() => string>>;
 }
 
@@ -14,8 +16,11 @@ enum EditorType {
   markdown = "markdown",
 }
 
-const PostEditor = ({ setGetPostDetailCallback }: PostEditorProps) => {
-  const [editorState, setEditorState] = useState(EditorState.createEmpty());
+const PostEditor = ({
+  setGetPostDetailCallback,
+  editorState,
+  setEditorState,
+}: PostEditorProps) => {
   const [markdownString, setMarkdownString] = useState("");
   const [editorType, setEditorType] = useState<EditorType>(EditorType.richText);
 

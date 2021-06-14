@@ -1,9 +1,6 @@
 import { Box, createStyles, makeStyles, Theme } from "@material-ui/core";
 import React from "react";
-import {
-  RegularPostDetailFragment,
-  usePostDetailQuery,
-} from "../../generated/graphql";
+import { usePostDetailQuery } from "../../generated/graphql";
 import { CommentCard } from "./CommentCard";
 import CommentEditor from "./post-editor/CommentEditor";
 import { LoadingPostDetailCard, PostDetailCard } from "./PostDetailCard";
@@ -61,10 +58,7 @@ const PostDetail = ({ postId }: PostDetailProps) => {
           </Box>
 
           {postDetailResponse.postDetail.children.map((child) => (
-            <CommentCard
-              key={child?.id}
-              post={child as RegularPostDetailFragment}
-            />
+            <CommentCard key={child.id} postId={child.id} />
           ))}
         </Box>
       </Box>
