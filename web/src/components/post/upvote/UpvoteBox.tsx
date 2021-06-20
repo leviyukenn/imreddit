@@ -14,14 +14,41 @@ import { RegularPostDetailFragment } from "../../../generated/graphql";
 import { useVote } from "../../hooks/hooks";
 import { VoteStatus } from "../../types/types";
 
+interface VerticalUpvoteBoxProps {
+  post: RegularPostDetailFragment;
+  isVerticalLayout: boolean;
+}
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
-    upvoteBox: {
+    verticalLayout: {
+      display: "flex",
+      flexDirection: "column",
+      justifyContent: "center",
+      alignItems: "center",
+      width: theme.spacing(5),
+      height: theme.spacing(10),
+      padding: "8px 4px",
+    },
+    horizontalLayout: {
       display: "flex",
       alignItems: "center",
+      justifyContent: "space-between",
+      minWidth: "80px",
       padding: "8px 0",
     },
-    notvoted: {
+    notUpvoted: {
+      color: "#878A8C",
+      "&:hover": {
+        color: "#FC3A05",
+      },
+    },
+    notDownvoted: {
+      color: "#878A8C",
+      "&:hover": {
+        color: "#728EFE",
+      },
+    },
+    pointsNotVoted: {
       color: "#878A8C",
     },
     upvoted: {
@@ -33,20 +60,21 @@ const useStyles = makeStyles((theme: Theme) =>
   })
 );
 
-export const HorizontalUpvoteBox = ({
-  post,
-}: {
-  post: RegularPostDetailFragment;
-}) => {
-  const { voteStatus, loading, onUpvote, onDownvote } = useVote(post);
+const UpvoteBox = ({ post, isVerticalLayout }: VerticalUpvoteBoxProps) => {
+  const classes = useStyles();
   const points = useMemo(
     () => numeral(post.points).format(post.points >= 1100 ? "0.0a" : "0a"),
     [post]
   );
 
-  const classes = useStyles();
+  const { voteStatus, loading, onUpvote, onDownvote } = useVote(post);
+
   return (
-    <Box className={classes.upvoteBox}>
+    <Box
+      className={
+        isVerticalLayout ? classes.verticalLayout : classes.horizontalLayout
+      }
+    >
       <IconButton
         aria-label="upvote"
         size="small"
@@ -57,11 +85,20 @@ export const HorizontalUpvoteBox = ({
           className={
             voteStatus === VoteStatus.UPVOTED
               ? classes.upvoted
-              : classes.notvoted
+              : classes.notUpvoted
           }
         />
       </IconButton>
-      <Typography variant="caption" className={classes[voteStatus]}>
+      <Typography
+        variant="caption"
+        className={
+          voteStatus === VoteStatus.UPVOTED
+            ? classes.upvoted
+            : voteStatus === VoteStatus.DOWNVOTED
+            ? classes.downvoted
+            : classes.pointsNotVoted
+        }
+      >
         {points}
       </Typography>
       <IconButton
@@ -74,10 +111,11 @@ export const HorizontalUpvoteBox = ({
           className={
             voteStatus === VoteStatus.DOWNVOTED
               ? classes.downvoted
-              : classes.notvoted
+              : classes.notDownvoted
           }
         />
       </IconButton>
     </Box>
   );
 };
+export default UpvoteBox;

@@ -13,12 +13,10 @@ import ChatBubbleOutlineIcon from "@material-ui/icons/ChatBubbleOutline";
 import ControlPointIcon from "@material-ui/icons/ControlPoint";
 import { Skeleton } from "@material-ui/lab";
 import React, { useCallback, useMemo, useState } from "react";
-// Import Swiper styles
-// import "swiper/swiper.scss";
 import { format } from "timeago.js";
 import { usePostDetailQuery } from "../../generated/graphql";
 import CommentEditor from "./post-editor/CommentEditor";
-import { HorizontalUpvoteBox } from "./upvote/HorizontalUpvoteBox";
+import UpvoteBox from "./upvote/UpvoteBox";
 
 interface PostDetailProps extends CardProps {
   postId: string;
@@ -143,7 +141,7 @@ export const CommentCard = ({ postId, ...props }: PostDetailProps) => {
           <Box className={classes.content}>
             <Box dangerouslySetInnerHTML={{ __html: post.text || "" }}></Box>
             <Box display="flex">
-              <HorizontalUpvoteBox post={post} />
+              <UpvoteBox post={post} isVerticalLayout={false} />
               <Button
                 size="small"
                 startIcon={<ChatBubbleOutlineIcon />}

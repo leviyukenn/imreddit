@@ -1,16 +1,25 @@
-import { Avatar, Box, Card, CardContent, CardHeader, CardProps, createStyles, IconButton, makeStyles, Theme, Typography } from "@material-ui/core";
+import {
+  Avatar,
+  Box,
+  Card,
+  CardContent,
+  CardHeader,
+  CardProps,
+  createStyles,
+  IconButton,
+  makeStyles,
+  Theme,
+  Typography,
+} from "@material-ui/core";
 import { red } from "@material-ui/core/colors";
-import ArrowDownwardRoundedIcon from "@material-ui/icons/ArrowDownwardRounded";
-import ArrowUpwardRoundedIcon from "@material-ui/icons/ArrowUpwardRounded";
 import MoreVertIcon from "@material-ui/icons/MoreVert";
 import { Skeleton } from "@material-ui/lab";
 import NextLink from "next/link";
-import numeral from "numeral";
 import React, { useMemo } from "react";
 import { format } from "timeago.js";
 import { RegularPostDetailFragment } from "../../generated/graphql";
-import { useVote } from "../hooks/hooks";
-import { VoteStatus } from "../types/types";
+import ImagePostSwiper from "./ImgaePostSwiper";
+import UpvoteBox from "./upvote/UpvoteBox";
 
 interface PostCardProps extends CardProps {
   post: RegularPostDetailFragment;
@@ -35,41 +44,29 @@ const useStyles = makeStyles((theme: Theme) =>
       position: "absolute",
       top: 0,
       left: 0,
-      display: "flex",
-      flexDirection: "column",
-      justifyContent: "center",
-      alignItems: "center",
-      width: theme.spacing(5),
-      height: theme.spacing(10),
-      padding: "8px 4px",
     },
-    notvoted: {
-      color: "#878A8C",
-    },
-    upvoted: {
-      color: "#FC3A05",
-    },
-    downvoted: {
-      color: "#728EFE",
-    },
-
     header: {
       backgroundColor: theme.palette.background.paper,
     },
-    content: {
+    textPostContent: {
       paddingTop: 0,
       backgroundColor: theme.palette.background.paper,
       maxHeight: "300px",
       overflow: "hidden",
       "&::after": {
         content: '""',
-        // display: "block",
         background: " linear-gradient(rgba(255, 255, 255, 0.001),white)",
         position: "absolute",
         bottom: "1px",
         height: "60px",
         width: "calc(100% - 58px)",
       },
+    },
+    imagePostContent: {
+      paddingTop: 0,
+      backgroundColor: theme.palette.background.paper,
+      maxHeight: "600px",
+      overflow: "hidden",
     },
     avatar: {
       backgroundColor: red[500],
@@ -80,49 +77,14 @@ const useStyles = makeStyles((theme: Theme) =>
 export const PostCard = ({ post, ...props }: PostCardProps) => {
   const classes = useStyles();
 
-  const { voteStatus, loading, onUpvote, onDownvote } = useVote(post);
-
-  const points = useMemo(
-    () => numeral(post.points).format(post.points >= 1100 ? "0.0a" : "0a"),
-    [post]
-  );
-
   const timeago = useMemo(() => format(parseInt(post.createdAt)), [post]);
+
+  const isTextPost = useMemo(() => post.images.length === 0, [post]);
 
   return (
     <Box className={classes.root}>
       <Box className={classes.upvoteBox}>
-        <IconButton
-          aria-label="upvote"
-          size="small"
-          onClick={onUpvote}
-          disabled={loading}
-        >
-          <ArrowUpwardRoundedIcon
-            className={
-              voteStatus === VoteStatus.UPVOTED
-                ? classes.upvoted
-                : classes.notvoted
-            }
-          />
-        </IconButton>
-        <Typography variant="caption" className={classes[voteStatus]}>
-          {points}
-        </Typography>
-        <IconButton
-          aria-label="downvote"
-          size="small"
-          onClick={onDownvote}
-          disabled={loading}
-        >
-          <ArrowDownwardRoundedIcon
-            className={
-              voteStatus === VoteStatus.DOWNVOTED
-                ? classes.downvoted
-                : classes.notvoted
-            }
-          />
-        </IconButton>
+        <UpvoteBox post={post} isVerticalLayout={true} />
       </Box>
       <NextLink
         href={`/?postId=${post.id}`}
@@ -144,11 +106,18 @@ export const PostCard = ({ post, ...props }: PostCardProps) => {
             subheader={`Posted by ${post.creator.username} ${timeago}`}
             className={classes.header}
           />
-          <CardContent className={classes.content}>
+          <CardContent
+            className={
+              isTextPost ? classes.textPostContent : classes.imagePostContent
+            }
+          >
             <Typography variant="h6" gutterBottom>
               {post.title}
             </Typography>
-            <div dangerouslySetInnerHTML={{ __html: post.text }}></div>
+            {isTextPost ? (
+              <Box dangerouslySetInnerHTML={{ __html: post.text || "" }}></Box>
+            ) : null}
+            {!isTextPost ? <ImagePostSwiper images={post.images} /> : null}
           </CardContent>
         </Card>
       </NextLink>
@@ -161,7 +130,7 @@ export const LoadingPostCard = () => {
 
   return (
     <Card className={classes.card}>
-      <Box className={classes.upvoteBox}>
+      {/* <Box className={classes.upvoteBox}>
         <IconButton aria-label="upvote" size="small">
           <Skeleton />
         </IconButton>
@@ -169,7 +138,7 @@ export const LoadingPostCard = () => {
         <IconButton aria-label="downvote" size="small">
           <Skeleton />
         </IconButton>
-      </Box>
+      </Box> */}
       <CardHeader
         avatar={
           <Avatar aria-label="recipe" className={classes.avatar}>
@@ -184,7 +153,7 @@ export const LoadingPostCard = () => {
         subheader={<Skeleton />}
         className={classes.header}
       />
-      <CardContent className={classes.content}>
+      <CardContent className={classes.textPostContent}>
         <Typography variant="h6" gutterBottom>
           <Skeleton />
         </Typography>

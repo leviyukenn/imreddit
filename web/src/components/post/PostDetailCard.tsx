@@ -78,6 +78,7 @@ export const PostDetailCard = ({ post, ...props }: PostDetailProps) => {
   const timeago = useMemo(() => format(parseInt(post.createdAt)), [post]);
 
   const { voteStatus, loading, onUpvote, onDownvote } = useVote(post);
+  const isTextPost = useMemo(() => post.images.length === 0, [post]);
 
   return (
     <Card className={classes.root} {...props}>
@@ -132,10 +133,10 @@ export const PostDetailCard = ({ post, ...props }: PostDetailProps) => {
         <Typography variant="h6" gutterBottom>
           {post.title}
         </Typography>
-        {post.images.length === 0 ? (
+        {isTextPost ? (
           <Box dangerouslySetInnerHTML={{ __html: post.text || "" }}></Box>
         ) : null}
-        <ImagePostSwiper images={post.images} />
+        {!isTextPost ? <ImagePostSwiper images={post.images} /> : null}
       </CardContent>
     </Card>
   );
