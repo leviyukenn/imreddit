@@ -3,6 +3,11 @@ import { useVoteMutation } from "../../generated/graphql";
 import { useIsAuth } from "../../utils/hooks/useIsAuth";
 import { VoteStatus } from "../types/types";
 
+enum VoteType {
+  UPVOTE = 1,
+  DOWNVOTE = -1,
+}
+
 export function useVote(post: { __typename?: string; id: string }) {
   const [vote, { loading: voteLoading }] = useVoteMutation({
     update(cache, { data: voteResponse }) {
@@ -20,6 +25,7 @@ export function useVote(post: { __typename?: string; id: string }) {
   const { checkIsAuth, meLoading } = useIsAuth();
   const [voteStatus, setVoteStatus] = useState<VoteStatus>(VoteStatus.NOTVOTED);
 
+  console.log(voteLoading);
   const onVote = useCallback(
     async (value) => {
       if (meLoading) return;
@@ -48,11 +54,11 @@ export function useVote(post: { __typename?: string; id: string }) {
   );
 
   const onUpvote = useCallback(() => {
-    onVote(1);
+    onVote(VoteType.UPVOTE);
   }, [onVote]);
 
   const onDownvote = useCallback(() => {
-    onVote(-1);
+    onVote(VoteType.DOWNVOTE);
   }, [onVote]);
 
   return {

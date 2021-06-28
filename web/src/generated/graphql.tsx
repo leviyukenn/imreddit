@@ -17,6 +17,28 @@ export type Scalars = {
   Upload: any;
 };
 
+export type Community = {
+  __typename?: 'Community';
+  id: Scalars['String'];
+  createdAt: Scalars['String'];
+  updatedAt: Scalars['String'];
+  name: Scalars['String'];
+  description: Scalars['String'];
+  topics: Array<Topic>;
+};
+
+export type CommunityResponse = {
+  __typename?: 'CommunityResponse';
+  errors?: Maybe<Array<FieldError>>;
+  community?: Maybe<Community>;
+};
+
+export type CreateCommunityInput = {
+  name: Scalars['String'];
+  description: Scalars['String'];
+  topicIds: Array<Scalars['String']>;
+};
+
 export type CreatePostInput = {
   title?: Maybe<Scalars['String']>;
   text?: Maybe<Scalars['String']>;
@@ -65,6 +87,8 @@ export type Mutation = {
   deletePost: Scalars['Boolean'];
   uploadImage: UploadResponse;
   vote: Scalars['Int'];
+  createCommunity: CommunityResponse;
+  createTopic: Topic;
 };
 
 
@@ -108,6 +132,16 @@ export type MutationVoteArgs = {
   voteInput: VoteInput;
 };
 
+
+export type MutationCreateCommunityArgs = {
+  createCommunityInput: CreateCommunityInput;
+};
+
+
+export type MutationCreateTopicArgs = {
+  title: Scalars['String'];
+};
+
 export type PaginatedPosts = {
   __typename?: 'PaginatedPosts';
   posts: Array<Post>;
@@ -132,6 +166,7 @@ export type Query = {
   me?: Maybe<User>;
   posts: PaginatedPosts;
   postDetail?: Maybe<Post>;
+  topics: Array<Topic>;
 };
 
 
@@ -151,6 +186,15 @@ export type RegisterInput = {
   password: Scalars['String'];
 };
 
+export type Topic = {
+  __typename?: 'Topic';
+  id: Scalars['String'];
+  createdAt: Scalars['String'];
+  updatedAt: Scalars['String'];
+  creator: User;
+  title: Scalars['String'];
+};
+
 
 export type UploadResponse = {
   __typename?: 'UploadResponse';
@@ -164,6 +208,7 @@ export type User = {
   createdAt: Scalars['String'];
   updatedAt: Scalars['String'];
   username: Scalars['String'];
+  role: Scalars['String'];
   email: Scalars['String'];
 };
 
@@ -227,6 +272,27 @@ export type ChangePasswordMutation = (
   & { changePassword: (
     { __typename?: 'UserResponse' }
     & RegularUserResponseFragment
+  ) }
+);
+
+export type CreateCommunityMutationVariables = Exact<{
+  name: Scalars['String'];
+  description: Scalars['String'];
+  topicIds: Array<Scalars['String']> | Scalars['String'];
+}>;
+
+
+export type CreateCommunityMutation = (
+  { __typename?: 'Mutation' }
+  & { createCommunity: (
+    { __typename?: 'CommunityResponse' }
+    & { community?: Maybe<(
+      { __typename?: 'Community' }
+      & Pick<Community, 'id'>
+    )>, errors?: Maybe<Array<(
+      { __typename?: 'FieldError' }
+      & Pick<FieldError, 'field' | 'message'>
+    )>> }
   ) }
 );
 
@@ -380,6 +446,17 @@ export type PostsQuery = (
   ) }
 );
 
+export type TopicsQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type TopicsQuery = (
+  { __typename?: 'Query' }
+  & { topics: Array<(
+    { __typename?: 'Topic' }
+    & Pick<Topic, 'title' | 'id'>
+  )> }
+);
+
 export const RegularUserFragmentDoc = gql`
     fragment RegularUser on User {
   id
@@ -463,6 +540,49 @@ export function useChangePasswordMutation(baseOptions?: Apollo.MutationHookOptio
 export type ChangePasswordMutationHookResult = ReturnType<typeof useChangePasswordMutation>;
 export type ChangePasswordMutationResult = Apollo.MutationResult<ChangePasswordMutation>;
 export type ChangePasswordMutationOptions = Apollo.BaseMutationOptions<ChangePasswordMutation, ChangePasswordMutationVariables>;
+export const CreateCommunityDocument = gql`
+    mutation CreateCommunity($name: String!, $description: String!, $topicIds: [String!]!) {
+  createCommunity(
+    createCommunityInput: {name: $name, description: $description, topicIds: $topicIds}
+  ) {
+    community {
+      id
+    }
+    errors {
+      field
+      message
+    }
+  }
+}
+    `;
+export type CreateCommunityMutationFn = Apollo.MutationFunction<CreateCommunityMutation, CreateCommunityMutationVariables>;
+
+/**
+ * __useCreateCommunityMutation__
+ *
+ * To run a mutation, you first call `useCreateCommunityMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useCreateCommunityMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [createCommunityMutation, { data, loading, error }] = useCreateCommunityMutation({
+ *   variables: {
+ *      name: // value for 'name'
+ *      description: // value for 'description'
+ *      topicIds: // value for 'topicIds'
+ *   },
+ * });
+ */
+export function useCreateCommunityMutation(baseOptions?: Apollo.MutationHookOptions<CreateCommunityMutation, CreateCommunityMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<CreateCommunityMutation, CreateCommunityMutationVariables>(CreateCommunityDocument, options);
+      }
+export type CreateCommunityMutationHookResult = ReturnType<typeof useCreateCommunityMutation>;
+export type CreateCommunityMutationResult = Apollo.MutationResult<CreateCommunityMutation>;
+export type CreateCommunityMutationOptions = Apollo.BaseMutationOptions<CreateCommunityMutation, CreateCommunityMutationVariables>;
 export const CreatePostDocument = gql`
     mutation CreatePost($text: String, $title: String, $parentId: String, $images: [ImageInput!]) {
   createPost(
@@ -824,6 +944,55 @@ export function usePostsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<Post
 export type PostsQueryHookResult = ReturnType<typeof usePostsQuery>;
 export type PostsLazyQueryHookResult = ReturnType<typeof usePostsLazyQuery>;
 export type PostsQueryResult = Apollo.QueryResult<PostsQuery, PostsQueryVariables>;
+export const TopicsDocument = gql`
+    query Topics {
+  topics {
+    title
+    id
+  }
+}
+    `;
+
+/**
+ * __useTopicsQuery__
+ *
+ * To run a query within a React component, call `useTopicsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useTopicsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useTopicsQuery({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useTopicsQuery(baseOptions?: Apollo.QueryHookOptions<TopicsQuery, TopicsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<TopicsQuery, TopicsQueryVariables>(TopicsDocument, options);
+      }
+export function useTopicsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<TopicsQuery, TopicsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<TopicsQuery, TopicsQueryVariables>(TopicsDocument, options);
+        }
+export type TopicsQueryHookResult = ReturnType<typeof useTopicsQuery>;
+export type TopicsLazyQueryHookResult = ReturnType<typeof useTopicsLazyQuery>;
+export type TopicsQueryResult = Apollo.QueryResult<TopicsQuery, TopicsQueryVariables>;
+export type CommunityKeySpecifier = ('id' | 'createdAt' | 'updatedAt' | 'name' | 'description' | 'topics' | CommunityKeySpecifier)[];
+export type CommunityFieldPolicy = {
+	id?: FieldPolicy<any> | FieldReadFunction<any>,
+	createdAt?: FieldPolicy<any> | FieldReadFunction<any>,
+	updatedAt?: FieldPolicy<any> | FieldReadFunction<any>,
+	name?: FieldPolicy<any> | FieldReadFunction<any>,
+	description?: FieldPolicy<any> | FieldReadFunction<any>,
+	topics?: FieldPolicy<any> | FieldReadFunction<any>
+};
+export type CommunityResponseKeySpecifier = ('errors' | 'community' | CommunityResponseKeySpecifier)[];
+export type CommunityResponseFieldPolicy = {
+	errors?: FieldPolicy<any> | FieldReadFunction<any>,
+	community?: FieldPolicy<any> | FieldReadFunction<any>
+};
 export type FieldErrorKeySpecifier = ('field' | 'message' | FieldErrorKeySpecifier)[];
 export type FieldErrorFieldPolicy = {
 	field?: FieldPolicy<any> | FieldReadFunction<any>,
@@ -836,7 +1005,7 @@ export type ImageFieldPolicy = {
 	caption?: FieldPolicy<any> | FieldReadFunction<any>,
 	link?: FieldPolicy<any> | FieldReadFunction<any>
 };
-export type MutationKeySpecifier = ('changePassword' | 'forgotPassword' | 'register' | 'login' | 'logout' | 'createPost' | 'deletePost' | 'uploadImage' | 'vote' | MutationKeySpecifier)[];
+export type MutationKeySpecifier = ('changePassword' | 'forgotPassword' | 'register' | 'login' | 'logout' | 'createPost' | 'deletePost' | 'uploadImage' | 'vote' | 'createCommunity' | 'createTopic' | MutationKeySpecifier)[];
 export type MutationFieldPolicy = {
 	changePassword?: FieldPolicy<any> | FieldReadFunction<any>,
 	forgotPassword?: FieldPolicy<any> | FieldReadFunction<any>,
@@ -846,7 +1015,9 @@ export type MutationFieldPolicy = {
 	createPost?: FieldPolicy<any> | FieldReadFunction<any>,
 	deletePost?: FieldPolicy<any> | FieldReadFunction<any>,
 	uploadImage?: FieldPolicy<any> | FieldReadFunction<any>,
-	vote?: FieldPolicy<any> | FieldReadFunction<any>
+	vote?: FieldPolicy<any> | FieldReadFunction<any>,
+	createCommunity?: FieldPolicy<any> | FieldReadFunction<any>,
+	createTopic?: FieldPolicy<any> | FieldReadFunction<any>
 };
 export type PaginatedPostsKeySpecifier = ('posts' | 'hasMore' | PaginatedPostsKeySpecifier)[];
 export type PaginatedPostsFieldPolicy = {
@@ -865,23 +1036,33 @@ export type PostFieldPolicy = {
 	children?: FieldPolicy<any> | FieldReadFunction<any>,
 	images?: FieldPolicy<any> | FieldReadFunction<any>
 };
-export type QueryKeySpecifier = ('me' | 'posts' | 'postDetail' | QueryKeySpecifier)[];
+export type QueryKeySpecifier = ('me' | 'posts' | 'postDetail' | 'topics' | QueryKeySpecifier)[];
 export type QueryFieldPolicy = {
 	me?: FieldPolicy<any> | FieldReadFunction<any>,
 	posts?: FieldPolicy<any> | FieldReadFunction<any>,
-	postDetail?: FieldPolicy<any> | FieldReadFunction<any>
+	postDetail?: FieldPolicy<any> | FieldReadFunction<any>,
+	topics?: FieldPolicy<any> | FieldReadFunction<any>
+};
+export type TopicKeySpecifier = ('id' | 'createdAt' | 'updatedAt' | 'creator' | 'title' | TopicKeySpecifier)[];
+export type TopicFieldPolicy = {
+	id?: FieldPolicy<any> | FieldReadFunction<any>,
+	createdAt?: FieldPolicy<any> | FieldReadFunction<any>,
+	updatedAt?: FieldPolicy<any> | FieldReadFunction<any>,
+	creator?: FieldPolicy<any> | FieldReadFunction<any>,
+	title?: FieldPolicy<any> | FieldReadFunction<any>
 };
 export type UploadResponseKeySpecifier = ('errors' | 'path' | UploadResponseKeySpecifier)[];
 export type UploadResponseFieldPolicy = {
 	errors?: FieldPolicy<any> | FieldReadFunction<any>,
 	path?: FieldPolicy<any> | FieldReadFunction<any>
 };
-export type UserKeySpecifier = ('id' | 'createdAt' | 'updatedAt' | 'username' | 'email' | UserKeySpecifier)[];
+export type UserKeySpecifier = ('id' | 'createdAt' | 'updatedAt' | 'username' | 'role' | 'email' | UserKeySpecifier)[];
 export type UserFieldPolicy = {
 	id?: FieldPolicy<any> | FieldReadFunction<any>,
 	createdAt?: FieldPolicy<any> | FieldReadFunction<any>,
 	updatedAt?: FieldPolicy<any> | FieldReadFunction<any>,
 	username?: FieldPolicy<any> | FieldReadFunction<any>,
+	role?: FieldPolicy<any> | FieldReadFunction<any>,
 	email?: FieldPolicy<any> | FieldReadFunction<any>
 };
 export type UserResponseKeySpecifier = ('errors' | 'user' | UserResponseKeySpecifier)[];
@@ -890,6 +1071,14 @@ export type UserResponseFieldPolicy = {
 	user?: FieldPolicy<any> | FieldReadFunction<any>
 };
 export type TypedTypePolicies = TypePolicies & {
+	Community?: Omit<TypePolicy, "fields" | "keyFields"> & {
+		keyFields?: false | CommunityKeySpecifier | (() => undefined | CommunityKeySpecifier),
+		fields?: CommunityFieldPolicy,
+	},
+	CommunityResponse?: Omit<TypePolicy, "fields" | "keyFields"> & {
+		keyFields?: false | CommunityResponseKeySpecifier | (() => undefined | CommunityResponseKeySpecifier),
+		fields?: CommunityResponseFieldPolicy,
+	},
 	FieldError?: Omit<TypePolicy, "fields" | "keyFields"> & {
 		keyFields?: false | FieldErrorKeySpecifier | (() => undefined | FieldErrorKeySpecifier),
 		fields?: FieldErrorFieldPolicy,
@@ -913,6 +1102,10 @@ export type TypedTypePolicies = TypePolicies & {
 	Query?: Omit<TypePolicy, "fields" | "keyFields"> & {
 		keyFields?: false | QueryKeySpecifier | (() => undefined | QueryKeySpecifier),
 		fields?: QueryFieldPolicy,
+	},
+	Topic?: Omit<TypePolicy, "fields" | "keyFields"> & {
+		keyFields?: false | TopicKeySpecifier | (() => undefined | TopicKeySpecifier),
+		fields?: TopicFieldPolicy,
 	},
 	UploadResponse?: Omit<TypePolicy, "fields" | "keyFields"> & {
 		keyFields?: false | UploadResponseKeySpecifier | (() => undefined | UploadResponseKeySpecifier),

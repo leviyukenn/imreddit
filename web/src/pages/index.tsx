@@ -9,21 +9,10 @@ import { LoadingPostCard, PostCard } from "../components/post/PostCard";
 import PostDetailModal from "../components/post/PostDetailModal";
 import { RegularPostDetailFragment, usePostsQuery } from "../generated/graphql";
 
-// export async function getServerSideProps() {
-//   const { data } = await apolloClient.query<PostsQuery, PostsQueryVariables>({
-//     query: PostsDocument,
-//   });
-//   console.log(data);
-//   return {
-//     props: {
-//       posts: data.posts as Post[],
-//     },
-//   };
-// }
-
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
     mainContentHeart: {
+      marginTop: "24px",
       maxWidth: "740px",
       width: "calc(100% - 32px)",
     },
@@ -63,35 +52,37 @@ const Index = () => {
 
   return (
     <Container>
-      <Grid item className={classes.mainContentHeart}>
-        <CreatePostCard />
-        <InfiniteScroll
-          dataLength={posts.length || 0}
-          next={() => {
-            fetchMore({
-              variables: {
-                limit: 10,
-                cursor: posts[posts.length - 1].createdAt,
-              },
-            });
-          }}
-          hasMore={hasMore}
-          loader={<LoadingPostCard />}
+      <Grid container justify="center" spacing={4}>
+        <Grid item className={classes.mainContentHeart}>
+          <CreatePostCard />
+          <InfiniteScroll
+            dataLength={posts.length || 0}
+            next={() => {
+              fetchMore({
+                variables: {
+                  limit: 10,
+                  cursor: posts[posts.length - 1].createdAt,
+                },
+              });
+            }}
+            hasMore={hasMore}
+            loader={<LoadingPostCard />}
+          >
+            {posts.map((post) => {
+              return <PostCard post={post} key={post.id} />;
+            })}
+          </InfiniteScroll>
+        </Grid>
+        <Fab
+          variant="extended"
+          color="primary"
+          onClick={backToTop}
+          className={classes.backToTopButton}
         >
-          {posts.map((post) => {
-            return <PostCard post={post} key={post.id} />;
-          })}
-        </InfiniteScroll>
+          <NavigationIcon />
+          Back to Top
+        </Fab>
       </Grid>
-      <Fab
-        variant="extended"
-        color="primary"
-        onClick={backToTop}
-        className={classes.backToTopButton}
-      >
-        <NavigationIcon />
-        Back to Top
-      </Fab>
       <PostDetailModal />
     </Container>
   );

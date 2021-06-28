@@ -19,6 +19,7 @@ import { useIsAuth } from "../utils/hooks/useIsAuth";
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
     mainContentHeart: {
+      marginTop: "24px",
       maxWidth: "740px",
       width: "100%",
     },
@@ -40,39 +41,37 @@ const CreatePost = () => {
 
   const handleChange = useCallback((_: any, value: PostType) => {
     setPostType(value);
-    console.log(value);
   }, []);
 
   return (
     <Container>
-      <Grid item className={classes.mainContentHeart}>
-        <Card className={classes.createPostCard}>
-          <CardContent>
-            {/* <Typography variant="h6" gutterBottom>
-              create post
-            </Typography> */}
-            <Tabs
-              value={postType}
-              onChange={handleChange}
-              variant="fullWidth"
-              indicatorColor="primary"
-              textColor="primary"
-              aria-label="icon label tabs example"
-            >
-              <Tab
-                icon={<DescriptionOutlinedIcon />}
-                label="Posts"
-                value={PostType.TEXT_POST}
-              />
-              <Tab
-                icon={<ImageOutlinedIcon />}
-                label="Images"
-                value={PostType.IMAGE_POST}
-              />
-            </Tabs>
-            <CreatePostForm postType={postType} />
-          </CardContent>
-        </Card>
+      <Grid container justify="center" spacing={4}>
+        <Grid item className={classes.mainContentHeart}>
+          <Card className={classes.createPostCard}>
+            <CardContent>
+              <Tabs
+                value={postType}
+                onChange={handleChange}
+                variant="fullWidth"
+                indicatorColor="primary"
+                textColor="primary"
+                aria-label="icon label tabs example"
+              >
+                <Tab
+                  icon={<DescriptionOutlinedIcon />}
+                  label="Posts"
+                  value={PostType.TEXT_POST}
+                />
+                <Tab
+                  icon={<ImageOutlinedIcon />}
+                  label="Images"
+                  value={PostType.IMAGE_POST}
+                />
+              </Tabs>
+              <CreatePostForm postType={postType} />
+            </CardContent>
+          </Card>
+        </Grid>
       </Grid>
     </Container>
   );

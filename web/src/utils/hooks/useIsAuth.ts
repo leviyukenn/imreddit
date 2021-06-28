@@ -1,5 +1,5 @@
 import { useRouter } from "next/router";
-import { useCallback } from "react";
+import { useCallback, useMemo } from "react";
 import { useMeQuery } from "../../generated/graphql";
 import { useUserModalState } from "../../redux/hooks/useUserModalState";
 
@@ -10,10 +10,11 @@ export function useIsAuth() {
   const checkIsAuth = useCallback(() => {
     if (meLoading) return false;
     if (meResponse?.me) return true;
-    // router.replace("/?next=" + router.pathname);
+
     showLoginModal();
     return false;
-  }, [router, showLoginModal, meResponse]);
+  }, [meLoading, router, showLoginModal, meResponse]);
+  const isAuth = useMemo(() => !!meResponse?.me, [meResponse]);
 
-  return { checkIsAuth, meLoading };
+  return { checkIsAuth, meLoading, isAuth };
 }

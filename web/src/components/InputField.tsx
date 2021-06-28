@@ -1,11 +1,38 @@
-import { createStyles, makeStyles, Theme } from "@material-ui/core";
+import {
+  Chip,
+  createStyles,
+  FormControl,
+  FormHelperText,
+  Input,
+  InputLabel,
+  makeStyles,
+  MenuItem,
+  Select,
+  SelectProps,
+  Theme,
+} from "@material-ui/core";
+import CloseIcon from "@material-ui/icons/Close";
+import { useField, useFormikContext } from "formik";
 import { TextField, TextFieldProps } from "formik-material-ui";
-import React from "react";
+import React, { useCallback, useMemo, useRef } from "react";
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
     field: {
       width: "100%",
+    },
+    chips: {
+      display: "flex",
+      flexWrap: "wrap",
+    },
+    chip: {
+      margin: 2,
+      color: theme.palette.primary.main,
+      backgroundColor: "#f6f7f8",
+    },
+    popover: {
+      maxHeight: "260px",
+      overflow: "auto",
     },
   })
 );
@@ -51,34 +78,83 @@ export const TextAreaField = ({ children, ...props }: TextFieldProps) => {
   );
 };
 
-// export const PasswordInputField = ({
-//   label,
-//   size: _,
-//   ...props
-// }: InputFieldProps) => {
-//   const [field, meta] = useField<string>(props.name);
-//   const [showPassword, setshowPassword] = React.useState(false);
-//   const handleClick = () => setshowPassword(!showPassword);
+interface SelectFieldProps extends SelectProps {
+  name: string;
+  label: string;
+  options: { id: string; title: string }[];
+}
 
-//   return (
-//     <FormControl isInvalid={meta.touched && !!meta.error}>
-//       <FormLabel htmlFor={field.name}>{label}</FormLabel>
-//       <InputGroup>
-//         <Input
-//           id={field.name}
-//           {...field}
-//           {...props}
-//           pr="4.5rem"
-//           type={showPassword ? "text" : "password"}
-//         />
-//         <InputRightElement width="4.5rem">
-//           <Button h="1.75rem" size="sm" onClick={handleClick}>
-//             {showPassword ? "Hide" : "Show"}
-//           </Button>
-//         </InputRightElement>
-//       </InputGroup>
+export const SelectField = ({
+  label,
+  name,
+  options,
+  ...props
+}: SelectFieldProps) => {
+  const [field, meta] = useField<string[]>(name);
+  const anchorRef = useRef(null);
+  const classes = useStyles();
+  const remainingOptions = useMemo(
+    () => options.filter((option) => !field.value.includes(option.id)),
+    [field, options]
+  );
+  const { setFieldValue } = useFormikContext();
 
-//       <FormErrorMessage>{meta.error}</FormErrorMessage>
-//     </FormControl>
-//   );
-// };
+  const deleteChip = useCallback(
+    (id: string) => () => {
+      const filteredValue = field.value.filter(
+        (selectedOption) => selectedOption !== id
+      );
+      setFieldValue(name, filteredValue);
+    },
+    [field, name]
+  );
+
+  return (
+    <FormControl
+      className={classes.field}
+      error={!!(meta.touched && meta.error)}
+    >
+      <InputLabel id={props.id}>{label}</InputLabel>
+      <Select
+        {...field}
+        labelId={props.id}
+        multiple
+        ref={anchorRef}
+        input={<Input />}
+        renderValue={(selected) => (
+          <div className={classes.chips}>
+            {(selected as string[]).map((id) => (
+              <Chip
+                key={id}
+                onMouseDown={(e) => {
+                  e.stopPropagation();
+                }}
+                label={options.find((option) => option.id === id)?.title}
+                className={classes.chip}
+                onClick={deleteChip(id)}
+                onDelete={deleteChip(id)}
+                deleteIcon={<CloseIcon fontSize="small" />}
+              />
+            ))}
+          </div>
+        )}
+        MenuProps={{
+          anchorEl: anchorRef.current,
+          getContentAnchorEl: null,
+          anchorOrigin: {
+            horizontal: "left",
+            vertical: "bottom",
+          },
+          classes: { paper: classes.popover },
+        }}
+      >
+        {remainingOptions.map((option) => (
+          <MenuItem key={option.id} value={option.id}>
+            {option.title}
+          </MenuItem>
+        ))}
+      </Select>
+      <FormHelperText>{meta.touched && meta.error}</FormHelperText>
+    </FormControl>
+  );
+};

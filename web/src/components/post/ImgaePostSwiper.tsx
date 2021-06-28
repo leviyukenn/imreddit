@@ -93,8 +93,6 @@ const ImgaePostSwiper = ({ images }: ImgaePostSwiperProps) => {
     [images]
   );
 
-  console.log(images);
-
   return (
     <>
       <Box className={classes.imageContainer}>

@@ -18,6 +18,11 @@ const useStyles = makeStyles((theme: Theme) =>
       position: "sticky",
       top: 0,
       zIndex: 10000,
+      height: "56px",
+      borderBottom: "1px solid #edeff1",
+    },
+    toolBar: {
+      minHeight: "56px",
     },
     menuButton: {
       marginRight: theme.spacing(2),
@@ -105,7 +110,7 @@ export default function NavBar() {
 
   return (
     <AppBar position="static" elevation={0} className={classes.root}>
-      <Toolbar>
+      <Toolbar className={classes.toolBar}>
         <NextLink href="/" passHref>
           <IconButton
             edge="start"

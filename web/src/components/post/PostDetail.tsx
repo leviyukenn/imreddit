@@ -11,10 +11,6 @@ interface PostDetailProps {
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
-    container: {
-      width: "100%",
-      backgroundColor: theme.palette.background.default,
-    },
     heart: {
       maxWidth: "740px",
       width: "calc(100% - 32px)",
@@ -49,7 +45,7 @@ const PostDetail = ({ postId }: PostDetailProps) => {
   }
 
   return (
-    <Box display="flex" justifyContent="center" className={classes.container}>
+    <Box display="flex" justifyContent="center">
       <Box className={classes.heart}>
         <PostDetailCard post={postDetailResponse.postDetail} />
         <Box className={classes.comments}>

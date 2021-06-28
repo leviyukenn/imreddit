@@ -37,6 +37,7 @@ const useStyles = makeStyles((theme: Theme) =>
     },
     content: {
       padding: 0,
+      backgroundColor: theme.palette.background.default,
     },
   })
 );

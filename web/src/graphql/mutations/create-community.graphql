@@ -1,0 +1,21 @@
+mutation CreateCommunity(
+  $name: String!
+  $description: String!
+  $topicIds: [String!]!
+) {
+  createCommunity(
+    createCommunityInput: {
+      name: $name
+      description: $description
+      topicIds: $topicIds
+    }
+  ) {
+    community {
+      id
+    }
+    errors {
+      field
+      message
+    }
+  }
+}
