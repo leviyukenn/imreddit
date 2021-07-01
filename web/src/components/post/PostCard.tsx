@@ -7,6 +7,7 @@ import {
   CardProps,
   createStyles,
   IconButton,
+  Link,
   makeStyles,
   Theme,
   Typography,
@@ -15,6 +16,7 @@ import { red } from "@material-ui/core/colors";
 import MoreVertIcon from "@material-ui/icons/MoreVert";
 import { Skeleton } from "@material-ui/lab";
 import NextLink from "next/link";
+import { useRouter } from "next/router";
 import React, { useMemo } from "react";
 import { format } from "timeago.js";
 import { RegularPostDetailFragment } from "../../generated/graphql";
@@ -48,6 +50,16 @@ const useStyles = makeStyles((theme: Theme) =>
     header: {
       backgroundColor: theme.palette.background.paper,
     },
+    communityLink: {
+      lineHeight: "20px",
+      fontSize: "12px",
+      color: theme.palette.text.primary,
+      fontWeight: 700,
+      "&:hover": {
+        textDecoration: "underLine",
+        textDecorationColor: theme.palette.text.primary,
+      },
+    },
     textPostContent: {
       paddingTop: 0,
       backgroundColor: theme.palette.background.paper,
@@ -80,6 +92,7 @@ export const PostCard = ({ post, ...props }: PostCardProps) => {
   const timeago = useMemo(() => format(parseInt(post.createdAt)), [post]);
 
   const isTextPost = useMemo(() => post.images.length === 0, [post]);
+  const router = useRouter();
 
   return (
     <Box className={classes.root}>
@@ -87,7 +100,7 @@ export const PostCard = ({ post, ...props }: PostCardProps) => {
         <UpvoteBox post={post} isVerticalLayout={true} />
       </Box>
       <NextLink
-        href={`/?postId=${post.id}`}
+        href={`${router.pathname}?postId=${post.id}`}
         as={`/post-detail/${post.id}`}
         shallow
       >
@@ -103,7 +116,22 @@ export const PostCard = ({ post, ...props }: PostCardProps) => {
                 <MoreVertIcon />
               </IconButton>
             }
-            subheader={`Posted by ${post.creator.username} ${timeago}`}
+            subheader={
+              <Box display="flex" alignItems="center">
+                <NextLink href="/">
+                  <Link
+                    className={classes.communityLink}
+                    onMouseDown={(
+                      e: React.MouseEvent<HTMLAnchorElement, MouseEvent>
+                    ) => {
+                      e.stopPropagation();
+                    }}
+                  >{`r/${post.community.name}`}</Link>
+                </NextLink>
+                <span>&nbsp;&#183;&nbsp;</span>
+                <Typography variant="caption">{`Posted by ${post.creator.username} ${timeago}`}</Typography>
+              </Box>
+            }
             className={classes.header}
           />
           <CardContent

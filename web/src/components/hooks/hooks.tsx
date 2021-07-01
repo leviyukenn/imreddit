@@ -25,7 +25,6 @@ export function useVote(post: { __typename?: string; id: string }) {
   const { checkIsAuth, meLoading } = useIsAuth();
   const [voteStatus, setVoteStatus] = useState<VoteStatus>(VoteStatus.NOTVOTED);
 
-  console.log(voteLoading);
   const onVote = useCallback(
     async (value) => {
       if (meLoading) return;

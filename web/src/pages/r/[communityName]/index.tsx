@@ -1,8 +1,10 @@
 import { Box, createStyles, Fab, makeStyles, Theme } from "@material-ui/core";
 import NavigationIcon from "@material-ui/icons/Navigation";
-import { useCallback } from "react";
-import Container from "../components/Container";
-import PostInfiniteScroll from "../components/post/PostInfiniteScroll";
+import { useRouter } from "next/router";
+import { useCallback, useMemo } from "react";
+import Container from "../../../components/Container";
+import { LoadingPostCard } from "../../../components/post/PostCard";
+import PostInfiniteScroll from "../../../components/post/PostInfiniteScroll";
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -19,17 +21,26 @@ const useStyles = makeStyles((theme: Theme) =>
   })
 );
 
-const Index = () => {
+const CommunityHome = () => {
   const classes = useStyles();
+  const router = useRouter();
 
   const backToTop = useCallback(() => {
     window.scrollTo({ top: 0, behavior: "smooth" });
   }, []);
 
+  const communityName = useMemo(
+    () => (router.query.communityName as string) || undefined,
+    [router]
+  );
   return (
     <Container>
       <Box display="flex" justifyContent="center">
-        <PostInfiniteScroll />
+        {communityName ? (
+          <PostInfiniteScroll communityName={communityName} />
+        ) : (
+          <LoadingPostCard />
+        )}
         <Fab
           variant="extended"
           color="primary"
@@ -44,4 +55,4 @@ const Index = () => {
   );
 };
 
-export default Index;
+export default CommunityHome;

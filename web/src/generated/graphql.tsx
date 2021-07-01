@@ -157,6 +157,7 @@ export type Post = {
   text?: Maybe<Scalars['String']>;
   points: Scalars['Int'];
   creator: User;
+  community: Community;
   children: Array<Post>;
   images: Array<Image>;
 };
@@ -171,6 +172,7 @@ export type Query = {
 
 
 export type QueryPostsArgs = {
+  communityName?: Maybe<Scalars['String']>;
   cursor?: Maybe<Scalars['String']>;
   limit?: Maybe<Scalars['Int']>;
 };
@@ -242,7 +244,10 @@ export type RegularPostDetailFragment = (
   ), images: Array<(
     { __typename?: 'Image' }
     & RegularImageFragment
-  )> }
+  )>, community: (
+    { __typename?: 'Community' }
+    & Pick<Community, 'name'>
+  ) }
 );
 
 export type RegularUserFragment = (
@@ -431,6 +436,7 @@ export type PostDetailQuery = (
 export type PostsQueryVariables = Exact<{
   limit?: Maybe<Scalars['Int']>;
   cursor?: Maybe<Scalars['String']>;
+  communityName?: Maybe<Scalars['String']>;
 }>;
 
 
@@ -485,6 +491,9 @@ export const RegularPostDetailFragmentDoc = gql`
   }
   images {
     ...RegularImage
+  }
+  community {
+    name
   }
 }
     ${RegularUserFragmentDoc}
@@ -906,8 +915,8 @@ export type PostDetailQueryHookResult = ReturnType<typeof usePostDetailQuery>;
 export type PostDetailLazyQueryHookResult = ReturnType<typeof usePostDetailLazyQuery>;
 export type PostDetailQueryResult = Apollo.QueryResult<PostDetailQuery, PostDetailQueryVariables>;
 export const PostsDocument = gql`
-    query Posts($limit: Int, $cursor: String) {
-  posts(limit: $limit, cursor: $cursor) {
+    query Posts($limit: Int, $cursor: String, $communityName: String) {
+  posts(limit: $limit, cursor: $cursor, communityName: $communityName) {
     hasMore
     posts {
       ...RegularPostDetail
@@ -930,6 +939,7 @@ export const PostsDocument = gql`
  *   variables: {
  *      limit: // value for 'limit'
  *      cursor: // value for 'cursor'
+ *      communityName: // value for 'communityName'
  *   },
  * });
  */
@@ -1024,7 +1034,7 @@ export type PaginatedPostsFieldPolicy = {
 	posts?: FieldPolicy<any> | FieldReadFunction<any>,
 	hasMore?: FieldPolicy<any> | FieldReadFunction<any>
 };
-export type PostKeySpecifier = ('id' | 'createdAt' | 'updatedAt' | 'title' | 'text' | 'points' | 'creator' | 'children' | 'images' | PostKeySpecifier)[];
+export type PostKeySpecifier = ('id' | 'createdAt' | 'updatedAt' | 'title' | 'text' | 'points' | 'creator' | 'community' | 'children' | 'images' | PostKeySpecifier)[];
 export type PostFieldPolicy = {
 	id?: FieldPolicy<any> | FieldReadFunction<any>,
 	createdAt?: FieldPolicy<any> | FieldReadFunction<any>,
@@ -1033,6 +1043,7 @@ export type PostFieldPolicy = {
 	text?: FieldPolicy<any> | FieldReadFunction<any>,
 	points?: FieldPolicy<any> | FieldReadFunction<any>,
 	creator?: FieldPolicy<any> | FieldReadFunction<any>,
+	community?: FieldPolicy<any> | FieldReadFunction<any>,
 	children?: FieldPolicy<any> | FieldReadFunction<any>,
 	images?: FieldPolicy<any> | FieldReadFunction<any>
 };

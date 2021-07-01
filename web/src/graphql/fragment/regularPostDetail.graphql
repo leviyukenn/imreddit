@@ -11,4 +11,7 @@ fragment RegularPostDetail on Post {
   images {
     ...RegularImage
   }
+  community {
+    name
+  }
 }
