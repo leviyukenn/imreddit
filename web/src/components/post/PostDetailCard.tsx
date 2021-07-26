@@ -7,6 +7,7 @@ import {
   CardProps,
   createStyles,
   IconButton,
+  Link,
   makeStyles,
   Theme,
   Typography,
@@ -14,6 +15,8 @@ import {
 import { red } from "@material-ui/core/colors";
 import MoreVertIcon from "@material-ui/icons/MoreVert";
 import { Skeleton } from "@material-ui/lab";
+import NextLink from "next/link";
+import { useRouter } from "next/router";
 import React, { useMemo } from "react";
 import { format } from "timeago.js";
 import { RegularPostDetailFragment } from "../../generated/graphql";
@@ -37,6 +40,16 @@ const useStyles = makeStyles((theme: Theme) =>
       top: 0,
       left: 0,
     },
+    communityLink: {
+      lineHeight: "20px",
+      fontSize: "12px",
+      color: theme.palette.text.primary,
+      fontWeight: 700,
+      "&:hover": {
+        textDecoration: "underLine",
+        textDecorationColor: theme.palette.text.primary,
+      },
+    },
 
     content: {
       paddingTop: 0,
@@ -53,6 +66,7 @@ export const PostDetailCard = ({ post, ...props }: PostDetailProps) => {
   const timeago = useMemo(() => format(parseInt(post.createdAt)), [post]);
 
   const isTextPost = useMemo(() => post.images.length === 0, [post]);
+  const router = useRouter();
 
   return (
     <Card className={classes.root} {...props}>
@@ -71,7 +85,22 @@ export const PostDetailCard = ({ post, ...props }: PostDetailProps) => {
             <MoreVertIcon />
           </IconButton>
         }
-        subheader={`Posted by ${post.creator.username} ${timeago}`}
+        subheader={
+          <Box display="flex" alignItems="center">
+            <NextLink href={`/r/${post.community.name}`}>
+              <Link
+                className={classes.communityLink}
+                onMouseDown={(
+                  e: React.MouseEvent<HTMLAnchorElement, MouseEvent>
+                ) => {
+                  e.stopPropagation();
+                }}
+              >{`r/${post.community.name}`}</Link>
+            </NextLink>
+            <span>&nbsp;&#183;&nbsp;</span>
+            <Typography variant="caption">{`Posted by ${post.creator.username} ${timeago}`}</Typography>
+          </Box>
+        }
       />
       <CardContent className={classes.content}>
         <Typography variant="h6" gutterBottom>
@@ -79,8 +108,9 @@ export const PostDetailCard = ({ post, ...props }: PostDetailProps) => {
         </Typography>
         {isTextPost ? (
           <Box dangerouslySetInnerHTML={{ __html: post.text || "" }}></Box>
-        ) : null}
-        {!isTextPost ? <ImagePostSwiper images={post.images} /> : null}
+        ) : (
+          <ImagePostSwiper images={post.images} />
+        )}
       </CardContent>
     </Card>
   );

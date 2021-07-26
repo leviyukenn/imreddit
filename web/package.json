@@ -14,6 +14,8 @@
     "@material-ui/core": "^4.11.3",
     "@material-ui/icons": "^4.11.2",
     "@material-ui/lab": "^4.0.0-alpha.57",
+    "@mui-treasury/components": "^2.0.0-alpha.1",
+    "@mui-treasury/styles": "^2.0.0-alpha.1",
     "@types/apollo-upload-client": "^14.1.0",
     "@types/draftjs-to-html": "^0.8.0",
     "@types/markdown-draft-js": "^2.2.2",

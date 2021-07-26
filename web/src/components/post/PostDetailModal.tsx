@@ -9,7 +9,7 @@ import {
 } from "@material-ui/core";
 import CloseIcon from "@material-ui/icons/Close";
 import { useRouter } from "next/router";
-import React from "react";
+import React, { useCallback } from "react";
 import PostDetail from "./PostDetail";
 
 interface PostDetailModalProps {}
@@ -43,11 +43,11 @@ const useStyles = makeStyles((theme: Theme) =>
 );
 
 const PostDetailModal = ({}: PostDetailModalProps) => {
-  const handleClose = () => {
-    router.push("/", undefined, { shallow: true });
-  };
   const router = useRouter();
   const classes = useStyles();
+  const handleClose = useCallback(() => {
+    router.back();
+  }, [router]);
 
   return (
     <Dialog

@@ -250,7 +250,6 @@ const ImagePostEditor = ({
     },
     [selectedImage]
   );
-  console.log(uploadedImages);
 
   const {
     acceptedFiles,

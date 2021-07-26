@@ -13,6 +13,7 @@ import ImageOutlinedIcon from "@material-ui/icons/ImageOutlined";
 import React, { useCallback, useEffect, useState } from "react";
 import Container from "../components/Container";
 import CreatePostForm from "../components/post/CreatePostForm";
+import SelectCommunity from "../components/post/SelectCommunity";
 import { PostType } from "../components/types/types";
 import { useIsAuth } from "../utils/hooks/useIsAuth";
 
@@ -25,19 +26,21 @@ const useStyles = makeStyles((theme: Theme) =>
     },
     createPostCard: {
       overflow: "visible",
+      marginTop: "24px",
     },
   })
 );
 
 const CreatePost = () => {
   const classes = useStyles();
-  const { checkIsAuth } = useIsAuth();
+  const { checkIsAuth, me } = useIsAuth();
 
   useEffect(() => {
     checkIsAuth();
   }, [checkIsAuth]);
 
   const [postType, setPostType] = useState<PostType>(PostType.TEXT_POST);
+  const [communityName, setCommunityName] = useState<string>("");
 
   const handleChange = useCallback((_: any, value: PostType) => {
     setPostType(value);
@@ -47,6 +50,9 @@ const CreatePost = () => {
     <Container>
       <Grid container justify="center" spacing={4}>
         <Grid item className={classes.mainContentHeart}>
+          <SelectCommunity
+            {...{ communityName, setCommunityName, userId: me?.id }}
+          />
           <Card className={classes.createPostCard}>
             <CardContent>
               <Tabs

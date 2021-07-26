@@ -16,5 +16,5 @@ export function useIsAuth() {
   }, [meLoading, router, showLoginModal, meResponse]);
   const isAuth = useMemo(() => !!meResponse?.me, [meResponse]);
 
-  return { checkIsAuth, meLoading, isAuth };
+  return { checkIsAuth, meLoading, isAuth, me: meResponse?.me };
 }

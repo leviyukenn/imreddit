@@ -100,8 +100,8 @@ export const PostCard = ({ post, ...props }: PostCardProps) => {
         <UpvoteBox post={post} isVerticalLayout={true} />
       </Box>
       <NextLink
-        href={`${router.pathname}?postId=${post.id}`}
-        as={`/post-detail/${post.id}`}
+        href={`${router.asPath}?postId=${post.id}`}
+        as={`/r/${post.community.name}/${post.id}`}
         shallow
       >
         <Card className={classes.card} {...props}>
@@ -118,17 +118,21 @@ export const PostCard = ({ post, ...props }: PostCardProps) => {
             }
             subheader={
               <Box display="flex" alignItems="center">
-                <NextLink href="/">
-                  <Link
-                    className={classes.communityLink}
-                    onMouseDown={(
-                      e: React.MouseEvent<HTMLAnchorElement, MouseEvent>
-                    ) => {
-                      e.stopPropagation();
-                    }}
-                  >{`r/${post.community.name}`}</Link>
-                </NextLink>
-                <span>&nbsp;&#183;&nbsp;</span>
+                {!router.query.postInfo ? (
+                  <>
+                    <NextLink href={`/r/${post.community.name}`}>
+                      <Link
+                        className={classes.communityLink}
+                        onMouseDown={(
+                          e: React.MouseEvent<HTMLAnchorElement, MouseEvent>
+                        ) => {
+                          e.stopPropagation();
+                        }}
+                      >{`r/${post.community.name}`}</Link>
+                    </NextLink>
+                    <span>&nbsp;&#183;&nbsp;</span>
+                  </>
+                ) : null}
                 <Typography variant="caption">{`Posted by ${post.creator.username} ${timeago}`}</Typography>
               </Box>
             }
@@ -144,8 +148,9 @@ export const PostCard = ({ post, ...props }: PostCardProps) => {
             </Typography>
             {isTextPost ? (
               <Box dangerouslySetInnerHTML={{ __html: post.text || "" }}></Box>
-            ) : null}
-            {!isTextPost ? <ImagePostSwiper images={post.images} /> : null}
+            ) : (
+              <ImagePostSwiper images={post.images} />
+            )}
           </CardContent>
         </Card>
       </NextLink>
@@ -158,15 +163,6 @@ export const LoadingPostCard = () => {
 
   return (
     <Card className={classes.card}>
-      {/* <Box className={classes.upvoteBox}>
-        <IconButton aria-label="upvote" size="small">
-          <Skeleton />
-        </IconButton>
-        <Skeleton />
-        <IconButton aria-label="downvote" size="small">
-          <Skeleton />
-        </IconButton>
-      </Box> */}
       <CardHeader
         avatar={
           <Avatar aria-label="recipe" className={classes.avatar}>

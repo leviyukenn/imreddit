@@ -1,0 +1,12 @@
+query CommunityPosts($limit: Int, $cursor: String, $communityName: String!) {
+  communityPosts(
+    limit: $limit
+    cursor: $cursor
+    communityName: $communityName
+  ) {
+    hasMore
+    posts {
+      ...RegularPostDetail
+    }
+  }
+}

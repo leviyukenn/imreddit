@@ -1,5 +1,5 @@
-query Posts($limit: Int, $cursor: String, $communityName: String) {
-  posts(limit: $limit, cursor: $cursor, communityName: $communityName) {
+query Posts($limit: Int, $cursor: String) {
+  posts(limit: $limit, cursor: $cursor) {
     hasMore
     posts {
       ...RegularPostDetail

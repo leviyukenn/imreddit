@@ -2,7 +2,7 @@ import { Box, createStyles, Fab, makeStyles, Theme } from "@material-ui/core";
 import NavigationIcon from "@material-ui/icons/Navigation";
 import { useCallback } from "react";
 import Container from "../components/Container";
-import PostInfiniteScroll from "../components/post/PostInfiniteScroll";
+import { HomePostsInfiniteScroll } from "../components/post/PostInfiniteScroll";
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -29,7 +29,7 @@ const Index = () => {
   return (
     <Container>
       <Box display="flex" justifyContent="center">
-        <PostInfiniteScroll />
+        <HomePostsInfiniteScroll />
         <Fab
           variant="extended"
           color="primary"
