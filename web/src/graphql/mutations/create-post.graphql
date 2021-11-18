@@ -1,4 +1,5 @@
 mutation CreatePost(
+  $communityId: String!
   $text: String
   $title: String
   $parentId: String
@@ -10,8 +11,12 @@ mutation CreatePost(
       text: $text
       parentId: $parentId
       images: $images
+      communityId: $communityId
     }
   ) {
-    ...RegularPostDetail
+    id
+    community {
+      name
+    }
   }
 }

@@ -6,7 +6,7 @@ import {
   Theme,
 } from "@material-ui/core";
 import React from "react";
-import NavBar from "./NavBar";
+import NavBar from "./navbar/NavBar";
 
 interface ContainerProps extends BoxProps {
   backgroundMode?: "light" | "grey";

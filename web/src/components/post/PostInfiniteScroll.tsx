@@ -6,6 +6,7 @@ import {
   useCommunityPostsQuery,
   usePostsQuery,
 } from "../../generated/graphql";
+import { useIsAuth } from "../../utils/hooks/useIsAuth";
 import CreatePostCard from "./CreatePostCard";
 import { LoadingPostCard, PostCard } from "./PostCard";
 import PostDetailModal from "./PostDetailModal";
@@ -37,11 +38,12 @@ const PostInfiniteScroll = ({
   next,
 }: PostInfiniteScrollProps) => {
   const classes = useStyles();
+  const { me } = useIsAuth();
 
   return (
     <>
       <Box className={classes.mainContentHeart}>
-        <CreatePostCard />
+        {me ? <CreatePostCard /> : null}
         <InfiniteScroll
           dataLength={posts.length}
           next={next}

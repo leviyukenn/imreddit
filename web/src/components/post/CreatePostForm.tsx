@@ -44,7 +44,12 @@ const useStyles = makeStyles((theme: Theme) =>
   })
 );
 
-const CreatePost = ({ postType }: { postType: PostType }) => {
+interface CreatePostFormProps {
+  postType: PostType;
+  communityId: string;
+}
+
+const CreatePost = ({ postType, communityId }: CreatePostFormProps) => {
   const [createPost, { error: createPostError }] = useCreatePostMutation({
     update(cache, { data: createPostResponse }) {
       cache.modify({
@@ -72,6 +77,7 @@ const CreatePost = ({ postType }: { postType: PostType }) => {
       });
     },
   });
+
   const [displayInnerError, setDisplayInnerError] = useState<boolean>(false);
 
   const router = useRouter();
@@ -90,9 +96,13 @@ const CreatePost = ({ postType }: { postType: PostType }) => {
 
       if (postType === PostType.TEXT_POST) {
         const postDetail = getPostDetailCallback();
-        inputVariable = { title, text: postDetail };
+        inputVariable = {
+          communityId,
+          title,
+          text: postDetail,
+        };
       } else {
-        inputVariable = { title, images: uploadedImages };
+        inputVariable = { communityId, title, images: uploadedImages };
       }
 
       const result = await createPost({
@@ -104,7 +114,9 @@ const CreatePost = ({ postType }: { postType: PostType }) => {
         return;
       }
       if (result.data?.createPost) {
-        router.push(`/post-detail/${result.data.createPost.id}`);
+        router.push(
+          `/r/${result.data.createPost.community.name}/${result.data.createPost.id}`
+        );
       }
     },
     [
@@ -115,6 +127,7 @@ const CreatePost = ({ postType }: { postType: PostType }) => {
       getPostDetailCallback,
       postType,
       uploadedImages,
+      communityId,
     ]
   );
 
@@ -168,7 +181,7 @@ const CreatePost = ({ postType }: { postType: PostType }) => {
               <Button
                 variant="contained"
                 color="primary"
-                disabled={isSubmitting}
+                disabled={isSubmitting || !communityId}
                 onClick={submitForm}
               >
                 Post

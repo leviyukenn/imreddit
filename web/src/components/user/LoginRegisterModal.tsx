@@ -30,14 +30,18 @@ const useStyles = makeStyles((theme: Theme) =>
 const LoginRegisterModal = () => {
   const { isOpen, onClose, showWhichContent } = useUserModalState();
   let modalContent = null;
+  let modalTitle = "";
   switch (showWhichContent) {
     case USER_MODAL_CONTENT.LOGIN:
+      modalTitle = "Login";
       modalContent = <Login />;
       break;
     case USER_MODAL_CONTENT.REGISTER:
+      modalTitle = "Sign up";
       modalContent = <Register />;
       break;
     case USER_MODAL_CONTENT.FORGOT_PASSWORD:
+      modalTitle = "Reset your password";
       modalContent = <ForgotPassword />;
       break;
   }
@@ -53,7 +57,7 @@ const LoginRegisterModal = () => {
       aria-labelledby="form-dialog-title"
     >
       <DialogTitle id="form-dialog-title" onClick={onClose}>
-        <Typography>{showWhichContent}</Typography>
+        <Typography>{modalTitle}</Typography>
         <IconButton
           aria-label="close"
           className={classes.closeButton}

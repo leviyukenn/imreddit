@@ -14,8 +14,7 @@ mutation CreateCommunity(
       id
     }
     errors {
-      field
-      message
+      ...RegularErrors
     }
   }
 }

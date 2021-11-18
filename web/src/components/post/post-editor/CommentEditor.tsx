@@ -64,7 +64,12 @@ const CommentEditor = ({ replyTo }: CommentEditorProps) => {
       }
 
       const result = await createPost({
-        variables: { text: postDetail, parentId: replyTo.id },
+
+        variables: {
+          communityId: replyTo.community.id,
+          text: postDetail,
+          parentId: replyTo.id,
+        },
       });
 
       if (createPostError || result.errors) {

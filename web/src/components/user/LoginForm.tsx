@@ -60,13 +60,17 @@ const Login = () => {
   });
 
   const {
+    isOpen,
     onClose,
     showRegisterModal,
     showForgotPasswordModal,
+    showRegisterPage,
+    showForgotPasswordPage,
   } = useUserModalState();
 
   const [displayInnerError, setDisplayInnerError] = useState<boolean>(false);
   const router = useRouter();
+
   const onlogin = useCallback(
     async (values: FormData, actions: FormikHelpers<FormData>) => {
       const loginResult = await login({ variables: values });
@@ -80,13 +84,18 @@ const Login = () => {
         return;
       }
       if (loginResult.data?.login.user) {
+        if (!isOpen) {
+          router.back();
+          return;
+        }
         onClose();
+
         if (typeof router.query.next === "string") {
           router.push(router.query.next);
         }
       }
     },
-    [login, setDisplayInnerError]
+    [login, setDisplayInnerError, isOpen, router]
   );
 
   const classes = useStyles();
@@ -149,13 +158,21 @@ const Login = () => {
             <Grid item className={classes.formItem}>
               <Typography variant="caption">
                 Forgot your{" "}
-                <Link onClick={showForgotPasswordModal}>PASSWORD?</Link>
+                <Link
+                  onClick={
+                    isOpen ? showForgotPasswordModal : showForgotPasswordPage
+                  }
+                >
+                  PASSWORD?
+                </Link>
               </Typography>
             </Grid>
             <Grid item className={classes.formItem}>
               <Typography variant="caption">
                 Don't have an account?{" "}
-                <Link onClick={showRegisterModal}>SIGN UP</Link>
+                <Link onClick={isOpen ? showRegisterModal : showRegisterPage}>
+                  SIGN UP
+                </Link>
               </Typography>
             </Grid>
           </Grid>

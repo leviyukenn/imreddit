@@ -42,7 +42,13 @@ const ForgotPassword = () => {
   ] = useForgotPasswordMutation();
   const [displayInnerError, setDisplayInnerError] = useState<boolean>(false);
   const [completeSendingEmail, setCompleteSendingEmail] = useState(false);
-  const { showLoginModal, showRegisterModal } = useUserModalState();
+  const {
+    isOpen,
+    showLoginModal,
+    showRegisterModal,
+    showLoginPage,
+    showRegisterPage,
+  } = useUserModalState();
 
   const classes = useStyles();
 
@@ -121,12 +127,20 @@ const ForgotPassword = () => {
             <Grid item className={classes.formItem}>
               <Breadcrumbs separator="-" aria-label="breadcrumb">
                 <Typography variant="caption">
-                  <Link color="primary" href="#" onClick={showLoginModal}>
+                  <Link
+                    color="primary"
+                    href="#"
+                    onClick={isOpen ? showLoginModal : showLoginPage}
+                  >
                     LOG IN
                   </Link>
                 </Typography>
                 <Typography variant="caption">
-                  <Link color="primary" href="#" onClick={showRegisterModal}>
+                  <Link
+                    color="primary"
+                    href="#"
+                    onClick={isOpen ? showRegisterModal : showRegisterPage}
+                  >
                     SIGN UP
                   </Link>
                 </Typography>

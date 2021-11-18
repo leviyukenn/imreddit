@@ -33,6 +33,12 @@ export type CommunityResponse = {
   community?: Maybe<Community>;
 };
 
+export type CompleteResponse = {
+  __typename?: 'CompleteResponse';
+  errors?: Maybe<Array<FieldError>>;
+  isComplete?: Maybe<Scalars['Boolean']>;
+};
+
 export type CreateCommunityInput = {
   name: Scalars['String'];
   description: Scalars['String'];
@@ -44,11 +50,13 @@ export type CreatePostInput = {
   text?: Maybe<Scalars['String']>;
   parentId?: Maybe<Scalars['String']>;
   images?: Maybe<Array<ImageInput>>;
+  communityId: Scalars['String'];
 };
 
 export type FieldError = {
   __typename?: 'FieldError';
   field: Scalars['String'];
+  errorCode: Scalars['String'];
   message: Scalars['String'];
 };
 
@@ -78,8 +86,8 @@ export type LoginInput = {
 
 export type Mutation = {
   __typename?: 'Mutation';
-  changePassword: UserResponse;
-  forgotPassword: Scalars['Boolean'];
+  changePassword: CompleteResponse;
+  forgotPassword: CompleteResponse;
   register: UserResponse;
   login: UserResponse;
   logout: Scalars['Boolean'];
@@ -192,7 +200,7 @@ export type QueryPostDetailArgs = {
 
 
 export type QueryCommunitiesArgs = {
-  cursor?: Maybe<Scalars['String']>;
+  userId: Scalars['String'];
 };
 
 export type RegisterInput = {
@@ -240,7 +248,7 @@ export type VoteInput = {
 
 export type RegularErrorsFragment = (
   { __typename?: 'FieldError' }
-  & Pick<FieldError, 'field' | 'message'>
+  & Pick<FieldError, 'field' | 'errorCode' | 'message'>
 );
 
 export type RegularImageFragment = (
@@ -259,7 +267,7 @@ export type RegularPostDetailFragment = (
     & RegularImageFragment
   )>, community: (
     { __typename?: 'Community' }
-    & Pick<Community, 'name'>
+    & Pick<Community, 'id' | 'name'>
   ) }
 );
 
@@ -288,8 +296,12 @@ export type ChangePasswordMutationVariables = Exact<{
 export type ChangePasswordMutation = (
   { __typename?: 'Mutation' }
   & { changePassword: (
-    { __typename?: 'UserResponse' }
-    & RegularUserResponseFragment
+    { __typename?: 'CompleteResponse' }
+    & Pick<CompleteResponse, 'isComplete'>
+    & { errors?: Maybe<Array<(
+      { __typename?: 'FieldError' }
+      & RegularErrorsFragment
+    )>> }
   ) }
 );
 
@@ -309,12 +321,13 @@ export type CreateCommunityMutation = (
       & Pick<Community, 'id'>
     )>, errors?: Maybe<Array<(
       { __typename?: 'FieldError' }
-      & Pick<FieldError, 'field' | 'message'>
+      & RegularErrorsFragment
     )>> }
   ) }
 );
 
 export type CreatePostMutationVariables = Exact<{
+  communityId: Scalars['String'];
   text?: Maybe<Scalars['String']>;
   title?: Maybe<Scalars['String']>;
   parentId?: Maybe<Scalars['String']>;
@@ -326,7 +339,11 @@ export type CreatePostMutation = (
   { __typename?: 'Mutation' }
   & { createPost: (
     { __typename?: 'Post' }
-    & RegularPostDetailFragment
+    & Pick<Post, 'id'>
+    & { community: (
+      { __typename?: 'Community' }
+      & Pick<Community, 'name'>
+    ) }
   ) }
 );
 
@@ -338,7 +355,14 @@ export type ForgotPasswordMutationVariables = Exact<{
 
 export type ForgotPasswordMutation = (
   { __typename?: 'Mutation' }
-  & Pick<Mutation, 'forgotPassword'>
+  & { forgotPassword: (
+    { __typename?: 'CompleteResponse' }
+    & Pick<CompleteResponse, 'isComplete'>
+    & { errors?: Maybe<Array<(
+      { __typename?: 'FieldError' }
+      & RegularErrorsFragment
+    )>> }
+  ) }
 );
 
 export type LoginMutationVariables = Exact<{
@@ -418,7 +442,9 @@ export type VoteMutation = (
   & Pick<Mutation, 'vote'>
 );
 
-export type CommunitiesQueryVariables = Exact<{ [key: string]: never; }>;
+export type CommunitiesQueryVariables = Exact<{
+  userId: Scalars['String'];
+}>;
 
 
 export type CommunitiesQuery = (
@@ -535,6 +561,7 @@ export const RegularPostDetailFragmentDoc = gql`
     ...RegularImage
   }
   community {
+    id
     name
   }
 }
@@ -543,6 +570,7 @@ ${RegularImageFragmentDoc}`;
 export const RegularErrorsFragmentDoc = gql`
     fragment RegularErrors on FieldError {
   field
+  errorCode
   message
 }
     `;
@@ -560,10 +588,13 @@ ${RegularUserFragmentDoc}`;
 export const ChangePasswordDocument = gql`
     mutation ChangePassword($token: String!, $newPassword: String!) {
   changePassword(token: $token, newPassword: $newPassword) {
-    ...RegularUserResponse
+    errors {
+      ...RegularErrors
+    }
+    isComplete
   }
 }
-    ${RegularUserResponseFragmentDoc}`;
+    ${RegularErrorsFragmentDoc}`;
 export type ChangePasswordMutationFn = Apollo.MutationFunction<ChangePasswordMutation, ChangePasswordMutationVariables>;
 
 /**
@@ -600,12 +631,11 @@ export const CreateCommunityDocument = gql`
       id
     }
     errors {
-      field
-      message
+      ...RegularErrors
     }
   }
 }
-    `;
+    ${RegularErrorsFragmentDoc}`;
 export type CreateCommunityMutationFn = Apollo.MutationFunction<CreateCommunityMutation, CreateCommunityMutationVariables>;
 
 /**
@@ -635,14 +665,17 @@ export type CreateCommunityMutationHookResult = ReturnType<typeof useCreateCommu
 export type CreateCommunityMutationResult = Apollo.MutationResult<CreateCommunityMutation>;
 export type CreateCommunityMutationOptions = Apollo.BaseMutationOptions<CreateCommunityMutation, CreateCommunityMutationVariables>;
 export const CreatePostDocument = gql`
-    mutation CreatePost($text: String, $title: String, $parentId: String, $images: [ImageInput!]) {
+    mutation CreatePost($communityId: String!, $text: String, $title: String, $parentId: String, $images: [ImageInput!]) {
   createPost(
-    createPostInput: {title: $title, text: $text, parentId: $parentId, images: $images}
+    createPostInput: {title: $title, text: $text, parentId: $parentId, images: $images, communityId: $communityId}
   ) {
-    ...RegularPostDetail
+    id
+    community {
+      name
+    }
   }
 }
-    ${RegularPostDetailFragmentDoc}`;
+    `;
 export type CreatePostMutationFn = Apollo.MutationFunction<CreatePostMutation, CreatePostMutationVariables>;
 
 /**
@@ -658,6 +691,7 @@ export type CreatePostMutationFn = Apollo.MutationFunction<CreatePostMutation, C
  * @example
  * const [createPostMutation, { data, loading, error }] = useCreatePostMutation({
  *   variables: {
+ *      communityId: // value for 'communityId'
  *      text: // value for 'text'
  *      title: // value for 'title'
  *      parentId: // value for 'parentId'
@@ -674,9 +708,14 @@ export type CreatePostMutationResult = Apollo.MutationResult<CreatePostMutation>
 export type CreatePostMutationOptions = Apollo.BaseMutationOptions<CreatePostMutation, CreatePostMutationVariables>;
 export const ForgotPasswordDocument = gql`
     mutation ForgotPassword($username: String!, $email: String!) {
-  forgotPassword(forgotPasswordInput: {username: $username, email: $email})
+  forgotPassword(forgotPasswordInput: {username: $username, email: $email}) {
+    errors {
+      ...RegularErrors
+    }
+    isComplete
+  }
 }
-    `;
+    ${RegularErrorsFragmentDoc}`;
 export type ForgotPasswordMutationFn = Apollo.MutationFunction<ForgotPasswordMutation, ForgotPasswordMutationVariables>;
 
 /**
@@ -885,8 +924,8 @@ export type VoteMutationHookResult = ReturnType<typeof useVoteMutation>;
 export type VoteMutationResult = Apollo.MutationResult<VoteMutation>;
 export type VoteMutationOptions = Apollo.BaseMutationOptions<VoteMutation, VoteMutationVariables>;
 export const CommunitiesDocument = gql`
-    query Communities {
-  communities {
+    query Communities($userId: String!) {
+  communities(userId: $userId) {
     id
     name
   }
@@ -905,10 +944,11 @@ export const CommunitiesDocument = gql`
  * @example
  * const { data, loading, error } = useCommunitiesQuery({
  *   variables: {
+ *      userId: // value for 'userId'
  *   },
  * });
  */
-export function useCommunitiesQuery(baseOptions?: Apollo.QueryHookOptions<CommunitiesQuery, CommunitiesQueryVariables>) {
+export function useCommunitiesQuery(baseOptions: Apollo.QueryHookOptions<CommunitiesQuery, CommunitiesQueryVariables>) {
         const options = {...defaultOptions, ...baseOptions}
         return Apollo.useQuery<CommunitiesQuery, CommunitiesQueryVariables>(CommunitiesDocument, options);
       }
@@ -1119,9 +1159,15 @@ export type CommunityResponseFieldPolicy = {
 	errors?: FieldPolicy<any> | FieldReadFunction<any>,
 	community?: FieldPolicy<any> | FieldReadFunction<any>
 };
-export type FieldErrorKeySpecifier = ('field' | 'message' | FieldErrorKeySpecifier)[];
+export type CompleteResponseKeySpecifier = ('errors' | 'isComplete' | CompleteResponseKeySpecifier)[];
+export type CompleteResponseFieldPolicy = {
+	errors?: FieldPolicy<any> | FieldReadFunction<any>,
+	isComplete?: FieldPolicy<any> | FieldReadFunction<any>
+};
+export type FieldErrorKeySpecifier = ('field' | 'errorCode' | 'message' | FieldErrorKeySpecifier)[];
 export type FieldErrorFieldPolicy = {
 	field?: FieldPolicy<any> | FieldReadFunction<any>,
+	errorCode?: FieldPolicy<any> | FieldReadFunction<any>,
 	message?: FieldPolicy<any> | FieldReadFunction<any>
 };
 export type ImageKeySpecifier = ('id' | 'path' | 'caption' | 'link' | ImageKeySpecifier)[];
@@ -1207,6 +1253,10 @@ export type TypedTypePolicies = TypePolicies & {
 	CommunityResponse?: Omit<TypePolicy, "fields" | "keyFields"> & {
 		keyFields?: false | CommunityResponseKeySpecifier | (() => undefined | CommunityResponseKeySpecifier),
 		fields?: CommunityResponseFieldPolicy,
+	},
+	CompleteResponse?: Omit<TypePolicy, "fields" | "keyFields"> & {
+		keyFields?: false | CompleteResponseKeySpecifier | (() => undefined | CompleteResponseKeySpecifier),
+		fields?: CompleteResponseFieldPolicy,
 	},
 	FieldError?: Omit<TypePolicy, "fields" | "keyFields"> & {
 		keyFields?: false | FieldErrorKeySpecifier | (() => undefined | FieldErrorKeySpecifier),

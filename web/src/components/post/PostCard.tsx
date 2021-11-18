@@ -120,7 +120,7 @@ export const PostCard = ({ post, ...props }: PostCardProps) => {
               <Box display="flex" alignItems="center">
                 {!router.query.postInfo ? (
                   <>
-                    <NextLink href={`/r/${post.community.name}`}>
+                    <NextLink href={`/c/${post.community.name}`}>
                       <Link
                         className={classes.communityLink}
                         onMouseDown={(
@@ -128,7 +128,7 @@ export const PostCard = ({ post, ...props }: PostCardProps) => {
                         ) => {
                           e.stopPropagation();
                         }}
-                      >{`r/${post.community.name}`}</Link>
+                      >{`c/${post.community.name}`}</Link>
                     </NextLink>
                     <span>&nbsp;&#183;&nbsp;</span>
                   </>

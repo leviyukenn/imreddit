@@ -12,6 +12,7 @@ fragment RegularPostDetail on Post {
     ...RegularImage
   }
   community {
+    id
     name
   }
 }

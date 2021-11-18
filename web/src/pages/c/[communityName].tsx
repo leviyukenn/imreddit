@@ -4,7 +4,6 @@ import { useRouter } from "next/router";
 import { useCallback, useMemo } from "react";
 import Container from "../../components/Container";
 import { LoadingPostCard } from "../../components/post/PostCard";
-import PostDetail from "../../components/post/PostDetail";
 import { CommunityPostsInfiniteScroll } from "../../components/post/PostInfiniteScroll";
 
 const useStyles = makeStyles((theme: Theme) =>
@@ -31,38 +30,28 @@ const CommunityHome = () => {
   }, []);
 
   const communityName = useMemo(
-    () => ((router.query.postInfo as string[]) || [])[0] || "",
+    () => (router.query.communityName as string) || "",
     [router]
   );
-  const postId = useMemo(
-    () => ((router.query.postInfo as string[]) || [])[1] || "",
-    [router]
-  );
-  const modalPostId = useMemo(() => router.query.postId as string, [router]);
-  debugger;
 
   return (
     <Container>
-      {postId && !modalPostId ? (
-        <PostDetail postId={postId} />
-      ) : (
-        <Box display="flex" justifyContent="center">
-          {communityName ? (
-            <CommunityPostsInfiniteScroll communityName={communityName} />
-          ) : (
-            <LoadingPostCard />
-          )}
-          <Fab
-            variant="extended"
-            color="primary"
-            onClick={backToTop}
-            className={classes.backToTopButton}
-          >
-            <NavigationIcon />
-            Back to Top
-          </Fab>
-        </Box>
-      )}
+      <Box display="flex" justifyContent="center">
+        {communityName ? (
+          <CommunityPostsInfiniteScroll communityName={communityName} />
+        ) : (
+          <LoadingPostCard />
+        )}
+        <Fab
+          variant="extended"
+          color="primary"
+          onClick={backToTop}
+          className={classes.backToTopButton}
+        >
+          <NavigationIcon />
+          Back to Top
+        </Fab>
+      </Box>
     </Container>
   );
 };

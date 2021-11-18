@@ -1,35 +1,21 @@
-import AppBar from "@material-ui/core/AppBar";
-import Button from "@material-ui/core/Button";
-import IconButton from "@material-ui/core/IconButton";
-import { createStyles, makeStyles, Theme } from "@material-ui/core/styles";
-import Toolbar from "@material-ui/core/Toolbar";
-import Typography from "@material-ui/core/Typography";
-import MenuIcon from "@material-ui/icons/Menu";
-import NextLink from "next/link";
+import {
+  Button,
+  createStyles,
+  makeStyles,
+  Theme,
+  Typography,
+} from "@material-ui/core";
 import React from "react";
-import { useLogoutMutation, useMeQuery } from "../generated/graphql";
-import { useUserModalState } from "../redux/hooks/useUserModalState";
-import LoginRegisterModal from "./user/LoginRegisterModal";
+import { useLogoutMutation, useMeQuery } from "../../generated/graphql";
+import { useUserModalState } from "../../redux/hooks/useUserModalState";
+import LoginRegisterModal from "../user/LoginRegisterModal";
 
+interface UserStatusBarProps {}
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
-    root: {
-      backgroundColor: theme.palette.background.paper,
-      position: "sticky",
-      top: 0,
-      zIndex: 10000,
-      height: "56px",
-      borderBottom: "1px solid #edeff1",
-    },
-    toolBar: {
-      minHeight: "56px",
-    },
     menuButton: {
       marginRight: theme.spacing(2),
       borderRadius: "9999px",
-    },
-    title: {
-      flexGrow: 1,
     },
     username: {
       marginRight: theme.spacing(2),
@@ -37,8 +23,9 @@ const useStyles = makeStyles((theme: Theme) =>
   })
 );
 
-export default function NavBar() {
+const UserStatusBar = ({}: UserStatusBarProps) => {
   const { loading: meLoading, error, data: meResponse } = useMeQuery();
+
   const [logout, { loading: logoutLoading }] = useLogoutMutation({
     update(cache, { data: logoutResponse }) {
       cache.modify({
@@ -53,15 +40,12 @@ export default function NavBar() {
       });
     },
   });
-
   const { showLoginModal, showRegisterModal } = useUserModalState();
 
   const classes = useStyles();
 
-  let body = null;
-
   if (!error && !meLoading && meResponse?.me) {
-    body = (
+    return (
       <>
         <Typography
           variant="h6"
@@ -83,7 +67,7 @@ export default function NavBar() {
       </>
     );
   } else {
-    body = (
+    return (
       <>
         <Button
           disableElevation
@@ -107,31 +91,5 @@ export default function NavBar() {
       </>
     );
   }
-
-  return (
-    <AppBar position="static" elevation={0} className={classes.root}>
-      <Toolbar className={classes.toolBar}>
-        <NextLink href="/" passHref>
-          <IconButton
-            edge="start"
-            className={classes.menuButton}
-            color="default"
-            aria-label="menu"
-          >
-            <MenuIcon />
-          </IconButton>
-        </NextLink>
-        <NextLink href="/">
-          <Typography
-            variant="h6"
-            className={classes.title}
-            color="textPrimary"
-          >
-            Imreddit
-          </Typography>
-        </NextLink>
-        {body}
-      </Toolbar>
-    </AppBar>
-  );
-}
+};
+export default UserStatusBar;

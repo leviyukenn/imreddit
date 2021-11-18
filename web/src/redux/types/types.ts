@@ -10,9 +10,9 @@ export interface Action<T> {
 }
 
 export enum USER_MODAL_CONTENT {
-  LOGIN = "Login",
-  REGISTER = "Sign up",
-  FORGOT_PASSWORD = "Reset your password",
+  LOGIN = 1,
+  REGISTER,
+  FORGOT_PASSWORD,
 }
 
 export interface UserModalState {

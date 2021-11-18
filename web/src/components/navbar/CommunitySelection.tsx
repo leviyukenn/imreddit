@@ -11,14 +11,8 @@ import {
 } from "@material-ui/core";
 import { blue, grey } from "@material-ui/core/colors";
 import ExpandMoreRoundedIcon from "@material-ui/icons/ExpandMoreRounded";
-import React, { useCallback, useMemo } from "react";
-import { useCommunitiesQuery } from "../../generated/graphql";
-
-interface SelectCommunityProps {
-  setCommunityId: React.Dispatch<React.SetStateAction<string>>;
-  communityId: string;
-  userId: string;
-}
+import React, { useEffect, useMemo } from "react";
+import { useCommunitiesLazyQuery, useMeQuery } from "../../generated/graphql";
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -89,42 +83,25 @@ const useStyles = makeStyles((theme: Theme) =>
   })
 );
 
-const SelectCommunity = ({
-  communityId,
-  setCommunityId,
-  userId,
-}: SelectCommunityProps) => {
+const CommunitySelection = () => {
   const outlineSelectClasses = useStyles();
-  const {
-    data: communitiesResponse,
-    loading: communitiesLoading,
-  } = useCommunitiesQuery({ variables: { userId } });
+  const [
+    getCommunities,
+    { loading: lodaingCommunities, data: communitiesResponse },
+  ] = useCommunitiesLazyQuery({ fetchPolicy: "network-only" });
+
+  const { loading: meLoading, error, data: meResponse } = useMeQuery();
+
+  useEffect(() => {
+    if (meResponse?.me?.id) {
+      console.log(meResponse.me.id);
+      getCommunities();
+    }
+  }, [meResponse?.me?.id]);
 
   const communities = useMemo(() => communitiesResponse?.communities || [], [
     communitiesResponse,
   ]);
-
-  const communityName = useMemo(
-    () =>
-      communities.find((community) => community.id === communityId)?.name || "",
-    [communities, communityId]
-  );
-
-  const handleChange = useCallback(
-    (
-      event: React.ChangeEvent<{
-        name?: string;
-        value: unknown;
-      }>
-    ) => {
-      const communityId =
-        communities.find(
-          (community) => community.name === (event.target.value as string)
-        )?.id || "";
-      setCommunityId(communityId);
-    },
-    [communities]
-  );
 
   const iconComponent = (props: SvgIconProps) => {
     return (
@@ -158,8 +135,6 @@ const SelectCommunity = ({
         classes={{ root: outlineSelectClasses.select }}
         MenuProps={menuProps}
         IconComponent={iconComponent}
-        value={communityName}
-        onChange={handleChange}
         displayEmpty
         renderValue={(selected) =>
           (selected as string) ? (
@@ -189,4 +164,4 @@ const SelectCommunity = ({
     </FormControl>
   );
 };
-export default SelectCommunity;
+export default CommunitySelection;

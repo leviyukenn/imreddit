@@ -1,5 +1,5 @@
-query Communities {
-  communities {
+query Communities($userId: String!) {
+  communities(userId: $userId) {
     id
     name
   }

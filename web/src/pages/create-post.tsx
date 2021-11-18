@@ -10,6 +10,7 @@ import {
 } from "@material-ui/core";
 import DescriptionOutlinedIcon from "@material-ui/icons/DescriptionOutlined";
 import ImageOutlinedIcon from "@material-ui/icons/ImageOutlined";
+import { useRouter } from "next/router";
 import React, { useCallback, useEffect, useState } from "react";
 import Container from "../components/Container";
 import CreatePostForm from "../components/post/CreatePostForm";
@@ -33,25 +34,33 @@ const useStyles = makeStyles((theme: Theme) =>
 
 const CreatePost = () => {
   const classes = useStyles();
-  const { checkIsAuth, me } = useIsAuth();
 
+  //if not loged in, redirect to login page
+  const { me, meLoading } = useIsAuth();
+  const router = useRouter();
   useEffect(() => {
-    checkIsAuth();
-  }, [checkIsAuth]);
+    if (!me && !meLoading) {
+      router.push("/login");
+    }
+  }, [me, meLoading]);
 
   const [postType, setPostType] = useState<PostType>(PostType.TEXT_POST);
-  const [communityName, setCommunityName] = useState<string>("");
+  const [communityId, setCommunityId] = useState<string>("");
 
   const handleChange = useCallback((_: any, value: PostType) => {
     setPostType(value);
   }, []);
+
+  if (!me) {
+    return null;
+  }
 
   return (
     <Container>
       <Grid container justify="center" spacing={4}>
         <Grid item className={classes.mainContentHeart}>
           <SelectCommunity
-            {...{ communityName, setCommunityName, userId: me?.id }}
+            {...{ communityId, setCommunityId, userId: me.id }}
           />
           <Card className={classes.createPostCard}>
             <CardContent>
@@ -74,7 +83,7 @@ const CreatePost = () => {
                   value={PostType.IMAGE_POST}
                 />
               </Tabs>
-              <CreatePostForm postType={postType} />
+              <CreatePostForm postType={postType} communityId={communityId} />
             </CardContent>
           </Card>
         </Grid>

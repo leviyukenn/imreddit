@@ -58,7 +58,12 @@ const Register = () => {
     },
   });
   const [displayInnerError, setDisplayInnerError] = useState<boolean>(false);
-  const { onClose, showLoginModal } = useUserModalState();
+  const {
+    isOpen,
+    onClose,
+    showLoginModal,
+    showLoginPage,
+  } = useUserModalState();
 
   const onRegister = useCallback(
     async (values: FormData, actions: FormikHelpers<FormData>) => {
@@ -148,7 +153,9 @@ const Register = () => {
             <Grid item className={classes.formItem}>
               <Typography variant="caption">
                 Already has a account?{" "}
-                <Link onClick={showLoginModal}>LOG IN</Link>
+                <Link onClick={isOpen ? showLoginModal : showLoginPage}>
+                  LOG IN
+                </Link>
               </Typography>
             </Grid>
           </Grid>

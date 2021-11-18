@@ -50,9 +50,8 @@ const communityPostsFieldPolicy: FieldPolicy<
   // Return all items stored so far, to avoid ambiguities
   // about the order of the items.
   read(existing, { args, readField }) {
-    console.log("read existing", existing);
-    if (!existing) {
-      return existing;
+    if (!existing || !existing[args!.communityName]) {
+      return undefined;
     }
     const posts = Object.values(existing[args!.communityName].posts);
     //sort cached posts by create time
