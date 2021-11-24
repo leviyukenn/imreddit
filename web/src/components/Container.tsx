@@ -18,8 +18,9 @@ const useStyles = makeStyles((theme: Theme) =>
       position: "relative",
     },
     mainContentBox: {
-      marginTop: "0",
-      minHeight: "calc(100vh - 56px)",
+      [theme.breakpoints.up("sm")]: {
+        padding: "1.25rem 1.5rem",
+      },
     },
     lightBackground: {
       backgroundColor: theme.palette.background.paper,

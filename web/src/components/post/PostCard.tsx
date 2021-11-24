@@ -90,6 +90,25 @@ export const PostCard = ({ post, ...props }: PostCardProps) => {
   const classes = useStyles();
 
   const timeago = useMemo(() => format(parseInt(post.createdAt)), [post]);
+  const subHeader = useMemo(
+    () => (
+      <Box display="flex" alignItems="center">
+        <NextLink href={`/c/${post.community.name}`} passHref>
+          <Link
+            className={classes.communityLink}
+            onMouseDown={(
+              e: React.MouseEvent<HTMLAnchorElement, MouseEvent>
+            ) => {
+              e.stopPropagation();
+            }}
+          >{`c/${post.community.name}`}</Link>
+        </NextLink>
+        <span>&nbsp;&#183;&nbsp;</span>
+        <Typography variant="caption">{`Posted by ${post.creator.username} ${timeago}`}</Typography>
+      </Box>
+    ),
+    []
+  );
 
   const isTextPost = useMemo(() => post.images.length === 0, [post]);
   const router = useRouter();
@@ -100,7 +119,8 @@ export const PostCard = ({ post, ...props }: PostCardProps) => {
         <UpvoteBox post={post} isVerticalLayout={true} />
       </Box>
       <NextLink
-        href={`${router.asPath}?postId=${post.id}`}
+        // href={`/r/[...postInfo]?postId=${post.id}`}
+        href={`${router.pathname}?postId=${post.id}`}
         as={`/r/${post.community.name}/${post.id}`}
         shallow
       >
@@ -116,26 +136,7 @@ export const PostCard = ({ post, ...props }: PostCardProps) => {
                 <MoreVertIcon />
               </IconButton>
             }
-            subheader={
-              <Box display="flex" alignItems="center">
-                {!router.query.postInfo ? (
-                  <>
-                    <NextLink href={`/c/${post.community.name}`}>
-                      <Link
-                        className={classes.communityLink}
-                        onMouseDown={(
-                          e: React.MouseEvent<HTMLAnchorElement, MouseEvent>
-                        ) => {
-                          e.stopPropagation();
-                        }}
-                      >{`c/${post.community.name}`}</Link>
-                    </NextLink>
-                    <span>&nbsp;&#183;&nbsp;</span>
-                  </>
-                ) : null}
-                <Typography variant="caption">{`Posted by ${post.creator.username} ${timeago}`}</Typography>
-              </Box>
-            }
+            subheader={subHeader}
             className={classes.header}
           />
           <CardContent

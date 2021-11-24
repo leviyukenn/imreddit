@@ -1,4 +1,3 @@
-import { Box, createStyles, makeStyles, Theme } from "@material-ui/core";
 import { useCallback, useMemo } from "react";
 import InfiniteScroll from "react-infinite-scroll-component";
 import {
@@ -6,25 +5,7 @@ import {
   useCommunityPostsQuery,
   usePostsQuery,
 } from "../../generated/graphql";
-import { useIsAuth } from "../../utils/hooks/useIsAuth";
-import CreatePostCard from "./CreatePostCard";
 import { LoadingPostCard, PostCard } from "./PostCard";
-import PostDetailModal from "./PostDetailModal";
-
-const useStyles = makeStyles((theme: Theme) =>
-  createStyles({
-    mainContentHeart: {
-      maxWidth: "740px",
-      width: "calc(100% - 32px)",
-      padding: "16px",
-    },
-    backToTopButton: {
-      position: "sticky",
-      top: "calc(100vh - 80px)",
-      right: 0,
-    },
-  })
-);
 
 interface PostInfiniteScrollProps {
   posts: RegularPostDetailFragment[];
@@ -37,26 +18,17 @@ const PostInfiniteScroll = ({
   hasMore,
   next,
 }: PostInfiniteScrollProps) => {
-  const classes = useStyles();
-  const { me } = useIsAuth();
-
   return (
-    <>
-      <Box className={classes.mainContentHeart}>
-        {me ? <CreatePostCard /> : null}
-        <InfiniteScroll
-          dataLength={posts.length}
-          next={next}
-          hasMore={hasMore}
-          loader={<LoadingPostCard />}
-        >
-          {posts.map((post) => {
-            return <PostCard post={post} key={post.id} />;
-          })}
-        </InfiniteScroll>
-      </Box>
-      <PostDetailModal />
-    </>
+    <InfiniteScroll
+      dataLength={posts.length}
+      next={next}
+      hasMore={hasMore}
+      loader={<LoadingPostCard />}
+    >
+      {posts.map((post) => {
+        return <PostCard post={post} key={post.id} />;
+      })}
+    </InfiniteScroll>
   );
 };
 

@@ -43,11 +43,16 @@ const useStyles = makeStyles((theme: Theme) =>
 );
 
 const PostDetailModal = ({}: PostDetailModalProps) => {
+  // const [isOpen, setIsOpen] = useState<boolean>(false);
   const router = useRouter();
   const classes = useStyles();
   const handleClose = useCallback(() => {
     router.back();
+    // setIsOpen(false);
   }, [router]);
+  // useEffect(() => {
+  //   if (router.query.postId) setIsOpen(true);
+  // }, [router]);
 
   return (
     <Dialog

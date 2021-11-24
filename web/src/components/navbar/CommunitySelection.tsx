@@ -1,4 +1,5 @@
 import {
+  Box,
   createStyles,
   FormControl,
   ListItemText,
@@ -7,35 +8,52 @@ import {
   MenuProps,
   Select,
   SvgIconProps,
+  TextField,
   Theme,
 } from "@material-ui/core";
-import { blue, grey } from "@material-ui/core/colors";
+import { blue } from "@material-ui/core/colors";
+import AddIcon from "@material-ui/icons/Add";
 import ExpandMoreRoundedIcon from "@material-ui/icons/ExpandMoreRounded";
-import React, { useEffect, useMemo } from "react";
-import { useCommunitiesLazyQuery, useMeQuery } from "../../generated/graphql";
+import HomeIcon from "@material-ui/icons/Home";
+import { useRouter } from "next/router";
+import React, { useCallback, useMemo, useState } from "react";
+import { useCommunitiesQuery } from "../../generated/graphql";
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
     select: {
       display: "flex",
-      minWidth: 240,
-      background: "white",
-      borderStyle: "none",
-      borderRadius: 8,
-      paddingLeft: 24,
-      paddingTop: 14,
-      paddingBottom: 15,
-      boxShadow: "none",
+      width: 270,
+      height: 36,
+      backgroundColor: "#fff",
+      borderRadius: 4,
+      boxSizing: "border-box",
+      padding: "0 12px",
+      marginLeft: "24px",
+      border: "1px solid #fff",
+      alignItems: "center",
+      // borderStyle: "none",
+      // boxShadow: "none",
       "&:focus": {
         borderRadius: 8,
-        background: "white",
+        backgroundColor: "#fff",
+        border: "1px solid rgb(237, 239, 241)",
+      },
+      "&:hover": {
+        border: "1px solid rgb(237, 239, 241)",
       },
       '&[aria-expanded="true"]': {
-        background: grey[50],
+        border: "1px solid rgb(237, 239, 241)",
       },
-      "& > div": {
-        display: "inline-flex", // this shows the icon in the SelectInput but not the dropdown
-      },
+      // "& > div": {
+      //   display: "inline-flex", // this shows the icon in the SelectInput but not the dropdown
+      // },
+    },
+
+    placeholder: {
+      display: "flex",
+      alignItems: "center",
+      paddingLeft: "8",
     },
     icon: {
       color: blue[500],
@@ -55,6 +73,7 @@ const useStyles = makeStyles((theme: Theme) =>
       paddingLeft: 8,
       background: "white",
       "& li": {
+        fontSize: 14,
         paddingTop: 12,
         paddingBottom: 12,
         paddingRight: 8,
@@ -71,7 +90,10 @@ const useStyles = makeStyles((theme: Theme) =>
         background: blue[50],
       },
     },
-
+    filter: {
+      width: "100%",
+      margin: "12px 0",
+    },
     listIcon: {
       minWidth: 32,
       display: "none", // hide the ListItemIcon in the dropdown
@@ -83,25 +105,37 @@ const useStyles = makeStyles((theme: Theme) =>
   })
 );
 
-const CommunitySelection = () => {
+const CommunitySelection = ({ userId }: { userId: string }) => {
   const outlineSelectClasses = useStyles();
-  const [
-    getCommunities,
-    { loading: lodaingCommunities, data: communitiesResponse },
-  ] = useCommunitiesLazyQuery({ fetchPolicy: "network-only" });
+  const { data: communitiesResponse } = useCommunitiesQuery({
+    variables: { userId },
+  });
+  const [keyword, setKeyword] = useState("");
 
-  const { loading: meLoading, error, data: meResponse } = useMeQuery();
+  const communities = useMemo(() => {
+    const communities = communitiesResponse?.communities || [];
+    return communities.filter((community) => community.name.includes(keyword));
+  }, [communitiesResponse, keyword]);
 
-  useEffect(() => {
-    if (meResponse?.me?.id) {
-      console.log(meResponse.me.id);
-      getCommunities();
-    }
-  }, [meResponse?.me?.id]);
+  const moderatingCommunity = useMemo(
+    () =>
+      communities.filter(
+        (community) => community.membersRole[0].role === "moderator"
+      ) || [],
+    [communities]
+  );
 
-  const communities = useMemo(() => communitiesResponse?.communities || [], [
-    communitiesResponse,
-  ]);
+  const [communityName, setCommunityName] = useState("");
+
+  const router = useRouter();
+
+  const goToCreateCommunity = useCallback(
+    (event: React.MouseEvent<HTMLLIElement, MouseEvent>) => {
+      router.push("/create-community");
+      event.stopPropagation();
+    },
+    [router]
+  );
 
   const iconComponent = (props: SvgIconProps) => {
     return (
@@ -128,6 +162,42 @@ const CommunitySelection = () => {
     getContentAnchorEl: null,
   };
 
+  const handleSelectionChange = useCallback(
+    (
+      event: React.ChangeEvent<{
+        name?: string;
+        value: unknown;
+      }>
+    ) => {
+      setCommunityName(event.target.value as string);
+    },
+    [setCommunityName]
+  );
+
+  const handleKeywordChange = useCallback(
+    (
+      event: React.ChangeEvent<{
+        name?: string;
+        value: unknown;
+      }>
+    ) => {
+      setKeyword(event.target.value as string);
+    },
+    [setKeyword]
+  );
+
+  const placeholder = useMemo(
+    () => (
+      <Box display="flex" alignItems="center">
+        <HomeIcon />
+        <Box marginLeft="8px" fontSize="14px">
+          Home
+        </Box>
+      </Box>
+    ),
+    []
+  );
+
   return (
     <FormControl>
       <Select
@@ -135,15 +205,44 @@ const CommunitySelection = () => {
         classes={{ root: outlineSelectClasses.select }}
         MenuProps={menuProps}
         IconComponent={iconComponent}
+        onChange={handleSelectionChange}
         displayEmpty
+        value={communityName}
         renderValue={(selected) =>
           (selected as string) ? (
             <div>{("r/" + selected) as string}</div>
           ) : (
-            <div>Choose a community</div>
+            placeholder
           )
         }
       >
+        <MenuItem>
+          <TextField
+            placeholder="Filter"
+            inputProps={{ "aria-label": "description" }}
+            className={outlineSelectClasses.filter}
+            // variant="outlined"
+            value={keyword}
+            onChange={handleKeywordChange}
+            autoFocus
+          />
+        </MenuItem>
+        <MenuItem disabled>
+          <ListItemText
+            primary="MODERATING"
+            primaryTypographyProps={{
+              className: outlineSelectClasses.labelText,
+            }}
+          />
+        </MenuItem>
+        {moderatingCommunity.map((community) => (
+          <MenuItem key={community.id} value={community.name}>
+            {/* <ListItemIcon classes={{ root: outlineSelectClasses.listIcon }}>
+            <SortIcon />
+          </ListItemIcon> */}
+            <span style={{ marginTop: 3 }}>{"r/" + community.name}</span>
+          </MenuItem>
+        ))}
         <MenuItem disabled>
           <ListItemText
             primary="MY COMMUNITIES"
@@ -151,6 +250,10 @@ const CommunitySelection = () => {
               className: outlineSelectClasses.labelText,
             }}
           />
+        </MenuItem>
+        <MenuItem onClick={goToCreateCommunity} value="">
+          <AddIcon />
+          <span>Create Community</span>
         </MenuItem>
         {communities.map((community) => (
           <MenuItem key={community.id} value={community.name}>

@@ -24,6 +24,7 @@ export type Community = {
   updatedAt: Scalars['String'];
   name: Scalars['String'];
   description: Scalars['String'];
+  membersRole: Array<Role>;
   topics: Array<Topic>;
 };
 
@@ -207,6 +208,13 @@ export type RegisterInput = {
   username: Scalars['String'];
   email: Scalars['String'];
   password: Scalars['String'];
+};
+
+export type Role = {
+  __typename?: 'Role';
+  userId: Scalars['String'];
+  joinedAt: Scalars['String'];
+  role: Scalars['String'];
 };
 
 export type Topic = {
@@ -452,6 +460,10 @@ export type CommunitiesQuery = (
   & { communities: Array<(
     { __typename?: 'Community' }
     & Pick<Community, 'id' | 'name'>
+    & { membersRole: Array<(
+      { __typename?: 'Role' }
+      & Pick<Role, 'role'>
+    )> }
   )> }
 );
 
@@ -928,6 +940,9 @@ export const CommunitiesDocument = gql`
   communities(userId: $userId) {
     id
     name
+    membersRole {
+      role
+    }
   }
 }
     `;
@@ -1145,13 +1160,14 @@ export function useTopicsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<Top
 export type TopicsQueryHookResult = ReturnType<typeof useTopicsQuery>;
 export type TopicsLazyQueryHookResult = ReturnType<typeof useTopicsLazyQuery>;
 export type TopicsQueryResult = Apollo.QueryResult<TopicsQuery, TopicsQueryVariables>;
-export type CommunityKeySpecifier = ('id' | 'createdAt' | 'updatedAt' | 'name' | 'description' | 'topics' | CommunityKeySpecifier)[];
+export type CommunityKeySpecifier = ('id' | 'createdAt' | 'updatedAt' | 'name' | 'description' | 'membersRole' | 'topics' | CommunityKeySpecifier)[];
 export type CommunityFieldPolicy = {
 	id?: FieldPolicy<any> | FieldReadFunction<any>,
 	createdAt?: FieldPolicy<any> | FieldReadFunction<any>,
 	updatedAt?: FieldPolicy<any> | FieldReadFunction<any>,
 	name?: FieldPolicy<any> | FieldReadFunction<any>,
 	description?: FieldPolicy<any> | FieldReadFunction<any>,
+	membersRole?: FieldPolicy<any> | FieldReadFunction<any>,
 	topics?: FieldPolicy<any> | FieldReadFunction<any>
 };
 export type CommunityResponseKeySpecifier = ('errors' | 'community' | CommunityResponseKeySpecifier)[];
@@ -1218,6 +1234,12 @@ export type QueryFieldPolicy = {
 	communities?: FieldPolicy<any> | FieldReadFunction<any>,
 	topics?: FieldPolicy<any> | FieldReadFunction<any>
 };
+export type RoleKeySpecifier = ('userId' | 'joinedAt' | 'role' | RoleKeySpecifier)[];
+export type RoleFieldPolicy = {
+	userId?: FieldPolicy<any> | FieldReadFunction<any>,
+	joinedAt?: FieldPolicy<any> | FieldReadFunction<any>,
+	role?: FieldPolicy<any> | FieldReadFunction<any>
+};
 export type TopicKeySpecifier = ('id' | 'createdAt' | 'updatedAt' | 'creator' | 'title' | TopicKeySpecifier)[];
 export type TopicFieldPolicy = {
 	id?: FieldPolicy<any> | FieldReadFunction<any>,
@@ -1281,6 +1303,10 @@ export type TypedTypePolicies = TypePolicies & {
 	Query?: Omit<TypePolicy, "fields" | "keyFields"> & {
 		keyFields?: false | QueryKeySpecifier | (() => undefined | QueryKeySpecifier),
 		fields?: QueryFieldPolicy,
+	},
+	Role?: Omit<TypePolicy, "fields" | "keyFields"> & {
+		keyFields?: false | RoleKeySpecifier | (() => undefined | RoleKeySpecifier),
+		fields?: RoleFieldPolicy,
 	},
 	Topic?: Omit<TypePolicy, "fields" | "keyFields"> & {
 		keyFields?: false | TopicKeySpecifier | (() => undefined | TopicKeySpecifier),
