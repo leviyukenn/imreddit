@@ -93,7 +93,7 @@ export const PostCard = ({ post, ...props }: PostCardProps) => {
   const subHeader = useMemo(
     () => (
       <Box display="flex" alignItems="center">
-        <NextLink href={`/c/${post.community.name}`} passHref>
+        <NextLink href={`/r/${post.community.name}`} passHref>
           <Link
             className={classes.communityLink}
             onMouseDown={(
@@ -101,7 +101,7 @@ export const PostCard = ({ post, ...props }: PostCardProps) => {
             ) => {
               e.stopPropagation();
             }}
-          >{`c/${post.community.name}`}</Link>
+          >{`r/${post.community.name}`}</Link>
         </NextLink>
         <span>&nbsp;&#183;&nbsp;</span>
         <Typography variant="caption">{`Posted by ${post.creator.username} ${timeago}`}</Typography>
@@ -112,15 +112,13 @@ export const PostCard = ({ post, ...props }: PostCardProps) => {
 
   const isTextPost = useMemo(() => post.images.length === 0, [post]);
   const router = useRouter();
-
   return (
     <Box className={classes.root}>
       <Box className={classes.upvoteBox}>
         <UpvoteBox post={post} isVerticalLayout={true} />
       </Box>
       <NextLink
-        // href={`/r/[...postInfo]?postId=${post.id}`}
-        href={`${router.pathname}?postId=${post.id}`}
+        href={`${router.asPath}?modalPostId=${post.id}`}
         as={`/r/${post.community.name}/${post.id}`}
         shallow
       >

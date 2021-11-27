@@ -9,7 +9,8 @@ import {
 } from "@material-ui/core";
 import CloseIcon from "@material-ui/icons/Close";
 import { useRouter } from "next/router";
-import React, { useCallback } from "react";
+import React, { useCallback, useMemo } from "react";
+import { usePostDetailQuery } from "../../generated/graphql";
 import PostDetail from "./PostDetail";
 
 interface PostDetailModalProps {}
@@ -43,20 +44,29 @@ const useStyles = makeStyles((theme: Theme) =>
 );
 
 const PostDetailModal = ({}: PostDetailModalProps) => {
-  // const [isOpen, setIsOpen] = useState<boolean>(false);
   const router = useRouter();
   const classes = useStyles();
+
   const handleClose = useCallback(() => {
     router.back();
-    // setIsOpen(false);
   }, [router]);
-  // useEffect(() => {
-  //   if (router.query.postId) setIsOpen(true);
-  // }, [router]);
+
+  const postId = useMemo(() => (router.query.modalPostId || "") as string, [
+    router,
+  ]);
+
+  const { data: postDetailResponse } = usePostDetailQuery({
+    skip: typeof window === "undefined" || !postId,
+    variables: { postId },
+  });
+
+  const post = useMemo(() => postDetailResponse?.postDetail, [
+    postDetailResponse,
+  ]);
 
   return (
     <Dialog
-      open={!!router.query.postId}
+      open={!!router.query.modalPostId}
       onClose={handleClose}
       scroll={"paper"}
       maxWidth={"lg"}
@@ -84,7 +94,7 @@ const PostDetailModal = ({}: PostDetailModalProps) => {
         </Box>
       </Box>
       <DialogContent dividers className={classes.content}>
-        <PostDetail postId={router.query.postId as string}></PostDetail>
+        <PostDetail post={post || null}></PostDetail>
       </DialogContent>
     </Dialog>
   );

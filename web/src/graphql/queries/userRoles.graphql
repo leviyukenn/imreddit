@@ -1,0 +1,6 @@
+query UserRoles($userId: String!) {
+  userRoles(userId: $userId) {
+    role
+    communityId
+  }
+}

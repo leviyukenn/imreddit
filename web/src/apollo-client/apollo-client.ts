@@ -30,9 +30,6 @@ const communityPostsFieldPolicy: FieldPolicy<
 > = {
   keyArgs: false,
   merge(existing = {}, incoming, { args, readField }) {
-    console.log("existing", existing);
-    console.log("incoming", incoming);
-
     const mergedPosts = existing[args!.communityName]
       ? { ...existing[args!.communityName].posts }
       : {};
@@ -116,7 +113,7 @@ const cache = new InMemoryCache({
     Query: {
       fields: {
         communityPosts: communityPostsFieldPolicy,
-        posts: postsFieldPolicy,
+        paginatedPosts: postsFieldPolicy,
       },
     },
   },

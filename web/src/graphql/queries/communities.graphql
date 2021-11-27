@@ -1,9 +1,6 @@
-query Communities($userId: String!) {
+query Communities($userId: String) {
   communities(userId: $userId) {
     id
     name
-    membersRole {
-      role
-    }
   }
 }

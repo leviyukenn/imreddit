@@ -17,7 +17,10 @@ import ExpandMoreRoundedIcon from "@material-ui/icons/ExpandMoreRounded";
 import HomeIcon from "@material-ui/icons/Home";
 import { useRouter } from "next/router";
 import React, { useCallback, useMemo, useState } from "react";
-import { useCommunitiesQuery } from "../../generated/graphql";
+import {
+  useCommunitiesQuery,
+  useUserRolesQuery,
+} from "../../generated/graphql";
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -110,19 +113,30 @@ const CommunitySelection = ({ userId }: { userId: string }) => {
   const { data: communitiesResponse } = useCommunitiesQuery({
     variables: { userId },
   });
+  const { data: userRolesResponse } = useUserRolesQuery({
+    variables: { userId },
+  });
   const [keyword, setKeyword] = useState("");
 
   const communities = useMemo(() => {
     const communities = communitiesResponse?.communities || [];
-    return communities.filter((community) => community.name.includes(keyword));
+    return communities.filter((community) =>
+      community ? community.name.includes(keyword) : false
+    );
   }, [communitiesResponse, keyword]);
+
+  const userRoles = useMemo(() => userRolesResponse?.userRoles || [], [
+    userRolesResponse,
+  ]);
 
   const moderatingCommunity = useMemo(
     () =>
       communities.filter(
-        (community) => community.membersRole[0].role === "moderator"
+        (community) =>
+          userRoles.find((userRole) => userRole?.communityId === community?.id)
+            ?.role === "moderator"
       ) || [],
-    [communities]
+    [communities, userRoles]
   );
 
   const [communityName, setCommunityName] = useState("");
@@ -235,14 +249,16 @@ const CommunitySelection = ({ userId }: { userId: string }) => {
             }}
           />
         </MenuItem>
-        {moderatingCommunity.map((community) => (
-          <MenuItem key={community.id} value={community.name}>
-            {/* <ListItemIcon classes={{ root: outlineSelectClasses.listIcon }}>
+        {moderatingCommunity.map((community) =>
+          community ? (
+            <MenuItem key={community.id} value={community.name}>
+              {/* <ListItemIcon classes={{ root: outlineSelectClasses.listIcon }}>
             <SortIcon />
           </ListItemIcon> */}
-            <span style={{ marginTop: 3 }}>{"r/" + community.name}</span>
-          </MenuItem>
-        ))}
+              <span style={{ marginTop: 3 }}>{"r/" + community.name}</span>
+            </MenuItem>
+          ) : null
+        )}
         <MenuItem disabled>
           <ListItemText
             primary="MY COMMUNITIES"
@@ -255,14 +271,16 @@ const CommunitySelection = ({ userId }: { userId: string }) => {
           <AddIcon />
           <span>Create Community</span>
         </MenuItem>
-        {communities.map((community) => (
-          <MenuItem key={community.id} value={community.name}>
-            {/* <ListItemIcon classes={{ root: outlineSelectClasses.listIcon }}>
+        {communities.map((community) =>
+          community ? (
+            <MenuItem key={community.id} value={community.name}>
+              {/* <ListItemIcon classes={{ root: outlineSelectClasses.listIcon }}>
             <SortIcon />
           </ListItemIcon> */}
-            <span style={{ marginTop: 3 }}>{"r/" + community.name}</span>
-          </MenuItem>
-        ))}
+              <span style={{ marginTop: 3 }}>{"r/" + community.name}</span>
+            </MenuItem>
+          ) : null
+        )}
       </Select>
     </FormControl>
   );

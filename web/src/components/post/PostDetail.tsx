@@ -1,12 +1,16 @@
 import { Box, createStyles, makeStyles, Theme } from "@material-ui/core";
 import React from "react";
-import { usePostDetailQuery } from "../../generated/graphql";
+import { Post, RegularPostDetailFragment } from "../../generated/graphql";
 import { CommentCard } from "./CommentCard";
 import CommentEditor from "./post-editor/CommentEditor";
 import { LoadingPostDetailCard, PostDetailCard } from "./PostDetailCard";
 
 interface PostDetailProps {
-  postId: string;
+  post:
+    | (RegularPostDetailFragment & {
+        children: Array<{ __typename?: "Post" } & Pick<Post, "id">>;
+      })
+    | null;
 }
 
 const useStyles = makeStyles((theme: Theme) =>
@@ -28,32 +32,23 @@ const useStyles = makeStyles((theme: Theme) =>
   })
 );
 
-const PostDetail = ({ postId }: PostDetailProps) => {
-  const {
-    data: postDetailResponse,
-    loading: postDetailLoading,
-    error,
-  } = usePostDetailQuery({
-    skip: !postId,
-    variables: { postId: postId! },
-  });
-
+const PostDetail = ({ post }: PostDetailProps) => {
   const classes = useStyles();
 
-  if (!postDetailResponse?.postDetail) {
+  if (!post) {
     return <LoadingPostDetailCard />;
   }
 
   return (
     <Box display="flex" justifyContent="center">
       <Box className={classes.heart}>
-        <PostDetailCard post={postDetailResponse.postDetail} />
+        <PostDetailCard post={post} />
         <Box className={classes.comments}>
           <Box className={classes.commentForm}>
-            <CommentEditor replyTo={postDetailResponse.postDetail} />
+            <CommentEditor replyTo={post} />
           </Box>
 
-          {postDetailResponse.postDetail.children.map((child) => (
+          {post.children.map((child) => (
             <CommentCard key={child.id} postId={child.id} />
           ))}
         </Box>

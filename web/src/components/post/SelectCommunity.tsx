@@ -106,7 +106,8 @@ const SelectCommunity = ({
 
   const communityName = useMemo(
     () =>
-      communities.find((community) => community.id === communityId)?.name || "",
+      communities.find((community) => community?.id === communityId)?.name ||
+      "",
     [communities, communityId]
   );
 
@@ -119,7 +120,7 @@ const SelectCommunity = ({
     ) => {
       const communityId =
         communities.find(
-          (community) => community.name === (event.target.value as string)
+          (community) => community?.name === (event.target.value as string)
         )?.id || "";
       setCommunityId(communityId);
     },
@@ -177,14 +178,16 @@ const SelectCommunity = ({
             }}
           />
         </MenuItem>
-        {communities.map((community) => (
-          <MenuItem key={community.id} value={community.name}>
-            {/* <ListItemIcon classes={{ root: outlineSelectClasses.listIcon }}>
+        {communities.map((community) =>
+          community ? (
+            <MenuItem key={community.id} value={community.name}>
+              {/* <ListItemIcon classes={{ root: outlineSelectClasses.listIcon }}>
             <SortIcon />
           </ListItemIcon> */}
-            <span style={{ marginTop: 3 }}>{"r/" + community.name}</span>
-          </MenuItem>
-        ))}
+              <span style={{ marginTop: 3 }}>{"r/" + community.name}</span>
+            </MenuItem>
+          ) : null
+        )}
       </Select>
     </FormControl>
   );

@@ -1,14 +1,11 @@
-import { useEffect } from "react";
-import HomeContainer from "../components/HomeContainer";
+import HomeLayout from "../components/HomeLayout";
 import { HomePostsInfiniteScroll } from "../components/post/PostInfiniteScroll";
 
 const Index = () => {
-  useEffect(() => console.log("mount"), []);
-
   return (
-    <HomeContainer>
+    <HomeLayout>
       <HomePostsInfiniteScroll />
-    </HomeContainer>
+    </HomeLayout>
   );
 };
 

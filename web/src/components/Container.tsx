@@ -21,6 +21,8 @@ const useStyles = makeStyles((theme: Theme) =>
       [theme.breakpoints.up("sm")]: {
         padding: "1.25rem 1.5rem",
       },
+      height: "100%",
+      minHeight: "calc(100vh - 56px)",
     },
     lightBackground: {
       backgroundColor: theme.palette.background.paper,

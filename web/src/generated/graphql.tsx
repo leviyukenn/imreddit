@@ -24,7 +24,6 @@ export type Community = {
   updatedAt: Scalars['String'];
   name: Scalars['String'];
   description: Scalars['String'];
-  membersRole: Array<Role>;
   topics: Array<Topic>;
 };
 
@@ -175,9 +174,12 @@ export type Query = {
   __typename?: 'Query';
   me?: Maybe<User>;
   communityPosts: PaginatedPosts;
-  posts: PaginatedPosts;
+  paginatedPosts: PaginatedPosts;
+  allPosts: Array<Post>;
   postDetail?: Maybe<Post>;
-  communities: Array<Community>;
+  communities: Array<Maybe<Community>>;
+  community?: Maybe<Community>;
+  userRoles: Array<Maybe<Role>>;
   topics: Array<Topic>;
 };
 
@@ -189,7 +191,7 @@ export type QueryCommunityPostsArgs = {
 };
 
 
-export type QueryPostsArgs = {
+export type QueryPaginatedPostsArgs = {
   cursor?: Maybe<Scalars['String']>;
   limit?: Maybe<Scalars['Int']>;
 };
@@ -201,6 +203,16 @@ export type QueryPostDetailArgs = {
 
 
 export type QueryCommunitiesArgs = {
+  userId?: Maybe<Scalars['String']>;
+};
+
+
+export type QueryCommunityArgs = {
+  communityName: Scalars['String'];
+};
+
+
+export type QueryUserRolesArgs = {
   userId: Scalars['String'];
 };
 
@@ -213,6 +225,7 @@ export type RegisterInput = {
 export type Role = {
   __typename?: 'Role';
   userId: Scalars['String'];
+  communityId: Scalars['String'];
   joinedAt: Scalars['String'];
   role: Scalars['String'];
 };
@@ -450,20 +463,44 @@ export type VoteMutation = (
   & Pick<Mutation, 'vote'>
 );
 
+export type AllPostsQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type AllPostsQuery = (
+  { __typename?: 'Query' }
+  & { allPosts: Array<(
+    { __typename?: 'Post' }
+    & Pick<Post, 'id'>
+    & { community: (
+      { __typename?: 'Community' }
+      & Pick<Community, 'name'>
+    ) }
+  )> }
+);
+
 export type CommunitiesQueryVariables = Exact<{
-  userId: Scalars['String'];
+  userId?: Maybe<Scalars['String']>;
 }>;
 
 
 export type CommunitiesQuery = (
   { __typename?: 'Query' }
-  & { communities: Array<(
+  & { communities: Array<Maybe<(
     { __typename?: 'Community' }
     & Pick<Community, 'id' | 'name'>
-    & { membersRole: Array<(
-      { __typename?: 'Role' }
-      & Pick<Role, 'role'>
-    )> }
+  )>> }
+);
+
+export type CommunityQueryVariables = Exact<{
+  communityName: Scalars['String'];
+}>;
+
+
+export type CommunityQuery = (
+  { __typename?: 'Query' }
+  & { community?: Maybe<(
+    { __typename?: 'Community' }
+    & Pick<Community, 'name'>
   )> }
 );
 
@@ -497,6 +534,24 @@ export type MeQuery = (
   )> }
 );
 
+export type PostsQueryVariables = Exact<{
+  limit?: Maybe<Scalars['Int']>;
+  cursor?: Maybe<Scalars['String']>;
+}>;
+
+
+export type PostsQuery = (
+  { __typename?: 'Query' }
+  & { paginatedPosts: (
+    { __typename?: 'PaginatedPosts' }
+    & Pick<PaginatedPosts, 'hasMore'>
+    & { posts: Array<(
+      { __typename?: 'Post' }
+      & RegularPostDetailFragment
+    )> }
+  ) }
+);
+
 export type PostDetailQueryVariables = Exact<{
   postId: Scalars['String'];
 }>;
@@ -514,24 +569,6 @@ export type PostDetailQuery = (
   )> }
 );
 
-export type PostsQueryVariables = Exact<{
-  limit?: Maybe<Scalars['Int']>;
-  cursor?: Maybe<Scalars['String']>;
-}>;
-
-
-export type PostsQuery = (
-  { __typename?: 'Query' }
-  & { posts: (
-    { __typename?: 'PaginatedPosts' }
-    & Pick<PaginatedPosts, 'hasMore'>
-    & { posts: Array<(
-      { __typename?: 'Post' }
-      & RegularPostDetailFragment
-    )> }
-  ) }
-);
-
 export type TopicsQueryVariables = Exact<{ [key: string]: never; }>;
 
 
@@ -541,6 +578,19 @@ export type TopicsQuery = (
     { __typename?: 'Topic' }
     & Pick<Topic, 'title' | 'id'>
   )> }
+);
+
+export type UserRolesQueryVariables = Exact<{
+  userId: Scalars['String'];
+}>;
+
+
+export type UserRolesQuery = (
+  { __typename?: 'Query' }
+  & { userRoles: Array<Maybe<(
+    { __typename?: 'Role' }
+    & Pick<Role, 'role' | 'communityId'>
+  )>> }
 );
 
 export const RegularUserFragmentDoc = gql`
@@ -935,14 +985,48 @@ export function useVoteMutation(baseOptions?: Apollo.MutationHookOptions<VoteMut
 export type VoteMutationHookResult = ReturnType<typeof useVoteMutation>;
 export type VoteMutationResult = Apollo.MutationResult<VoteMutation>;
 export type VoteMutationOptions = Apollo.BaseMutationOptions<VoteMutation, VoteMutationVariables>;
+export const AllPostsDocument = gql`
+    query AllPosts {
+  allPosts {
+    id
+    community {
+      name
+    }
+  }
+}
+    `;
+
+/**
+ * __useAllPostsQuery__
+ *
+ * To run a query within a React component, call `useAllPostsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useAllPostsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useAllPostsQuery({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useAllPostsQuery(baseOptions?: Apollo.QueryHookOptions<AllPostsQuery, AllPostsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<AllPostsQuery, AllPostsQueryVariables>(AllPostsDocument, options);
+      }
+export function useAllPostsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<AllPostsQuery, AllPostsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<AllPostsQuery, AllPostsQueryVariables>(AllPostsDocument, options);
+        }
+export type AllPostsQueryHookResult = ReturnType<typeof useAllPostsQuery>;
+export type AllPostsLazyQueryHookResult = ReturnType<typeof useAllPostsLazyQuery>;
+export type AllPostsQueryResult = Apollo.QueryResult<AllPostsQuery, AllPostsQueryVariables>;
 export const CommunitiesDocument = gql`
-    query Communities($userId: String!) {
+    query Communities($userId: String) {
   communities(userId: $userId) {
     id
     name
-    membersRole {
-      role
-    }
   }
 }
     `;
@@ -963,7 +1047,7 @@ export const CommunitiesDocument = gql`
  *   },
  * });
  */
-export function useCommunitiesQuery(baseOptions: Apollo.QueryHookOptions<CommunitiesQuery, CommunitiesQueryVariables>) {
+export function useCommunitiesQuery(baseOptions?: Apollo.QueryHookOptions<CommunitiesQuery, CommunitiesQueryVariables>) {
         const options = {...defaultOptions, ...baseOptions}
         return Apollo.useQuery<CommunitiesQuery, CommunitiesQueryVariables>(CommunitiesDocument, options);
       }
@@ -974,6 +1058,41 @@ export function useCommunitiesLazyQuery(baseOptions?: Apollo.LazyQueryHookOption
 export type CommunitiesQueryHookResult = ReturnType<typeof useCommunitiesQuery>;
 export type CommunitiesLazyQueryHookResult = ReturnType<typeof useCommunitiesLazyQuery>;
 export type CommunitiesQueryResult = Apollo.QueryResult<CommunitiesQuery, CommunitiesQueryVariables>;
+export const CommunityDocument = gql`
+    query Community($communityName: String!) {
+  community(communityName: $communityName) {
+    name
+  }
+}
+    `;
+
+/**
+ * __useCommunityQuery__
+ *
+ * To run a query within a React component, call `useCommunityQuery` and pass it any options that fit your needs.
+ * When your component renders, `useCommunityQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useCommunityQuery({
+ *   variables: {
+ *      communityName: // value for 'communityName'
+ *   },
+ * });
+ */
+export function useCommunityQuery(baseOptions: Apollo.QueryHookOptions<CommunityQuery, CommunityQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<CommunityQuery, CommunityQueryVariables>(CommunityDocument, options);
+      }
+export function useCommunityLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<CommunityQuery, CommunityQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<CommunityQuery, CommunityQueryVariables>(CommunityDocument, options);
+        }
+export type CommunityQueryHookResult = ReturnType<typeof useCommunityQuery>;
+export type CommunityLazyQueryHookResult = ReturnType<typeof useCommunityLazyQuery>;
+export type CommunityQueryResult = Apollo.QueryResult<CommunityQuery, CommunityQueryVariables>;
 export const CommunityPostsDocument = gql`
     query CommunityPosts($limit: Int, $cursor: String, $communityName: String!) {
   communityPosts(limit: $limit, cursor: $cursor, communityName: $communityName) {
@@ -1048,6 +1167,45 @@ export function useMeLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<MeQuery
 export type MeQueryHookResult = ReturnType<typeof useMeQuery>;
 export type MeLazyQueryHookResult = ReturnType<typeof useMeLazyQuery>;
 export type MeQueryResult = Apollo.QueryResult<MeQuery, MeQueryVariables>;
+export const PostsDocument = gql`
+    query Posts($limit: Int, $cursor: String) {
+  paginatedPosts(limit: $limit, cursor: $cursor) {
+    hasMore
+    posts {
+      ...RegularPostDetail
+    }
+  }
+}
+    ${RegularPostDetailFragmentDoc}`;
+
+/**
+ * __usePostsQuery__
+ *
+ * To run a query within a React component, call `usePostsQuery` and pass it any options that fit your needs.
+ * When your component renders, `usePostsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = usePostsQuery({
+ *   variables: {
+ *      limit: // value for 'limit'
+ *      cursor: // value for 'cursor'
+ *   },
+ * });
+ */
+export function usePostsQuery(baseOptions?: Apollo.QueryHookOptions<PostsQuery, PostsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<PostsQuery, PostsQueryVariables>(PostsDocument, options);
+      }
+export function usePostsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<PostsQuery, PostsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<PostsQuery, PostsQueryVariables>(PostsDocument, options);
+        }
+export type PostsQueryHookResult = ReturnType<typeof usePostsQuery>;
+export type PostsLazyQueryHookResult = ReturnType<typeof usePostsLazyQuery>;
+export type PostsQueryResult = Apollo.QueryResult<PostsQuery, PostsQueryVariables>;
 export const PostDetailDocument = gql`
     query PostDetail($postId: String!) {
   postDetail(postId: $postId) {
@@ -1086,45 +1244,6 @@ export function usePostDetailLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions
 export type PostDetailQueryHookResult = ReturnType<typeof usePostDetailQuery>;
 export type PostDetailLazyQueryHookResult = ReturnType<typeof usePostDetailLazyQuery>;
 export type PostDetailQueryResult = Apollo.QueryResult<PostDetailQuery, PostDetailQueryVariables>;
-export const PostsDocument = gql`
-    query Posts($limit: Int, $cursor: String) {
-  posts(limit: $limit, cursor: $cursor) {
-    hasMore
-    posts {
-      ...RegularPostDetail
-    }
-  }
-}
-    ${RegularPostDetailFragmentDoc}`;
-
-/**
- * __usePostsQuery__
- *
- * To run a query within a React component, call `usePostsQuery` and pass it any options that fit your needs.
- * When your component renders, `usePostsQuery` returns an object from Apollo Client that contains loading, error, and data properties
- * you can use to render your UI.
- *
- * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
- *
- * @example
- * const { data, loading, error } = usePostsQuery({
- *   variables: {
- *      limit: // value for 'limit'
- *      cursor: // value for 'cursor'
- *   },
- * });
- */
-export function usePostsQuery(baseOptions?: Apollo.QueryHookOptions<PostsQuery, PostsQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<PostsQuery, PostsQueryVariables>(PostsDocument, options);
-      }
-export function usePostsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<PostsQuery, PostsQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<PostsQuery, PostsQueryVariables>(PostsDocument, options);
-        }
-export type PostsQueryHookResult = ReturnType<typeof usePostsQuery>;
-export type PostsLazyQueryHookResult = ReturnType<typeof usePostsLazyQuery>;
-export type PostsQueryResult = Apollo.QueryResult<PostsQuery, PostsQueryVariables>;
 export const TopicsDocument = gql`
     query Topics {
   topics {
@@ -1160,14 +1279,49 @@ export function useTopicsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<Top
 export type TopicsQueryHookResult = ReturnType<typeof useTopicsQuery>;
 export type TopicsLazyQueryHookResult = ReturnType<typeof useTopicsLazyQuery>;
 export type TopicsQueryResult = Apollo.QueryResult<TopicsQuery, TopicsQueryVariables>;
-export type CommunityKeySpecifier = ('id' | 'createdAt' | 'updatedAt' | 'name' | 'description' | 'membersRole' | 'topics' | CommunityKeySpecifier)[];
+export const UserRolesDocument = gql`
+    query UserRoles($userId: String!) {
+  userRoles(userId: $userId) {
+    role
+    communityId
+  }
+}
+    `;
+
+/**
+ * __useUserRolesQuery__
+ *
+ * To run a query within a React component, call `useUserRolesQuery` and pass it any options that fit your needs.
+ * When your component renders, `useUserRolesQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useUserRolesQuery({
+ *   variables: {
+ *      userId: // value for 'userId'
+ *   },
+ * });
+ */
+export function useUserRolesQuery(baseOptions: Apollo.QueryHookOptions<UserRolesQuery, UserRolesQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<UserRolesQuery, UserRolesQueryVariables>(UserRolesDocument, options);
+      }
+export function useUserRolesLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<UserRolesQuery, UserRolesQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<UserRolesQuery, UserRolesQueryVariables>(UserRolesDocument, options);
+        }
+export type UserRolesQueryHookResult = ReturnType<typeof useUserRolesQuery>;
+export type UserRolesLazyQueryHookResult = ReturnType<typeof useUserRolesLazyQuery>;
+export type UserRolesQueryResult = Apollo.QueryResult<UserRolesQuery, UserRolesQueryVariables>;
+export type CommunityKeySpecifier = ('id' | 'createdAt' | 'updatedAt' | 'name' | 'description' | 'topics' | CommunityKeySpecifier)[];
 export type CommunityFieldPolicy = {
 	id?: FieldPolicy<any> | FieldReadFunction<any>,
 	createdAt?: FieldPolicy<any> | FieldReadFunction<any>,
 	updatedAt?: FieldPolicy<any> | FieldReadFunction<any>,
 	name?: FieldPolicy<any> | FieldReadFunction<any>,
 	description?: FieldPolicy<any> | FieldReadFunction<any>,
-	membersRole?: FieldPolicy<any> | FieldReadFunction<any>,
 	topics?: FieldPolicy<any> | FieldReadFunction<any>
 };
 export type CommunityResponseKeySpecifier = ('errors' | 'community' | CommunityResponseKeySpecifier)[];
@@ -1225,18 +1379,22 @@ export type PostFieldPolicy = {
 	children?: FieldPolicy<any> | FieldReadFunction<any>,
 	images?: FieldPolicy<any> | FieldReadFunction<any>
 };
-export type QueryKeySpecifier = ('me' | 'communityPosts' | 'posts' | 'postDetail' | 'communities' | 'topics' | QueryKeySpecifier)[];
+export type QueryKeySpecifier = ('me' | 'communityPosts' | 'paginatedPosts' | 'allPosts' | 'postDetail' | 'communities' | 'community' | 'userRoles' | 'topics' | QueryKeySpecifier)[];
 export type QueryFieldPolicy = {
 	me?: FieldPolicy<any> | FieldReadFunction<any>,
 	communityPosts?: FieldPolicy<any> | FieldReadFunction<any>,
-	posts?: FieldPolicy<any> | FieldReadFunction<any>,
+	paginatedPosts?: FieldPolicy<any> | FieldReadFunction<any>,
+	allPosts?: FieldPolicy<any> | FieldReadFunction<any>,
 	postDetail?: FieldPolicy<any> | FieldReadFunction<any>,
 	communities?: FieldPolicy<any> | FieldReadFunction<any>,
+	community?: FieldPolicy<any> | FieldReadFunction<any>,
+	userRoles?: FieldPolicy<any> | FieldReadFunction<any>,
 	topics?: FieldPolicy<any> | FieldReadFunction<any>
 };
-export type RoleKeySpecifier = ('userId' | 'joinedAt' | 'role' | RoleKeySpecifier)[];
+export type RoleKeySpecifier = ('userId' | 'communityId' | 'joinedAt' | 'role' | RoleKeySpecifier)[];
 export type RoleFieldPolicy = {
 	userId?: FieldPolicy<any> | FieldReadFunction<any>,
+	communityId?: FieldPolicy<any> | FieldReadFunction<any>,
 	joinedAt?: FieldPolicy<any> | FieldReadFunction<any>,
 	role?: FieldPolicy<any> | FieldReadFunction<any>
 };

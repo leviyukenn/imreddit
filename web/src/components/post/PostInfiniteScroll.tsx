@@ -33,22 +33,17 @@ const PostInfiniteScroll = ({
 };
 
 export const HomePostsInfiniteScroll = () => {
-  const {
-    loading: postsLoading,
-    error,
-    data: postsResponse,
-    fetchMore,
-  } = usePostsQuery({
+  const { data: postsResponse, fetchMore } = usePostsQuery({
     skip: typeof window === "undefined",
     variables: { limit: 10 },
   });
   const posts: RegularPostDetailFragment[] = useMemo(
-    () => (postsResponse ? postsResponse.posts.posts : []),
+    () => (postsResponse ? postsResponse.paginatedPosts.posts : []),
     [postsResponse]
   );
 
   const hasMore = useMemo(
-    () => (postsResponse ? postsResponse.posts.hasMore : false),
+    () => (postsResponse ? postsResponse.paginatedPosts.hasMore : false),
     [postsResponse]
   );
   const next = useCallback(() => {
@@ -67,12 +62,7 @@ export const CommunityPostsInfiniteScroll = ({
 }: {
   communityName: string;
 }) => {
-  const {
-    loading: postsLoading,
-    error,
-    data: postsResponse,
-    fetchMore,
-  } = useCommunityPostsQuery({
+  const { data: postsResponse, fetchMore } = useCommunityPostsQuery({
     skip: typeof window === "undefined",
     variables: { limit: 10, communityName: communityName },
   });

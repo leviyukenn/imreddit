@@ -1,0 +1,8 @@
+query AllPosts {
+  allPosts {
+    id
+    community {
+      name
+    }
+  }
+}

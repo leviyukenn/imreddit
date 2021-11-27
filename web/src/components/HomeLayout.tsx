@@ -9,9 +9,9 @@ import {
 } from "@material-ui/core";
 import NavigationIcon from "@material-ui/icons/Navigation";
 import { useCallback } from "react";
-import Container from "../components/Container";
-import CreatePostCard from "../components/post/CreatePostCard";
-import PostDetailModal from "../components/post/PostDetailModal";
+import Container from "./Container";
+import CreatePostCard from "./post/CreatePostCard";
+import PostDetailModal from "./post/PostDetailModal";
 import { useIsAuth } from "../utils/hooks/useIsAuth";
 
 const useStyles = makeStyles((theme: Theme) =>
