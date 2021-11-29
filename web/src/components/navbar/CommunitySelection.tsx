@@ -38,6 +38,7 @@ const useStyles = makeStyles((theme: Theme) =>
       justifyContent: "space-between",
       color: "#586069",
       border: "1px solid #fff",
+      borderRadius: "4px",
       padding: "0 1em",
       fontWeight: 600,
       "&:hover,&:focus": {
@@ -156,7 +157,7 @@ function useCommunitySelectionOption(userId: string) {
       group: CommunitySelectionOptionGroupType.MY_COMMUNITIES,
     });
 
-    return [...myCommunities, createCommunity];
+    return [createCommunity, ...myCommunities];
   }, [communities]);
 
   const userRoles = useMemo(() => userRolesResponse?.userRoles || [], [
@@ -270,7 +271,6 @@ export default function CommunitySelection({ userId }: { userId: string }) {
           onChange={(event, newValue) => {
             setPendingValue(newValue);
           }}
-          loading={true}
           disablePortal
           renderTags={() => null}
           noOptionsText="Nothing found"
@@ -281,6 +281,7 @@ export default function CommunitySelection({ userId }: { userId: string }) {
                 className={classes.iconSelected}
                 style={{ visibility: selected ? "visible" : "hidden" }}
               />
+              {option.icon ? option.icon : null}
               <NextLink href={option.link} passHref>
                 <Link
                   key={option.id}
