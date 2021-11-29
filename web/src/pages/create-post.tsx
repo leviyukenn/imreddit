@@ -40,7 +40,7 @@ const CreatePost = () => {
   const router = useRouter();
   useEffect(() => {
     if (!me && !meLoading) {
-      router.push("/login");
+      router.push(loginPageLink);
     }
   }, [me, meLoading]);
 

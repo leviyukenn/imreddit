@@ -65,7 +65,9 @@ export default function NavBar() {
             </Typography>
           </NextLink>
           {meResponse?.me ? (
-            <CommunitySelection userId={meResponse.me.id} />
+            <Box marginLeft="1em">
+              <CommunitySelection userId={meResponse.me.id} />
+            </Box>
           ) : null}
         </Box>
         <Box className={classes.rightContainer}>

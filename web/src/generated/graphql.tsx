@@ -177,7 +177,7 @@ export type Query = {
   paginatedPosts: PaginatedPosts;
   allPosts: Array<Post>;
   postDetail?: Maybe<Post>;
-  communities: Array<Maybe<Community>>;
+  communities: Array<Community>;
   community?: Maybe<Community>;
   userRoles: Array<Maybe<Role>>;
   topics: Array<Topic>;
@@ -485,10 +485,10 @@ export type CommunitiesQueryVariables = Exact<{
 
 export type CommunitiesQuery = (
   { __typename?: 'Query' }
-  & { communities: Array<Maybe<(
+  & { communities: Array<(
     { __typename?: 'Community' }
     & Pick<Community, 'id' | 'name'>
-  )>> }
+  )> }
 );
 
 export type CommunityQueryVariables = Exact<{

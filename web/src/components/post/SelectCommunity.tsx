@@ -95,10 +95,9 @@ const SelectCommunity = ({
   userId,
 }: SelectCommunityProps) => {
   const outlineSelectClasses = useStyles();
-  const {
-    data: communitiesResponse,
-    loading: communitiesLoading,
-  } = useCommunitiesQuery({ variables: { userId } });
+  const { data: communitiesResponse } = useCommunitiesQuery({
+    variables: { userId },
+  });
 
   const communities = useMemo(() => communitiesResponse?.communities || [], [
     communitiesResponse,
@@ -106,8 +105,7 @@ const SelectCommunity = ({
 
   const communityName = useMemo(
     () =>
-      communities.find((community) => community?.id === communityId)?.name ||
-      "",
+      communities.find((community) => community.id === communityId)?.name || "",
     [communities, communityId]
   );
 
@@ -120,7 +118,7 @@ const SelectCommunity = ({
     ) => {
       const communityId =
         communities.find(
-          (community) => community?.name === (event.target.value as string)
+          (community) => community.name === (event.target.value as string)
         )?.id || "";
       setCommunityId(communityId);
     },

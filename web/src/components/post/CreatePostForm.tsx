@@ -18,6 +18,7 @@ import {
   RegularPostDetailFragmentDoc,
   useCreatePostMutation,
 } from "../../generated/graphql";
+import { createPostDetailPageLink } from "../../utils/links";
 import { useIsAuth } from "../../utils/hooks/useIsAuth";
 import { TextInputField } from "../InputField";
 import { PostType, UploadedImage } from "../types/types";
@@ -115,7 +116,10 @@ const CreatePost = ({ postType, communityId }: CreatePostFormProps) => {
       }
       if (result.data?.createPost) {
         router.push(
-          `/r/${result.data.createPost.community.name}/${result.data.createPost.id}`
+          createPostDetailPageLink(
+            result.data.createPost.community.name,
+            result.data.createPost.id
+          )
         );
       }
     },

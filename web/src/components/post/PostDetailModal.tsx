@@ -37,8 +37,15 @@ const useStyles = makeStyles((theme: Theme) =>
       padding: "0 32px",
     },
     content: {
+      display: "flex",
+      justifyContent: "center",
       padding: 0,
       backgroundColor: theme.palette.background.default,
+    },
+    heart: {
+      maxWidth: "740px",
+      width: "calc(100% - 32px)",
+      margin: "32px",
     },
   })
 );
@@ -94,7 +101,9 @@ const PostDetailModal = ({}: PostDetailModalProps) => {
         </Box>
       </Box>
       <DialogContent dividers className={classes.content}>
-        <PostDetail post={post || null}></PostDetail>
+        <Box className={classes.heart}>
+          <PostDetail post={post || null}></PostDetail>
+        </Box>
       </DialogContent>
     </Dialog>
   );

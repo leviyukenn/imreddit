@@ -15,11 +15,6 @@ interface PostDetailProps {
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
-    heart: {
-      maxWidth: "740px",
-      width: "calc(100% - 32px)",
-      margin: "32px",
-    },
     comments: {
       borderRadius: "4px",
       padding: "48px 0",
@@ -40,20 +35,18 @@ const PostDetail = ({ post }: PostDetailProps) => {
   }
 
   return (
-    <Box display="flex" justifyContent="center">
-      <Box className={classes.heart}>
-        <PostDetailCard post={post} />
-        <Box className={classes.comments}>
-          <Box className={classes.commentForm}>
-            <CommentEditor replyTo={post} />
-          </Box>
-
-          {post.children.map((child) => (
-            <CommentCard key={child.id} postId={child.id} />
-          ))}
+    <>
+      <PostDetailCard post={post} />
+      <Box className={classes.comments}>
+        <Box className={classes.commentForm}>
+          <CommentEditor replyTo={post} />
         </Box>
+
+        {post.children.map((child) => (
+          <CommentCard key={child.id} postId={child.id} />
+        ))}
       </Box>
-    </Box>
+    </>
   );
 };
 export default PostDetail;

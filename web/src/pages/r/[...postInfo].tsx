@@ -32,13 +32,11 @@ export const getStaticPaths: GetStaticPaths = async () => {
   // console.log("communities");
   // console.log(communities);
 
-  const communityPaths = communities
-    .filter((community) => !!community)
-    .map((community) => ({
-      params: {
-        postInfo: [community!.name],
-      },
-    }));
+  const communityPaths = communities.map((community) => ({
+    params: {
+      postInfo: [community!.name],
+    },
+  }));
   const postPaths = posts.map((post) => ({
     params: {
       postInfo: [post.community.name, post.id],

@@ -1,5 +1,7 @@
+import { useRouter } from "next/router";
 import { useCallback } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import { loginPageLink, registerPageLink, forgotPasswordPageLink } from "../../utils/links";
 import {
   changeUserModalContent,
   closeUserModal,
@@ -79,6 +81,7 @@ export function useUserModalState() {
     (state: RootState) => state.userModalState
   );
   const dispatch = useDispatch();
+  const router = useRouter();
 
   const onClose = useCallback(() => {
     dispatch(closeUserModal());
@@ -99,6 +102,18 @@ export function useUserModalState() {
     dispatch(changeUserModalContent(USER_MODAL_CONTENT.FORGOT_PASSWORD));
   }, [dispatch]);
 
+  const showLoginPage = useCallback(() => {
+    router.push(loginPageLink);
+  }, [router]);
+
+  const showRegisterPage = useCallback(() => {
+    router.push(registerPageLink);
+  }, [router]);
+
+  const showForgotPasswordPage = useCallback(() => {
+    router.push(forgotPasswordPageLink);
+  }, [router]);
+
   return {
     isOpen: userModalState.isOpen,
     onClose,
@@ -106,5 +121,8 @@ export function useUserModalState() {
     showLoginModal,
     showRegisterModal,
     showForgotPasswordModal,
+    showLoginPage,
+    showRegisterPage,
+    showForgotPasswordPage,
   };
 }

@@ -20,6 +20,11 @@ import { useRouter } from "next/router";
 import React, { useMemo } from "react";
 import { format } from "timeago.js";
 import { RegularPostDetailFragment } from "../../generated/graphql";
+import {
+  createCommunityHomeLink,
+  createPostDetailModalLink,
+  createPostDetailPageLink,
+} from "../../utils/links";
 import ImagePostSwiper from "./ImgaePostSwiper";
 import UpvoteBox from "./upvote/UpvoteBox";
 
@@ -93,7 +98,7 @@ export const PostCard = ({ post, ...props }: PostCardProps) => {
   const subHeader = useMemo(
     () => (
       <Box display="flex" alignItems="center">
-        <NextLink href={`/r/${post.community.name}`} passHref>
+        <NextLink href={createCommunityHomeLink(post.community.name)} passHref>
           <Link
             className={classes.communityLink}
             onMouseDown={(
@@ -118,8 +123,8 @@ export const PostCard = ({ post, ...props }: PostCardProps) => {
         <UpvoteBox post={post} isVerticalLayout={true} />
       </Box>
       <NextLink
-        href={`${router.asPath}?modalPostId=${post.id}`}
-        as={`/r/${post.community.name}/${post.id}`}
+        href={createPostDetailModalLink(router.asPath, post.id)}
+        as={createPostDetailPageLink(post.community.name, post.id)}
         shallow
       >
         <Card className={classes.card} {...props}>
