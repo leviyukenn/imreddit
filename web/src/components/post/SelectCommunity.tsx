@@ -2,21 +2,22 @@ import {
   Box,
   createStyles,
   InputBase,
+  Link,
   makeStyles,
   Theme,
 } from "@material-ui/core";
 import AddIcon from "@material-ui/icons/Add";
-import { Autocomplete, AutocompleteCloseReason } from "@material-ui/lab";
-import React, { useMemo } from "react";
+import ExpandMoreRoundedIcon from "@material-ui/icons/ExpandMoreRounded";
+import SearchIcon from "@material-ui/icons/Search";
+import { Autocomplete } from "@material-ui/lab";
+import NextLink from "next/link";
+import React, { useEffect, useMemo } from "react";
 import { useCommunitiesQuery } from "../../generated/graphql";
 import {
   CommunitySelectionOption,
   CommunitySelectionOptionGroupType,
 } from "../../utils/factory/communitySelectionOption";
-import {
-  createCommunityHomeLink,
-  createCommunityPageLink,
-} from "../../utils/links";
+import { createCommunityPageLink } from "../../utils/links";
 
 interface SelectCommunityProps {
   setCommunityId: React.Dispatch<React.SetStateAction<string>>;
@@ -27,25 +28,43 @@ interface SelectCommunityProps {
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
     inputBase: {
+      display: "flex",
+      alignItems: "center",
       width: "300px",
       height: "40px",
+      backgroundColor: theme.palette.common.white,
+      border: "1px solid #ced4da",
+      padding: "0 0.5em",
+      borderRadius: 4,
       "& input": {
         height: "100%",
-        borderRadius: 4,
-        backgroundColor: theme.palette.common.white,
-        padding: "0 0.5em",
+        color: "#1c1c1c",
+        fontWeight: 500,
         transition: theme.transitions.create(["border-color", "box-shadow"]),
-        border: "1px solid #ced4da",
         fontSize: "0.875rem",
+        padding: "0 0.75em",
         "&:focus": {
           borderColor: theme.palette.primary.main,
         },
+        "&::placeholder": {
+          color: "#1c1c1c",
+          fontWeight: 500,
+          opacity: 1,
+        },
       },
+    },
+    circle: {
+      boxSizing: "border-box",
+      width: 25,
+      height: 22,
+      borderRadius: 22,
+      border: "1px dashed #878a8c",
     },
     paper: {
       boxShadow: "none",
       margin: 0,
       color: "#586069",
+      border: "1px solid #ced4da",
       fontSize: "0.875rem",
     },
     option: {
@@ -58,23 +77,6 @@ const useStyles = makeStyles((theme: Theme) =>
       '&[data-focus="true"]': {
         backgroundColor: theme.palette.action.hover,
       },
-    },
-    popperDisablePortal: {
-      position: "relative",
-    },
-    iconSelected: {
-      width: 17,
-      height: 17,
-      marginRight: 5,
-      marginLeft: -2,
-    },
-    color: {
-      width: 14,
-      height: 14,
-      flexShrink: 0,
-      borderRadius: 3,
-      marginRight: 8,
-      marginTop: 2,
     },
     text: {
       flexGrow: 1,
@@ -97,7 +99,7 @@ function useCommunitySelectionOption(userId: string) {
         id: community.id,
         name: community.name,
         icon: "",
-        link: createCommunityHomeLink(community.name),
+        link: "",
         group: CommunitySelectionOptionGroupType.MY_COMMUNITIES,
       })
     );
@@ -115,7 +117,10 @@ function useCommunitySelectionOption(userId: string) {
   return [...myCommunitiesItems];
 }
 
-export default function SelectCommunity({ userId }: SelectCommunityProps) {
+export default function SelectCommunity({
+  setCommunityId,
+  userId,
+}: SelectCommunityProps) {
   const classes = useStyles();
 
   const communitySelectionOptions = useCommunitySelectionOption(userId);
@@ -124,25 +129,22 @@ export default function SelectCommunity({ userId }: SelectCommunityProps) {
     pendingValue,
     setPendingValue,
   ] = React.useState<CommunitySelectionOption | null>(null);
-  const handleClose = (
-    event: React.ChangeEvent<{}>,
-    reason: AutocompleteCloseReason
-  ) => {
-    console.log(reason);
-    if (reason === "toggleInput") {
+
+  useEffect(() => {
+    if (!pendingValue) {
+      setCommunityId("");
       return;
     }
-  };
+    setCommunityId(pendingValue.id);
+  }, [pendingValue]);
 
   return (
     <Autocomplete
       classes={{
         paper: classes.paper,
         option: classes.option,
-        popperDisablePortal: classes.popperDisablePortal,
       }}
       value={pendingValue}
-      // onClose={handleClose}
       onChange={(event, newValue) => {
         setPendingValue(newValue);
       }}
@@ -153,20 +155,59 @@ export default function SelectCommunity({ userId }: SelectCommunityProps) {
       renderOption={(option) => (
         <React.Fragment>
           {option.icon ? option.icon : null}
-          <Box key={option.id} className={classes.text}>
-            {option.name}
-          </Box>
+          {option.link ? (
+            <NextLink href={option.link} passHref>
+              <Link
+                key={option.id}
+                className={classes.text}
+                underline="none"
+                color="textPrimary"
+              >
+                {option.name}
+              </Link>
+            </NextLink>
+          ) : (
+            <Box key={option.id} className={classes.text}>
+              {option.name}
+            </Box>
+          )}
         </React.Fragment>
       )}
       options={communitySelectionOptions}
       getOptionLabel={(option) => option.name}
       renderInput={(params) => {
+        console.log("params:", params);
         return (
           <InputBase
             fullWidth
             ref={params.InputProps.ref}
             inputProps={params.inputProps}
             classes={{ root: classes.inputBase }}
+            startAdornment={
+              (params.inputProps as { ["aria-controls"]: string })[
+                "aria-controls"
+              ] ? (
+                <SearchIcon />
+              ) : (
+                <span className={classes.circle}></span>
+              )
+            }
+            endAdornment={
+              <ExpandMoreRoundedIcon
+                onClick={() =>
+                  (params.inputProps as {
+                    onMouseDown: () => void;
+                  }).onMouseDown()
+                }
+              />
+            }
+            placeholder={
+              (params.inputProps as { ["aria-controls"]: string })[
+                "aria-controls"
+              ]
+                ? "Search communities"
+                : "Choose a community"
+            }
           />
         );
       }}

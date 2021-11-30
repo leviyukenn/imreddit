@@ -10,7 +10,6 @@ import {
 } from "@material-ui/core";
 import DescriptionOutlinedIcon from "@material-ui/icons/DescriptionOutlined";
 import ImageOutlinedIcon from "@material-ui/icons/ImageOutlined";
-import { useRouter } from "next/router";
 import React, { useCallback, useEffect, useState } from "react";
 import Container from "../components/Container";
 import CreatePostForm from "../components/post/CreatePostForm";
@@ -36,13 +35,10 @@ const CreatePost = () => {
   const classes = useStyles();
 
   //if not loged in, redirect to login page
-  const { me, meLoading } = useIsAuth();
-  const router = useRouter();
+  const { me, redirectToLoginIfNotLoggedIn } = useIsAuth();
   useEffect(() => {
-    if (!me && !meLoading) {
-      router.push(loginPageLink);
-    }
-  }, [me, meLoading]);
+    redirectToLoginIfNotLoggedIn();
+  }, [redirectToLoginIfNotLoggedIn]);
 
   const [postType, setPostType] = useState<PostType>(PostType.TEXT_POST);
   const [communityId, setCommunityId] = useState<string>("");
