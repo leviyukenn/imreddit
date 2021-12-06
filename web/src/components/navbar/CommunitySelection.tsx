@@ -41,6 +41,7 @@ const useStyles = makeStyles((theme: Theme) =>
       borderRadius: "4px",
       padding: "0 1em",
       fontWeight: 600,
+      cursor: "pointer",
       "&:hover,&:focus": {
         border: "1px solid rgb(237, 239, 241)",
       },

@@ -176,7 +176,6 @@ export default function SelectCommunity({
       options={communitySelectionOptions}
       getOptionLabel={(option) => option.name}
       renderInput={(params) => {
-        console.log("params:", params);
         return (
           <InputBase
             fullWidth
