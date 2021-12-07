@@ -1,17 +1,12 @@
 import { Box } from "@material-ui/core";
 import React from "react";
-import LoginRegisterPageLayout from "../components/LoginRegisterPageLayout";
-import GoogleButton from "../components/user/GoogleLoginButton";
-import Login from "../components/user/LoginForm";
+import Login from "../components/user/Login";
 
-const login = () => {
+const loginPage = () => {
   return (
-    <LoginRegisterPageLayout>
-      <Box>
-        <GoogleButton />
-        <Login />
-      </Box>
-    </LoginRegisterPageLayout>
+    <Box height="100vh">
+      <Login />
+    </Box>
   );
 };
-export default login;
+export default loginPage;

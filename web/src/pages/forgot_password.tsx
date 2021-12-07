@@ -1,5 +1,5 @@
 import React from "react";
-import LoginRegisterPageLayout from "../components/LoginRegisterPageLayout";
+import LoginRegisterPageLayout from "../components/LoginRegisterLayout";
 import ForgotPassword from "../components/user/ForgotPasswordForm";
 
 const forgotPassword = () => {

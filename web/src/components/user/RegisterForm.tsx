@@ -29,16 +29,26 @@ interface FormData {
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
     formContainer: {
-      width: theme.spacing(45),
+      width: "100%",
       margin: "20px auto",
     },
     formItem: {
       width: "100%",
+      marginBottom: "1.25rem",
+      "& input": {
+        boxSizing: "border-box",
+        height: 48,
+        fontSize: "0.875rem",
+        padding: "1.375rem 0.75rem 0.625rem",
+      },
+      "& label": {
+        fontSize: "0.875rem",
+      },
     },
   })
 );
 
-const Register = () => {
+const RegisterForm = () => {
   const [register, { error: registerError }] = useRegisterMutation({
     update(cache, { data: registerResponse }) {
       cache.modify({
@@ -103,7 +113,6 @@ const Register = () => {
             justify="flex-start"
             alignItems="center"
             className={classes.formContainer}
-            spacing={3}
           >
             <Grid item className={classes.formItem}>
               {displayInnerError ? (
@@ -164,4 +173,4 @@ const Register = () => {
     </Formik>
   );
 };
-export default Register;
+export default RegisterForm;

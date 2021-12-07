@@ -1,0 +1,10 @@
+mutation GoogleAuthentication($idToken: String!) {
+  googleAuthentication(idToken: $idToken) {
+    errors {
+      ...RegularErrors
+    }
+    user {
+      ...RegularUser
+    }
+  }
+}

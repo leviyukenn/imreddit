@@ -1,12 +1,12 @@
+import { Box } from "@material-ui/core";
 import React from "react";
-import LoginRegisterPageLayout from "../components/LoginRegisterPageLayout";
-import Register from "../components/user/RegisterForm";
+import Register from "../components/user/Register";
 
 const register = () => {
   return (
-    <LoginRegisterPageLayout>
+    <Box height="100vh">
       <Register />
-    </LoginRegisterPageLayout>
+    </Box>
   );
 };
 export default register;

@@ -91,6 +91,7 @@ export type Mutation = {
   register: UserResponse;
   login: UserResponse;
   logout: Scalars['Boolean'];
+  googleAuthentication: UserResponse;
   createPost: Post;
   deletePost: Scalars['Boolean'];
   uploadImage: UploadResponse;
@@ -118,6 +119,11 @@ export type MutationRegisterArgs = {
 
 export type MutationLoginArgs = {
   userInput: LoginInput;
+};
+
+
+export type MutationGoogleAuthenticationArgs = {
+  idToken: Scalars['String'];
 };
 
 
@@ -383,6 +389,25 @@ export type ForgotPasswordMutation = (
       { __typename?: 'FieldError' }
       & RegularErrorsFragment
     )>> }
+  ) }
+);
+
+export type GoogleAuthenticationMutationVariables = Exact<{
+  idToken: Scalars['String'];
+}>;
+
+
+export type GoogleAuthenticationMutation = (
+  { __typename?: 'Mutation' }
+  & { googleAuthentication: (
+    { __typename?: 'UserResponse' }
+    & { errors?: Maybe<Array<(
+      { __typename?: 'FieldError' }
+      & RegularErrorsFragment
+    )>>, user?: Maybe<(
+      { __typename?: 'User' }
+      & RegularUserFragment
+    )> }
   ) }
 );
 
@@ -805,6 +830,45 @@ export function useForgotPasswordMutation(baseOptions?: Apollo.MutationHookOptio
 export type ForgotPasswordMutationHookResult = ReturnType<typeof useForgotPasswordMutation>;
 export type ForgotPasswordMutationResult = Apollo.MutationResult<ForgotPasswordMutation>;
 export type ForgotPasswordMutationOptions = Apollo.BaseMutationOptions<ForgotPasswordMutation, ForgotPasswordMutationVariables>;
+export const GoogleAuthenticationDocument = gql`
+    mutation GoogleAuthentication($idToken: String!) {
+  googleAuthentication(idToken: $idToken) {
+    errors {
+      ...RegularErrors
+    }
+    user {
+      ...RegularUser
+    }
+  }
+}
+    ${RegularErrorsFragmentDoc}
+${RegularUserFragmentDoc}`;
+export type GoogleAuthenticationMutationFn = Apollo.MutationFunction<GoogleAuthenticationMutation, GoogleAuthenticationMutationVariables>;
+
+/**
+ * __useGoogleAuthenticationMutation__
+ *
+ * To run a mutation, you first call `useGoogleAuthenticationMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useGoogleAuthenticationMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [googleAuthenticationMutation, { data, loading, error }] = useGoogleAuthenticationMutation({
+ *   variables: {
+ *      idToken: // value for 'idToken'
+ *   },
+ * });
+ */
+export function useGoogleAuthenticationMutation(baseOptions?: Apollo.MutationHookOptions<GoogleAuthenticationMutation, GoogleAuthenticationMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<GoogleAuthenticationMutation, GoogleAuthenticationMutationVariables>(GoogleAuthenticationDocument, options);
+      }
+export type GoogleAuthenticationMutationHookResult = ReturnType<typeof useGoogleAuthenticationMutation>;
+export type GoogleAuthenticationMutationResult = Apollo.MutationResult<GoogleAuthenticationMutation>;
+export type GoogleAuthenticationMutationOptions = Apollo.BaseMutationOptions<GoogleAuthenticationMutation, GoogleAuthenticationMutationVariables>;
 export const LoginDocument = gql`
     mutation Login($username: String!, $password: String!) {
   login(userInput: {username: $username, password: $password}) {
@@ -1347,13 +1411,14 @@ export type ImageFieldPolicy = {
 	caption?: FieldPolicy<any> | FieldReadFunction<any>,
 	link?: FieldPolicy<any> | FieldReadFunction<any>
 };
-export type MutationKeySpecifier = ('changePassword' | 'forgotPassword' | 'register' | 'login' | 'logout' | 'createPost' | 'deletePost' | 'uploadImage' | 'createCommunity' | 'vote' | 'createTopic' | MutationKeySpecifier)[];
+export type MutationKeySpecifier = ('changePassword' | 'forgotPassword' | 'register' | 'login' | 'logout' | 'googleAuthentication' | 'createPost' | 'deletePost' | 'uploadImage' | 'createCommunity' | 'vote' | 'createTopic' | MutationKeySpecifier)[];
 export type MutationFieldPolicy = {
 	changePassword?: FieldPolicy<any> | FieldReadFunction<any>,
 	forgotPassword?: FieldPolicy<any> | FieldReadFunction<any>,
 	register?: FieldPolicy<any> | FieldReadFunction<any>,
 	login?: FieldPolicy<any> | FieldReadFunction<any>,
 	logout?: FieldPolicy<any> | FieldReadFunction<any>,
+	googleAuthentication?: FieldPolicy<any> | FieldReadFunction<any>,
 	createPost?: FieldPolicy<any> | FieldReadFunction<any>,
 	deletePost?: FieldPolicy<any> | FieldReadFunction<any>,
 	uploadImage?: FieldPolicy<any> | FieldReadFunction<any>,

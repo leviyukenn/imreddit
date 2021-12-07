@@ -1,6 +1,6 @@
 import React from "react";
 import CreateCommunityForm from "../components/community/CreateCommunityForm";
-import LoginRegisterPageLayout from "../components/LoginRegisterPageLayout";
+import LoginRegisterPageLayout from "../components/LoginRegisterLayout";
 
 const createCommunity = () => {
   return (
