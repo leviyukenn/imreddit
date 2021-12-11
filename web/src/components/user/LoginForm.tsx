@@ -8,10 +8,10 @@ import {
   Theme,
 } from "@material-ui/core";
 import Typography from "@material-ui/core/Typography";
-import MuiAlert from "@material-ui/lab/Alert";
 import { Field, Form, Formik, FormikHelpers } from "formik";
 import { useRouter } from "next/router";
 import React, { useCallback, useState } from "react";
+import { FrontendError } from "../../const/errors";
 import { loginValidationSchema } from "../../fieldValidateSchema/fieldValidateSchema";
 import {
   RegularUserFragmentDoc,
@@ -19,6 +19,7 @@ import {
 } from "../../generated/graphql";
 import { useUserModalState } from "../../redux/hooks/useUserModalState";
 import { toErrorMap } from "../../utils/toErrorMap";
+import { AlertSeverity, SnackbarAlert } from "../errorHandling/SnackbarAlert";
 import { TextInputField } from "../InputField";
 
 interface FormData {
@@ -48,9 +49,14 @@ const useStyles = makeStyles((theme: Theme) =>
   })
 );
 
-const LoginForm = () => {
+interface LoginFormProps {
+  isSubmitting: boolean;
+  setIsSubmitting: (isSubmitting: boolean) => void;
+}
+
+function useLogin(setIsSubmitting: (isSubmitting: boolean) => void) {
   //post login mutation to graphql server and updtate the me query cache
-  const [login, { error: loginError }] = useLoginMutation({
+  const [login] = useLoginMutation({
     update(cache, { data: loginResponse }) {
       cache.modify({
         fields: {
@@ -69,125 +75,135 @@ const LoginForm = () => {
     },
   });
 
+  const { isOpen, onClose } = useUserModalState();
+
+  const [errorMessage, setErrorMessage] = useState("");
+  const router = useRouter();
+
+  const onLogin = useCallback(
+    async (values: FormData, actions: FormikHelpers<FormData>) => {
+      setIsSubmitting(true);
+      const loginResponse = await login({ variables: values }).catch(
+        () => null
+      );
+      const loginResult = loginResponse?.data?.login;
+
+      if (!loginResult) {
+        setErrorMessage(FrontendError.ERR0002);
+        setIsSubmitting(false);
+        return;
+      }
+      if (loginResult.errors) {
+        actions.setErrors(toErrorMap(loginResult.errors));
+        setIsSubmitting(false);
+        return;
+      }
+      if (loginResult.user) {
+        if (isOpen) {
+          onClose();
+          return;
+        }
+        router.back();
+      }
+    },
+    [login, isOpen, router]
+  );
+
+  return { onLogin, errorMessage, setErrorMessage };
+}
+
+const LoginForm = ({ isSubmitting, setIsSubmitting }: LoginFormProps) => {
   const {
     isOpen,
-    onClose,
     showRegisterModal,
     showForgotPasswordModal,
     showRegisterPage,
     showForgotPasswordPage,
   } = useUserModalState();
 
-  const [displayInnerError, setDisplayInnerError] = useState<boolean>(false);
-  const router = useRouter();
-
-  const onlogin = useCallback(
-    async (values: FormData, actions: FormikHelpers<FormData>) => {
-      const loginResult = await login({ variables: values });
-
-      if (loginError || loginResult.errors) {
-        setDisplayInnerError(true);
-        return;
-      }
-      if (loginResult.data?.login.errors) {
-        actions.setErrors(toErrorMap(loginResult.data?.login.errors));
-        return;
-      }
-      if (loginResult.data?.login.user) {
-        if (!isOpen) {
-          router.back();
-          return;
-        }
-        onClose();
-
-        if (typeof router.query.next === "string") {
-          router.push(router.query.next);
-        }
-      }
-    },
-    [login, setDisplayInnerError, isOpen, router]
-  );
+  const { onLogin, errorMessage, setErrorMessage } = useLogin(setIsSubmitting);
 
   const classes = useStyles();
   return (
-    <Formik
-      initialValues={{ username: "", password: "" }}
-      validationSchema={loginValidationSchema}
-      onSubmit={onlogin}
-    >
-      {({ submitForm, isSubmitting }) => (
-        <Form
-          onKeyPress={(event) => {
-            if (event.key === "Enter") submitForm();
-          }}
-        >
-          <Grid
-            container
-            direction="column"
-            justify="flex-start"
-            alignItems="center"
-            className={classes.formContainer}
+    <>
+      <Formik
+        initialValues={{ username: "", password: "" }}
+        validationSchema={loginValidationSchema}
+        onSubmit={onLogin}
+      >
+        {({ submitForm }) => (
+          <Form
+            onKeyPress={(event) => {
+              if (event.key === "Enter") submitForm();
+            }}
           >
-            <Grid item className={classes.formItem}>
-              {displayInnerError ? (
-                <MuiAlert elevation={6} variant="filled" severity="error">
-                  Inner error.Please try it again later.
-                </MuiAlert>
-              ) : null}
-            </Grid>
-
-            <Grid item className={classes.formItem}>
-              <Field
-                component={TextInputField}
-                name="username"
-                type="text"
-                label="USERNAME"
-              />
-            </Grid>
-            <Grid item className={classes.formItem}>
-              <Field
-                component={TextInputField}
-                type="password"
-                label="PASSWORD"
-                name="password"
-              />
-            </Grid>
-            {isSubmitting && <LinearProgress />}
-            <br />
-            <Grid item className={classes.formItem}>
-              <Button
-                variant="contained"
-                color="primary"
-                disabled={isSubmitting}
-                onClick={submitForm}
-              >
-                Log In
-              </Button>
-            </Grid>
-            <Grid item className={classes.formItem}>
-              <Typography variant="caption">
-                Forgot your{" "}
-                <Link
-                  onClick={
-                    isOpen ? showForgotPasswordModal : showForgotPasswordPage
-                  }
+            <Grid
+              container
+              direction="column"
+              justify="flex-start"
+              alignItems="center"
+              className={classes.formContainer}
+            >
+              <Grid item className={classes.formItem}>
+                <Field
+                  component={TextInputField}
+                  name="username"
+                  type="text"
+                  label="USERNAME"
+                />
+              </Grid>
+              <Grid item className={classes.formItem}>
+                <Field
+                  component={TextInputField}
+                  type="password"
+                  label="PASSWORD"
+                  name="password"
+                />
+              </Grid>
+              {isSubmitting && <LinearProgress />}
+              <br />
+              <Grid item className={classes.formItem}>
+                <Button
+                  variant="contained"
+                  color="primary"
+                  disabled={isSubmitting}
+                  onClick={submitForm}
                 >
-                  PASSWORD?
-                </Link>
-              </Typography>
+                  Log In
+                </Button>
+              </Grid>
+              <Grid item className={classes.formItem}>
+                <Typography variant="caption">
+                  Forgot your{" "}
+                  <Link
+                    onClick={
+                      isOpen ? showForgotPasswordModal : showForgotPasswordPage
+                    }
+                  >
+                    PASSWORD?
+                  </Link>
+                </Typography>
+              </Grid>
+              <Grid item className={classes.formItem}>
+                <Typography variant="caption">
+                  Don't have an account?{" "}
+                  <Link onClick={isOpen ? showRegisterModal : showRegisterPage}>
+                    SIGN UP
+                  </Link>
+                </Typography>
+              </Grid>
             </Grid>
-            <Grid item className={classes.formItem}>
-              <Typography variant="caption">
-                Don't have an account?{" "}
-                <Link onClick={isOpen ? showRegisterModal : showRegisterPage}>
-                  SIGN UP
-                </Link>
-              </Typography>
-            </Grid>
-          </Grid>
-        </Form>
-      )}
-    </Formik>
+          </Form>
+        )}
+      </Formik>
+      <SnackbarAlert
+        {...{
+          message: errorMessage,
+          setMessage: setErrorMessage,
+          severity: AlertSeverity.ERROR,
+        }}
+      />
+    </>
   );
 };
 export default LoginForm;

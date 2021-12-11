@@ -5,7 +5,7 @@ import {
   Theme,
   Typography,
 } from "@material-ui/core";
-import React from "react";
+import React, { useState } from "react";
 import LoginRegisterLayout from "../LoginRegisterLayout";
 import TextDivider from "../utility/TextDivider";
 import GoogleButton from "./GoogleLoginButton";
@@ -24,15 +24,16 @@ const useStyles = makeStyles((theme: Theme) =>
 
 const Login = () => {
   const classes = useStyles();
+  const [isSubmitting, setIsSubmitting] = useState(false);
   return (
     <LoginRegisterLayout>
       <Box className={classes.container}>
         <Typography variant="h6" className={classes.title}>
           Login
         </Typography>
-        <GoogleButton />
+        <GoogleButton {...{ isSubmitting, setIsSubmitting }} />
         <TextDivider text={"OR"} />
-        <LoginForm />
+        <LoginForm {...{ isSubmitting, setIsSubmitting }}/>
       </Box>
     </LoginRegisterLayout>
   );

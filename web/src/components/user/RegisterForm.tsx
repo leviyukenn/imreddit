@@ -8,9 +8,10 @@ import {
   Theme,
 } from "@material-ui/core";
 import Typography from "@material-ui/core/Typography";
-import MuiAlert from "@material-ui/lab/Alert";
 import { Field, Form, Formik, FormikHelpers } from "formik";
+import { useRouter } from "next/router";
 import React, { useCallback, useState } from "react";
+import { FrontendError } from "../../const/errors";
 import { registerValidationSchema } from "../../fieldValidateSchema/fieldValidateSchema";
 import {
   RegularUserFragmentDoc,
@@ -18,6 +19,7 @@ import {
 } from "../../generated/graphql";
 import { useUserModalState } from "../../redux/hooks/useUserModalState";
 import { toErrorMap } from "../../utils/toErrorMap";
+import { AlertSeverity, SnackbarAlert } from "../errorHandling/SnackbarAlert";
 import { TextInputField } from "../InputField";
 
 interface FormData {
@@ -48,8 +50,13 @@ const useStyles = makeStyles((theme: Theme) =>
   })
 );
 
-const RegisterForm = () => {
-  const [register, { error: registerError }] = useRegisterMutation({
+interface RegisterFormProps {
+  isSubmitting: boolean;
+  setIsSubmitting: (isSubmitting: boolean) => void;
+}
+
+function useRegister(setIsSubmitting: (isSubmitting: boolean) => void) {
+  const [register] = useRegisterMutation({
     update(cache, { data: registerResponse }) {
       cache.modify({
         fields: {
@@ -67,110 +74,129 @@ const RegisterForm = () => {
       });
     },
   });
-  const [displayInnerError, setDisplayInnerError] = useState<boolean>(false);
-  const {
-    isOpen,
-    onClose,
-    showLoginModal,
-    showLoginPage,
-  } = useUserModalState();
+  const [errorMessage, setErrorMessage] = useState("");
+  const { isOpen, onClose } = useUserModalState();
+  const router = useRouter();
 
   const onRegister = useCallback(
     async (values: FormData, actions: FormikHelpers<FormData>) => {
-      const result = await register({ variables: values });
+      setIsSubmitting(true);
+      const registerResponse = await register({ variables: values }).catch(
+        () => null
+      );
 
-      if (registerError || result.errors) {
-        setDisplayInnerError(true);
+      const registerResult = registerResponse?.data?.register;
+
+      if (!registerResult) {
+        setIsSubmitting(false);
+        setErrorMessage(FrontendError.ERR0002);
         return;
       }
-      if (result.data?.register.errors) {
-        actions.setErrors(toErrorMap(result.data?.register.errors));
+
+      if (registerResult?.errors) {
+        setIsSubmitting(false);
+        actions.setErrors(toErrorMap(registerResult.errors));
         return;
-      } else if (result.data?.register.user) {
-        onClose();
+      }
+      if (registerResult.user) {
+        if (isOpen) {
+          onClose();
+          return;
+        }
+        router.back();
       }
     },
-    [register, setDisplayInnerError]
+    [register, isOpen, router]
+  );
+
+  return { onRegister, errorMessage, setErrorMessage };
+}
+
+const RegisterForm = ({ isSubmitting, setIsSubmitting }: RegisterFormProps) => {
+  const { isOpen, showLoginModal, showLoginPage } = useUserModalState();
+
+  const { onRegister, setErrorMessage, errorMessage } = useRegister(
+    setIsSubmitting
   );
 
   const classes = useStyles();
   return (
-    <Formik
-      initialValues={{ username: "", password: "", email: "" }}
-      validationSchema={registerValidationSchema}
-      onSubmit={onRegister}
-      u
-    >
-      {({ submitForm, isSubmitting }) => (
-        <Form
-          onKeyPress={(event) => {
-            if (event.key === "Enter") submitForm();
-          }}
-        >
-          <Grid
-            container
-            direction="column"
-            justify="flex-start"
-            alignItems="center"
-            className={classes.formContainer}
+    <>
+      <Formik
+        initialValues={{ username: "", password: "", email: "" }}
+        validationSchema={registerValidationSchema}
+        onSubmit={onRegister}
+      >
+        {({ submitForm }) => (
+          <Form
+            onKeyPress={(event) => {
+              if (event.key === "Enter") submitForm();
+            }}
           >
-            <Grid item className={classes.formItem}>
-              {displayInnerError ? (
-                <MuiAlert elevation={6} variant="filled" severity="error">
-                  Inner error.Please try it again later.
-                </MuiAlert>
-              ) : null}
-            </Grid>
+            <Grid
+              container
+              direction="column"
+              justify="flex-start"
+              alignItems="center"
+              className={classes.formContainer}
+            >
+              <Grid item className={classes.formItem}>
+                <Field
+                  component={TextInputField}
+                  name="email"
+                  type="email"
+                  label="EMAIL"
+                />
+              </Grid>
 
-            <Grid item className={classes.formItem}>
-              <Field
-                component={TextInputField}
-                name="email"
-                type="email"
-                label="EMAIL"
-              />
+              <Grid item className={classes.formItem}>
+                <Field
+                  component={TextInputField}
+                  name="username"
+                  type="text"
+                  label="USERNAME"
+                />
+              </Grid>
+              <Grid item className={classes.formItem}>
+                <Field
+                  component={TextInputField}
+                  type="password"
+                  label="PASSWORD"
+                  name="password"
+                />
+              </Grid>
+              {isSubmitting && <LinearProgress />}
+              <br />
+              <Grid item className={classes.formItem}>
+                <Button
+                  variant="contained"
+                  color="primary"
+                  disabled={isSubmitting}
+                  onClick={submitForm}
+                >
+                  Sign Up
+                </Button>
+              </Grid>
+              <Grid item className={classes.formItem}>
+                <Typography variant="caption">
+                  Already has a account?{" "}
+                  <Link onClick={isOpen ? showLoginModal : showLoginPage}>
+                    LOG IN
+                  </Link>
+                </Typography>
+              </Grid>
             </Grid>
-
-            <Grid item className={classes.formItem}>
-              <Field
-                component={TextInputField}
-                name="username"
-                type="text"
-                label="USERNAME"
-              />
-            </Grid>
-            <Grid item className={classes.formItem}>
-              <Field
-                component={TextInputField}
-                type="password"
-                label="PASSWORD"
-                name="password"
-              />
-            </Grid>
-            {isSubmitting && <LinearProgress />}
-            <br />
-            <Grid item className={classes.formItem}>
-              <Button
-                variant="contained"
-                color="primary"
-                disabled={isSubmitting}
-                onClick={submitForm}
-              >
-                Sign Up
-              </Button>
-            </Grid>
-            <Grid item className={classes.formItem}>
-              <Typography variant="caption">
-                Already has a account?{" "}
-                <Link onClick={isOpen ? showLoginModal : showLoginPage}>
-                  LOG IN
-                </Link>
-              </Typography>
-            </Grid>
-          </Grid>
-        </Form>
-      )}
-    </Formik>
+          </Form>
+        )}
+      </Formik>
+      <SnackbarAlert
+        {...{
+          message: errorMessage,
+          setMessage: setErrorMessage,
+          severity: AlertSeverity.ERROR,
+        }}
+      />
+    </>
   );
 };
 export default RegisterForm;

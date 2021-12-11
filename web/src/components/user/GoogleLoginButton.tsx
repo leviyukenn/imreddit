@@ -3,10 +3,8 @@ import {
   Button,
   createStyles,
   makeStyles,
-  Snackbar,
   Theme,
 } from "@material-ui/core";
-import { Alert } from "@material-ui/lab";
 import { useRouter } from "next/router";
 import { useCallback, useState } from "react";
 import GoogleLogin, {
@@ -14,12 +12,14 @@ import GoogleLogin, {
   GoogleLoginResponseOffline,
 } from "react-google-login";
 import { GOOGLE_AUTH_CLIENT_ID } from "../../const/const";
+import { FrontendError } from "../../const/errors";
 import {
   RegularUserFragmentDoc,
   useGoogleAuthenticationMutation,
 } from "../../generated/graphql";
 import GoogleIcon from "../../images/icons/google_icon.svg";
 import { useUserModalState } from "../../redux/hooks/useUserModalState";
+import { AlertSeverity, SnackbarAlert } from "../errorHandling/SnackbarAlert";
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -55,8 +55,14 @@ const useStyles = makeStyles((theme: Theme) =>
   })
 );
 
-function GoogleButton() {
-  const clientId = GOOGLE_AUTH_CLIENT_ID;
+interface GoogleButtonProps {
+  isSubmitting: boolean;
+  setIsSubmitting: (isSubmitting: boolean) => void;
+}
+
+function useGoogleAuthentication(
+  setIsSubmitting: (isSubmitting: boolean) => void
+) {
   const [login] = useGoogleAuthenticationMutation({
     update(cache, { data: loginResponse }) {
       cache.modify({
@@ -75,54 +81,68 @@ function GoogleButton() {
       });
     },
   });
-  const [error, setError] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");
 
   const { isOpen, onClose } = useUserModalState();
   const router = useRouter();
 
   const onLogin = useCallback(
     async (response: GoogleLoginResponse | GoogleLoginResponseOffline) => {
-      const loginResult = await login({
+      setIsSubmitting(true);
+
+      const loginResponse = await login({
         variables: { idToken: (response as GoogleLoginResponse).tokenId },
       });
 
-      if ((loginResult.data?.googleAuthentication.errors?.length || 0) > 0) {
-        setError(loginResult.data!.googleAuthentication.errors![0].message);
+      const loginResult = loginResponse.data?.googleAuthentication;
+
+      if (!loginResult) {
+        setErrorMessage(FrontendError.ERR0002);
+        setIsSubmitting(false);
+        return;
       }
 
-      if (loginResult.data?.googleAuthentication.user) {
-        if (!isOpen) {
-          router.back();
+      if ((loginResult.errors?.length || 0) > 0) {
+        setErrorMessage(loginResult.errors![0].message);
+        setIsSubmitting(false);
+        return;
+      }
+
+      if (loginResult.user) {
+        if (isOpen) {
+          onClose();
           return;
         }
-        onClose();
+        router.back();
       }
     },
-    [login, isOpen, onClose]
+    [isOpen, login, router, onClose]
+  );
+
+  return { onLogin, errorMessage, setErrorMessage };
+}
+
+function GoogleButton({ isSubmitting, setIsSubmitting }: GoogleButtonProps) {
+  const clientId = GOOGLE_AUTH_CLIENT_ID;
+  const { onLogin, errorMessage, setErrorMessage } = useGoogleAuthentication(
+    setIsSubmitting
   );
   const classes = useStyles();
 
-  const handleClose = useCallback(
-    (event?: React.SyntheticEvent, reason?: string) => {
-      if (reason === "clickaway") {
-        return;
-      }
-      setError("");
-    },
-    []
-  );
-
   return (
     <>
-      <Snackbar open={!error} autoHideDuration={5000} onClose={handleClose}>
-        <Alert onClose={handleClose} severity="error">
-          {error}
-        </Alert>
-      </Snackbar>
+      <SnackbarAlert
+        {...{
+          message: errorMessage,
+          setMessage: setErrorMessage,
+          severity: AlertSeverity.ERROR,
+        }}
+      />
       <GoogleLogin
         clientId={clientId}
         onSuccess={onLogin}
-        onFailure={(error) => setError("Failed to login with google account.")}
+        onFailure={() => setErrorMessage(FrontendError.ERR0001)}
+        disabled={isSubmitting}
         uxMode="redirect"
         render={({ onClick }: { onClick: () => void }) => (
           <Button

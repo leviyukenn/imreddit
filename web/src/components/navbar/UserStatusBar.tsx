@@ -5,7 +5,7 @@ import {
   Theme,
   Typography,
 } from "@material-ui/core";
-import React, { useCallback } from "react";
+import React from "react";
 import { useGoogleLogout } from "react-google-login";
 import { GOOGLE_AUTH_CLIENT_ID } from "../../const/const";
 import { useLogoutMutation, useMeQuery } from "../../generated/graphql";
@@ -43,14 +43,11 @@ const UserStatusBar = ({}: UserStatusBarProps) => {
     },
   });
   const { showLoginModal, showRegisterModal } = useUserModalState();
-  const { signOut } = useGoogleLogout({
+  const { signOut, loaded } = useGoogleLogout({
     clientId: GOOGLE_AUTH_CLIENT_ID,
+    onFailure: () => alert("google logout failed"),
+    onLogoutSuccess: () => logout(),
   });
-
-  const onLogout = useCallback(() => {
-    signOut();
-    logout();
-  }, [signOut, logout]);
 
   const classes = useStyles();
 
@@ -69,8 +66,8 @@ const UserStatusBar = ({}: UserStatusBarProps) => {
           variant="outlined"
           color="primary"
           className={classes.menuButton}
-          onClick={onLogout}
-          disabled={logoutLoading}
+          onClick={signOut}
+          disabled={logoutLoading || !loaded}
         >
           Log Out
         </Button>
