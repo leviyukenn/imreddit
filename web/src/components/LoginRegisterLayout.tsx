@@ -1,4 +1,10 @@
-import { Box, createStyles, makeStyles, Theme } from "@material-ui/core";
+import {
+  Box,
+  createStyles,
+  makeStyles,
+  Theme,
+  Typography,
+} from "@material-ui/core";
 import React, { ReactNode } from "react";
 import { SERVER_URL } from "../const/const";
 
@@ -19,14 +25,33 @@ const useStyles = makeStyles((theme: Theme) =>
       width: "140px",
       backgroundPosition: "60%",
     },
+    container: {
+      width: 280,
+    },
+    title: {
+      marginBottom: "3rem",
+    },
   })
 );
-const LoginRegisterLayout = ({ children }: { children: ReactNode }) => {
+const LoginRegisterLayout = ({
+  children,
+  titleText,
+}: {
+  children: ReactNode;
+  titleText?: string;
+}) => {
   const classes = useStyles();
   return (
     <Box className={classes.mainContentBox}>
       <Box className={classes.sideImage} />
-      {children}
+      <Box className={classes.container}>
+        {titleText ? (
+          <Typography variant="h6" className={classes.title}>
+            {titleText}
+          </Typography>
+        ) : null}
+        {children}
+      </Box>
     </Box>
   );
 };

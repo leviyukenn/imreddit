@@ -1,12 +1,12 @@
 import React from "react";
 import LoginRegisterLayout from "../LoginRegisterLayout";
-import ForgotPasswordForm from "./ForgotPasswordForm";
+import ChangePasswordForm from "./ChangePasswordForm";
 
-const ForgotPassword = () => {
+const ChangePassword = () => {
   return (
     <LoginRegisterLayout titleText={"Reset your password"}>
-      <ForgotPasswordForm />
+      <ChangePasswordForm />
     </LoginRegisterLayout>
   );
 };
-export default ForgotPassword;
+export default ChangePassword;

@@ -10,12 +10,14 @@ import {
 } from "@material-ui/core";
 import Breadcrumbs from "@material-ui/core/Breadcrumbs";
 import { Alert, AlertTitle } from "@material-ui/lab";
-import MuiAlert from "@material-ui/lab/Alert";
 import { Field, Form, Formik, FormikHelpers } from "formik";
 import React, { useCallback, useState } from "react";
+import { FrontendError } from "../../const/errors";
 import { forgotPasswordValidationSchema } from "../../fieldValidateSchema/fieldValidateSchema";
 import { useForgotPasswordMutation } from "../../generated/graphql";
 import { useUserModalState } from "../../redux/hooks/useUserModalState";
+import { toErrorMap } from "../../utils/toErrorMap";
+import { AlertSeverity, SnackbarAlert } from "../errorHandling/SnackbarAlert";
 import { TextInputField } from "../InputField";
 
 interface FormData {
@@ -45,13 +47,43 @@ const useStyles = makeStyles((theme: Theme) =>
   })
 );
 
-const ForgotPasswordForm = () => {
-  const [
-    forgotPassword,
-    { error: forgotPasswordError },
-  ] = useForgotPasswordMutation();
-  const [displayInnerError, setDisplayInnerError] = useState<boolean>(false);
+function useForgotPassword() {
+  const [forgotPassword] = useForgotPasswordMutation();
   const [completeSendingEmail, setCompleteSendingEmail] = useState(false);
+
+  const [errorMessage, setErrorMessage] = useState("");
+
+  const onForgotPassword = useCallback(
+    async (values: FormData, actions: FormikHelpers<FormData>) => {
+      setCompleteSendingEmail(false);
+      const response = await forgotPassword({ variables: values }).catch(
+        () => null
+      );
+      const result = response?.data?.forgotPassword;
+
+      if (!result) {
+        setErrorMessage(FrontendError.ERR0002);
+        return;
+      }
+      if (result.errors) {
+        actions.setErrors(toErrorMap(result.errors));
+        return;
+      }
+      actions.resetForm();
+      setCompleteSendingEmail(true);
+    },
+    [forgotPassword]
+  );
+
+  return {
+    onForgotPassword,
+    completeSendingEmail,
+    errorMessage,
+    setErrorMessage,
+  };
+}
+
+const ForgotPasswordForm = () => {
   const {
     isOpen,
     showLoginModal,
@@ -62,112 +94,105 @@ const ForgotPasswordForm = () => {
 
   const classes = useStyles();
 
-  const onForgotPassword = useCallback(
-    async (values: FormData, actions: FormikHelpers<FormData>) => {
-      setCompleteSendingEmail(false);
-      const result = await forgotPassword({ variables: values });
-
-      if (forgotPasswordError || result.errors) {
-        setDisplayInnerError(true);
-        return;
-      }
-      actions.resetForm();
-      setCompleteSendingEmail(true);
-    },
-    [forgotPassword, setDisplayInnerError, forgotPasswordError]
-  );
+  const {
+    onForgotPassword,
+    completeSendingEmail,
+    setErrorMessage,
+    errorMessage,
+  } = useForgotPassword();
 
   return (
-    <Formik
-      initialValues={{ username: "", email: "" }}
-      validationSchema={forgotPasswordValidationSchema}
-      onSubmit={onForgotPassword}
-    >
-      {({ submitForm, isSubmitting }) => (
-        <Form
-          onKeyPress={(event) => {
-            if (event.key === "Enter") submitForm();
-          }}
-        >
-          <Grid
-            container
-            direction="column"
-            justify="flex-start"
-            alignItems="center"
-            className={classes.formContainer}
+    <>
+      <Formik
+        initialValues={{ username: "", email: "" }}
+        validationSchema={forgotPasswordValidationSchema}
+        onSubmit={onForgotPassword}
+      >
+        {({ submitForm, isSubmitting }) => (
+          <Form
+            onKeyPress={(event) => {
+              if (event.key === "Enter") submitForm();
+            }}
           >
-            <Grid item className={classes.formItem}>
-              {displayInnerError ? (
-                <MuiAlert elevation={6} variant="filled" severity="error">
-                  Inner error.Please try it again later.
-                </MuiAlert>
+            <Grid
+              container
+              direction="column"
+              justify="flex-start"
+              alignItems="center"
+              className={classes.formContainer}
+            >
+              <Grid item className={classes.formItem}>
+                <Field
+                  component={TextInputField}
+                  name="username"
+                  type="text"
+                  label="USERNAME"
+                />
+              </Grid>
+              <Grid item className={classes.formItem}>
+                <Field
+                  component={TextInputField}
+                  name="email"
+                  type="email"
+                  label="EMAIL"
+                />
+              </Grid>
+
+              {isSubmitting && <LinearProgress />}
+              <br />
+              <Grid item className={classes.formItem}>
+                <Button
+                  variant="contained"
+                  color="primary"
+                  disabled={isSubmitting}
+                  onClick={submitForm}
+                >
+                  Reset Password
+                </Button>
+              </Grid>
+              <Grid item className={classes.formItem}>
+                <Breadcrumbs separator="-" aria-label="breadcrumb">
+                  <Typography variant="caption">
+                    <Link
+                      color="primary"
+                      href="#"
+                      onClick={isOpen ? showLoginModal : showLoginPage}
+                    >
+                      LOG IN
+                    </Link>
+                  </Typography>
+                  <Typography variant="caption">
+                    <Link
+                      color="primary"
+                      href="#"
+                      onClick={isOpen ? showRegisterModal : showRegisterPage}
+                    >
+                      SIGN UP
+                    </Link>
+                  </Typography>
+                </Breadcrumbs>
+              </Grid>
+              {completeSendingEmail ? (
+                <Grid item className={classes.formItem}>
+                  <Alert severity="success">
+                    <AlertTitle>Success</AlertTitle>
+                    Thanks! If your username and email address match, you'll get
+                    an email with a link to reset your password shortly.
+                  </Alert>
+                </Grid>
               ) : null}
             </Grid>
-
-            <Grid item className={classes.formItem}>
-              <Field
-                component={TextInputField}
-                name="username"
-                type="text"
-                label="USERNAME"
-              />
-            </Grid>
-            <Grid item className={classes.formItem}>
-              <Field
-                component={TextInputField}
-                name="email"
-                type="email"
-                label="EMAIL"
-              />
-            </Grid>
-
-            {isSubmitting && <LinearProgress />}
-            <br />
-            <Grid item className={classes.formItem}>
-              <Button
-                variant="contained"
-                color="primary"
-                disabled={isSubmitting}
-                onClick={submitForm}
-              >
-                Reset Password
-              </Button>
-            </Grid>
-            <Grid item className={classes.formItem}>
-              <Breadcrumbs separator="-" aria-label="breadcrumb">
-                <Typography variant="caption">
-                  <Link
-                    color="primary"
-                    href="#"
-                    onClick={isOpen ? showLoginModal : showLoginPage}
-                  >
-                    LOG IN
-                  </Link>
-                </Typography>
-                <Typography variant="caption">
-                  <Link
-                    color="primary"
-                    href="#"
-                    onClick={isOpen ? showRegisterModal : showRegisterPage}
-                  >
-                    SIGN UP
-                  </Link>
-                </Typography>
-              </Breadcrumbs>
-            </Grid>
-            {completeSendingEmail ? (
-              <Grid item className={classes.formItem}>
-                <Alert severity="success">
-                  <AlertTitle>Success</AlertTitle>
-                  Thanks! If your username and email address match, you'll get
-                  an email with a link to reset your password shortly.
-                </Alert>
-              </Grid>
-            ) : null}
-          </Grid>
-        </Form>
-      )}
-    </Formik>
+          </Form>
+        )}
+      </Formik>
+      <SnackbarAlert
+        {...{
+          message: errorMessage,
+          setMessage: setErrorMessage,
+          severity: AlertSeverity.ERROR,
+        }}
+      />
+    </>
   );
 };
 export default ForgotPasswordForm;

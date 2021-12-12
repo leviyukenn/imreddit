@@ -86,7 +86,7 @@ export type LoginInput = {
 
 export type Mutation = {
   __typename?: 'Mutation';
-  changePassword: CompleteResponse;
+  changePassword: UserResponse;
   forgotPassword: CompleteResponse;
   register: UserResponse;
   login: UserResponse;
@@ -323,12 +323,14 @@ export type ChangePasswordMutationVariables = Exact<{
 export type ChangePasswordMutation = (
   { __typename?: 'Mutation' }
   & { changePassword: (
-    { __typename?: 'CompleteResponse' }
-    & Pick<CompleteResponse, 'isComplete'>
+    { __typename?: 'UserResponse' }
     & { errors?: Maybe<Array<(
       { __typename?: 'FieldError' }
       & RegularErrorsFragment
-    )>> }
+    )>>, user?: Maybe<(
+      { __typename?: 'User' }
+      & RegularUserFragment
+    )> }
   ) }
 );
 
@@ -678,10 +680,13 @@ export const ChangePasswordDocument = gql`
     errors {
       ...RegularErrors
     }
-    isComplete
+    user {
+      ...RegularUser
+    }
   }
 }
-    ${RegularErrorsFragmentDoc}`;
+    ${RegularErrorsFragmentDoc}
+${RegularUserFragmentDoc}`;
 export type ChangePasswordMutationFn = Apollo.MutationFunction<ChangePasswordMutation, ChangePasswordMutationVariables>;
 
 /**
