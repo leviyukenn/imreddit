@@ -12,20 +12,21 @@ const useStyles = makeStyles((theme: Theme) =>
   createStyles({
     mainContentBox: {
       display: "flex",
-      alignItems: "center",
+      width: "100%",
       height: "100%",
+      alignItems: "stretch",
       backgroundColor: theme.palette.background.paper,
     },
     sideImage: {
       marginRight: "1.5rem",
-      height: "100%",
       backgroundImage: `url(${
         SERVER_URL + "/resources/backgroundImages/createCommunityImg.jpeg"
       })`,
       width: "140px",
-      backgroundPosition: "60%",
     },
     container: {
+      display: "flex",
+      alignItems: "center",
       width: 280,
     },
     title: {
@@ -42,17 +43,19 @@ const LoginRegisterLayout = ({
 }) => {
   const classes = useStyles();
   return (
-    <Box className={classes.mainContentBox}>
-      <Box className={classes.sideImage} />
-      <Box className={classes.container}>
-        {titleText ? (
-          <Typography variant="h6" className={classes.title}>
-            {titleText}
-          </Typography>
-        ) : null}
-        {children}
+      <Box className={classes.mainContentBox}>
+        <Box className={classes.sideImage} />
+        <Box className={classes.container}>
+          <Box width="100%">
+            {titleText ? (
+              <Typography variant="h6" className={classes.title}>
+                {titleText}
+              </Typography>
+            ) : null}
+            {children}
+          </Box>
+        </Box>
       </Box>
-    </Box>
   );
 };
 export default LoginRegisterLayout;

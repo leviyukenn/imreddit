@@ -14,6 +14,7 @@ import {
   CommunityQuery,
   PostDetailDocument,
   PostDetailQuery,
+  useCommunityQuery,
   usePostDetailQuery,
 } from "../../generated/graphql";
 
@@ -29,8 +30,6 @@ export const getStaticPaths: GetStaticPaths = async () => {
   } = await client.query<CommunitiesQuery>({
     query: CommunitiesDocument,
   });
-  // console.log("communities");
-  // console.log(communities);
 
   const communityPaths = communities.map((community) => ({
     params: {
@@ -49,15 +48,15 @@ export const getStaticPaths: GetStaticPaths = async () => {
 
 export const getStaticProps: GetStaticProps = async (context) => {
   const [communityName, postId] = context.params!.postInfo as string[];
-  let postQuery: PostDetailQuery | null = null;
-  let communityQuery: CommunityQuery | null = null;
+  let postDetail: PostDetailQuery["postDetail"] = null;
+  let community: CommunityQuery["community"] = null;
 
   if (communityName && postId) {
     let { data } = await client.query<PostDetailQuery>({
       query: PostDetailDocument,
       variables: { postId },
     });
-    postQuery = data;
+    postDetail = data.postDetail;
   }
 
   if (!postId && communityName) {
@@ -66,46 +65,24 @@ export const getStaticProps: GetStaticProps = async (context) => {
       variables: { communityName },
     });
 
-    communityQuery = data;
+    community = data.community;
   }
 
   return {
     props: {
-      postQuery,
-      communityQuery,
+      postDetail,
+      community,
     },
     revalidate: 10,
   };
 };
 
-// export async function getStaticProps({ params }) {
-//   const { data } = await client.query({
-//     query: gql`
-//       query Countries {
-//         countries {
-//           code
-//           name
-//           emoji
-//         }
-//       }
-//     `,
-//   });
-
-//   return {
-//     props: {
-//       post: {},
-//     },
-//   };
-// }
 interface CommunityPostHomeProps {
-  postQuery: PostDetailQuery | null;
-  communityQuery: CommunityQuery | null;
+  postDetail: PostDetailQuery["postDetail"];
+  community: CommunityQuery["community"];
 }
 
-const CommunityPostHome = ({
-  postQuery,
-  communityQuery,
-}: CommunityPostHomeProps) => {
+const useClientCommunityPost = () => {
   const router = useRouter();
 
   const postInfo = useMemo(() => (router.query.postInfo || []) as string[], [
@@ -114,15 +91,13 @@ const CommunityPostHome = ({
 
   const communityName = useMemo(() => postInfo[0] || "", [postInfo]);
   const postId = useMemo(() => postInfo[1] || "", [postInfo]);
-
   const modalPostId = useMemo(() => router.query.modalPostId || "", [router]);
-  const serverSidePost = useMemo(() => postQuery?.postDetail, [postQuery]);
 
   const isPostDetailPage = useMemo(
-    () => communityName && postId && !modalPostId,
+    () => !!(communityName && postId && !modalPostId),
+
     [postId, communityName, modalPostId]
   );
-
   const { data: postDetailResponse } = usePostDetailQuery({
     skip: typeof window === "undefined" || !isPostDetailPage,
     variables: { postId },
@@ -132,13 +107,37 @@ const CommunityPostHome = ({
     postDetailResponse,
   ]);
 
+  const { data: communityResponse } = useCommunityQuery({
+    skip: typeof window === "undefined" || isPostDetailPage,
+    variables: { communityName },
+  });
+
+  const clientSideCommunity = useMemo(() => communityResponse?.community, [
+    communityResponse,
+  ]);
+
+  return { isPostDetailPage, clientSidePost, clientSideCommunity };
+};
+
+const CommunityPostHome = ({
+  postDetail: serverSidePost,
+  community: serverSideCommunity,
+}: CommunityPostHomeProps) => {
+  const {
+    clientSidePost,
+    clientSideCommunity,
+    isPostDetailPage,
+  } = useClientCommunityPost();
+
   return (
     <HomeContainer>
       {isPostDetailPage ? (
-        <PostDetail post={clientSidePost || serverSidePost || null} />
-      ) : communityQuery?.community?.name ? (
+        <PostDetail post={clientSidePost || serverSidePost} />
+      ) : clientSideCommunity || serverSideCommunity ? (
         <CommunityPostsInfiniteScroll
-          communityName={communityQuery.community.name}
+          communityName={
+            (clientSideCommunity?.name || serverSideCommunity?.name)!
+          }
         />
       ) : null}
     </HomeContainer>

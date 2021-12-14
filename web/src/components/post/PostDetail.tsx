@@ -1,16 +1,12 @@
 import { Box, createStyles, makeStyles, Theme } from "@material-ui/core";
 import React from "react";
-import { Post, RegularPostDetailFragment } from "../../generated/graphql";
+import { PostDetailQuery } from "../../generated/graphql";
 import { CommentCard } from "./CommentCard";
 import CommentEditor from "./post-editor/CommentEditor";
 import { LoadingPostDetailCard, PostDetailCard } from "./PostDetailCard";
 
 interface PostDetailProps {
-  post:
-    | (RegularPostDetailFragment & {
-        children: Array<{ __typename?: "Post" } & Pick<Post, "id">>;
-      })
-    | null;
+  post: PostDetailQuery["postDetail"];
 }
 
 const useStyles = makeStyles((theme: Theme) =>

@@ -102,7 +102,7 @@ const PostDetailModal = ({}: PostDetailModalProps) => {
       </Box>
       <DialogContent dividers className={classes.content}>
         <Box className={classes.heart}>
-          <PostDetail post={post || null}></PostDetail>
+          <PostDetail post={post}></PostDetail>
         </Box>
       </DialogContent>
     </Dialog>

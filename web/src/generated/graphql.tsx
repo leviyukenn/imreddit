@@ -347,7 +347,7 @@ export type CreateCommunityMutation = (
     { __typename?: 'CommunityResponse' }
     & { community?: Maybe<(
       { __typename?: 'Community' }
-      & Pick<Community, 'id'>
+      & Pick<Community, 'name' | 'id'>
     )>, errors?: Maybe<Array<(
       { __typename?: 'FieldError' }
       & RegularErrorsFragment
@@ -720,6 +720,7 @@ export const CreateCommunityDocument = gql`
     createCommunityInput: {name: $name, description: $description, topicIds: $topicIds}
   ) {
     community {
+      name
       id
     }
     errors {

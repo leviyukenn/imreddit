@@ -4,7 +4,7 @@ import ChangePassword from "../../components/user/ChangePassword";
 
 const changePasswordPage = () => {
   return (
-    <Box height="100vh">
+    <Box height="100vh" minHeight="500px">
       <ChangePassword />
     </Box>
   );

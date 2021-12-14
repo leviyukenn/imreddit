@@ -1,12 +1,12 @@
+import { Box } from "@material-ui/core";
 import React from "react";
-import CreateCommunityForm from "../components/community/CreateCommunityForm";
-import LoginRegisterPageLayout from "../components/LoginRegisterLayout";
+import CreateCommunity from "../components/community/CreateCommunity";
 
 const createCommunity = () => {
   return (
-    <LoginRegisterPageLayout>
-      <CreateCommunityForm />
-    </LoginRegisterPageLayout>
+    <Box height="100vh" minHeight="900px">
+      <CreateCommunity />
+    </Box>
   );
 };
 export default createCommunity;

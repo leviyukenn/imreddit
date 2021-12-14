@@ -4,7 +4,7 @@ import ForgotPassword from "../components/user/ForgotPassword";
 
 const forgotPassword = () => {
   return (
-    <Box height="100vh">
+    <Box height="100vh" minHeight="500px">
       <ForgotPassword />
     </Box>
   );
