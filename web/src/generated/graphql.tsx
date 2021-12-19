@@ -273,6 +273,15 @@ export type VoteInput = {
   value: Scalars['Int'];
 };
 
+export type RegularCommunityFragment = (
+  { __typename?: 'Community' }
+  & Pick<Community, 'id' | 'createdAt' | 'updatedAt' | 'name' | 'description'>
+  & { topics: Array<(
+    { __typename?: 'Topic' }
+    & Pick<Topic, 'title'>
+  )> }
+);
+
 export type RegularErrorsFragment = (
   { __typename?: 'FieldError' }
   & Pick<FieldError, 'field' | 'errorCode' | 'message'>
@@ -294,7 +303,7 @@ export type RegularPostDetailFragment = (
     & RegularImageFragment
   )>, community: (
     { __typename?: 'Community' }
-    & Pick<Community, 'id' | 'name'>
+    & Pick<Community, 'name'>
   ) }
 );
 
@@ -527,7 +536,7 @@ export type CommunityQuery = (
   { __typename?: 'Query' }
   & { community?: Maybe<(
     { __typename?: 'Community' }
-    & Pick<Community, 'name'>
+    & RegularCommunityFragment
   )> }
 );
 
@@ -620,6 +629,18 @@ export type UserRolesQuery = (
   )>> }
 );
 
+export const RegularCommunityFragmentDoc = gql`
+    fragment RegularCommunity on Community {
+  id
+  createdAt
+  updatedAt
+  name
+  description
+  topics {
+    title
+  }
+}
+    `;
 export const RegularUserFragmentDoc = gql`
     fragment RegularUser on User {
   id
@@ -650,7 +671,6 @@ export const RegularPostDetailFragmentDoc = gql`
     ...RegularImage
   }
   community {
-    id
     name
   }
 }
@@ -1131,10 +1151,10 @@ export type CommunitiesQueryResult = Apollo.QueryResult<CommunitiesQuery, Commun
 export const CommunityDocument = gql`
     query Community($communityName: String!) {
   community(communityName: $communityName) {
-    name
+    ...RegularCommunity
   }
 }
-    `;
+    ${RegularCommunityFragmentDoc}`;
 
 /**
  * __useCommunityQuery__

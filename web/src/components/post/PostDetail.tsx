@@ -3,7 +3,7 @@ import React from "react";
 import { PostDetailQuery } from "../../generated/graphql";
 import { CommentCard } from "./CommentCard";
 import CommentEditor from "./post-editor/CommentEditor";
-import { LoadingPostDetailCard, PostDetailCard } from "./PostDetailCard";
+import { PostDetailCard, LoadingPostDetailCard } from "./PostDetailCard";
 
 interface PostDetailProps {
   post: PostDetailQuery["postDetail"];
@@ -25,7 +25,6 @@ const useStyles = makeStyles((theme: Theme) =>
 
 const PostDetail = ({ post }: PostDetailProps) => {
   const classes = useStyles();
-
   if (!post) {
     return <LoadingPostDetailCard />;
   }

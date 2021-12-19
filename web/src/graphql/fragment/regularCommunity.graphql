@@ -1,0 +1,10 @@
+fragment RegularCommunity on Community {
+  id
+  createdAt
+  updatedAt
+  name
+  description
+  topics {
+    title
+  }
+}

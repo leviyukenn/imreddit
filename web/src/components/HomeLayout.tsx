@@ -1,27 +1,27 @@
-import {
-  Box,
-  createStyles,
-  Fab,
-  makeStyles,
-  Theme,
-  useMediaQuery,
-  useTheme,
-} from "@material-ui/core";
+import { Box, createStyles, Fab, makeStyles, Theme } from "@material-ui/core";
 import NavigationIcon from "@material-ui/icons/Navigation";
 import { useCallback } from "react";
 import Container from "./Container";
-import CreatePostCard from "./post/CreatePostCard";
 import PostDetailModal from "./post/PostDetailModal";
-import { useIsAuth } from "../utils/hooks/useIsAuth";
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
-    mainContentHeart: {
-      [theme.breakpoints.up("xs")]: {
-        width: "100%",
-      },
+    heartContainer: {
+      flex: "1 1 100%",
+      // [theme.breakpoints.up("xs")]: {
+      //   width: "100%",
+      // },
+      // (960px,infinity)
       [theme.breakpoints.up("md")]: {
-        width: "640px",
+        maxWidth: "740px",
+      },
+    },
+    rightSideContainer: {
+      display: "none",
+      // width: "312px",
+      flex: "0 0 312px",
+      [theme.breakpoints.up("md")]: {
+        display: "block",
       },
     },
     backToTopButton: {
@@ -32,11 +32,16 @@ const useStyles = makeStyles((theme: Theme) =>
   })
 );
 
-const HomeContainer = ({ children }: { children: React.ReactNode }) => {
+interface HomeContainerProps {
+  mainContent: JSX.Element;
+  rightSideContent?: JSX.Element;
+}
+
+const HomeContainer = ({
+  mainContent,
+  rightSideContent,
+}: HomeContainerProps) => {
   const classes = useStyles();
-  const { isAuth } = useIsAuth();
-  const theme = useTheme();
-  const matches = useMediaQuery(theme.breakpoints.up("md"));
 
   const backToTop = useCallback(() => {
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -45,11 +50,9 @@ const HomeContainer = ({ children }: { children: React.ReactNode }) => {
   return (
     <Container>
       <Box display="flex" justifyContent="center">
-        <Box className={classes.mainContentHeart}>
-          {isAuth ? <CreatePostCard /> : null}
-          {children}
-        </Box>
-        {matches ? (
+        <Box className={classes.heartContainer}>{mainContent}</Box>
+        <Box className={classes.rightSideContainer}>
+          {rightSideContent}
           <Fab
             variant="extended"
             color="primary"
@@ -59,7 +62,7 @@ const HomeContainer = ({ children }: { children: React.ReactNode }) => {
             <NavigationIcon />
             Back to Top
           </Fab>
-        ) : null}
+        </Box>
       </Box>
       <PostDetailModal />
     </Container>

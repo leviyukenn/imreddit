@@ -2,9 +2,8 @@ import { GetStaticPaths, GetStaticProps } from "next";
 import { useRouter } from "next/router";
 import { useMemo } from "react";
 import client from "../../apollo-client/apollo-client";
-import HomeContainer from "../../components/HomeLayout";
-import PostDetail from "../../components/post/PostDetail";
-import { CommunityPostsInfiniteScroll } from "../../components/post/PostInfiniteScroll";
+import CommunityHomePage from "../../components/community/CommunityHomePage";
+import PostDetailPage from "../../components/post/PostDetailPage";
 import {
   AllPostsDocument,
   AllPostsQuery,
@@ -14,8 +13,6 @@ import {
   CommunityQuery,
   PostDetailDocument,
   PostDetailQuery,
-  useCommunityQuery,
-  usePostDetailQuery,
 } from "../../generated/graphql";
 
 export const getStaticPaths: GetStaticPaths = async () => {
@@ -82,7 +79,7 @@ interface CommunityPostHomeProps {
   community: CommunityQuery["community"];
 }
 
-const useClientCommunityPost = () => {
+const useIsPostDetailPage = () => {
   const router = useRouter();
 
   const postInfo = useMemo(() => (router.query.postInfo || []) as string[], [
@@ -98,49 +95,27 @@ const useClientCommunityPost = () => {
 
     [postId, communityName, modalPostId]
   );
-  const { data: postDetailResponse } = usePostDetailQuery({
-    skip: typeof window === "undefined" || !isPostDetailPage,
-    variables: { postId },
-  });
 
-  const clientSidePost = useMemo(() => postDetailResponse?.postDetail, [
-    postDetailResponse,
-  ]);
-
-  const { data: communityResponse } = useCommunityQuery({
-    skip: typeof window === "undefined" || isPostDetailPage,
-    variables: { communityName },
-  });
-
-  const clientSideCommunity = useMemo(() => communityResponse?.community, [
-    communityResponse,
-  ]);
-
-  return { isPostDetailPage, clientSidePost, clientSideCommunity };
+  return { isPostDetailPage, postId, communityName };
 };
 
 const CommunityPostHome = ({
   postDetail: serverSidePost,
   community: serverSideCommunity,
 }: CommunityPostHomeProps) => {
-  const {
-    clientSidePost,
-    clientSideCommunity,
-    isPostDetailPage,
-  } = useClientCommunityPost();
+  const { isPostDetailPage, postId, communityName } = useIsPostDetailPage();
 
   return (
-    <HomeContainer>
+    <>
       {isPostDetailPage ? (
-        <PostDetail post={clientSidePost || serverSidePost} />
-      ) : clientSideCommunity || serverSideCommunity ? (
-        <CommunityPostsInfiniteScroll
-          communityName={
-            (clientSideCommunity?.name || serverSideCommunity?.name)!
-          }
+        <PostDetailPage postId={postId} serverSidePost={serverSidePost} />
+      ) : communityName ? (
+        <CommunityHomePage
+          communityName={communityName}
+          serverSideCommunity={serverSideCommunity}
         />
       ) : null}
-    </HomeContainer>
+    </>
   );
 };
 

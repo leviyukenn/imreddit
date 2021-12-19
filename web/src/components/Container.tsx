@@ -18,6 +18,7 @@ const useStyles = makeStyles((theme: Theme) =>
       position: "relative",
     },
     mainContentBox: {
+      padding: "1.25rem 0",
       [theme.breakpoints.up("sm")]: {
         padding: "1.25rem 1.5rem",
       },

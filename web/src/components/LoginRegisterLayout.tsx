@@ -23,6 +23,7 @@ const useStyles = makeStyles((theme: Theme) =>
         SERVER_URL + "/resources/backgroundImages/createCommunityImg.jpeg"
       })`,
       width: "140px",
+      backgroundPosition: "60%",
     },
     container: {
       display: "flex",
@@ -43,19 +44,19 @@ const LoginRegisterLayout = ({
 }) => {
   const classes = useStyles();
   return (
-      <Box className={classes.mainContentBox}>
-        <Box className={classes.sideImage} />
-        <Box className={classes.container}>
-          <Box width="100%">
-            {titleText ? (
-              <Typography variant="h6" className={classes.title}>
-                {titleText}
-              </Typography>
-            ) : null}
-            {children}
-          </Box>
+    <Box className={classes.mainContentBox}>
+      <Box className={classes.sideImage} />
+      <Box className={classes.container}>
+        <Box width="100%">
+          {titleText ? (
+            <Typography variant="h6" className={classes.title}>
+              {titleText}
+            </Typography>
+          ) : null}
+          {children}
         </Box>
       </Box>
+    </Box>
   );
 };
 export default LoginRegisterLayout;
