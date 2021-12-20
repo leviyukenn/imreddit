@@ -17,6 +17,7 @@ const useStyles = makeStyles((theme: Theme) =>
       },
     },
     rightSideContainer: {
+      marginLeft: "2rem",
       display: "none",
       // width: "312px",
       flex: "0 0 312px",
@@ -27,7 +28,12 @@ const useStyles = makeStyles((theme: Theme) =>
     backToTopButton: {
       position: "sticky",
       top: "calc(100vh - 80px)",
-      right: 0,
+      textTransform: "none",
+      fontWeight: 700,
+    },
+    backToTopButtonIcon: {
+      fontSize: "1.25rem",
+      marginRight: "0.5em",
     },
   })
 );
@@ -35,11 +41,13 @@ const useStyles = makeStyles((theme: Theme) =>
 interface HomeContainerProps {
   mainContent: JSX.Element;
   rightSideContent?: JSX.Element;
+  banner?: JSX.Element;
 }
 
 const HomeContainer = ({
   mainContent,
   rightSideContent,
+  banner,
 }: HomeContainerProps) => {
   const classes = useStyles();
 
@@ -49,6 +57,7 @@ const HomeContainer = ({
 
   return (
     <Container>
+      {banner}
       <Box display="flex" justifyContent="center">
         <Box className={classes.heartContainer}>{mainContent}</Box>
         <Box className={classes.rightSideContainer}>
@@ -59,7 +68,7 @@ const HomeContainer = ({
             onClick={backToTop}
             className={classes.backToTopButton}
           >
-            <NavigationIcon />
+            <NavigationIcon className={classes.backToTopButtonIcon} />
             Back to Top
           </Fab>
         </Box>

@@ -25,6 +25,7 @@ export type Community = {
   name: Scalars['String'];
   description: Scalars['String'];
   topics: Array<Topic>;
+  totalMemberships: Scalars['Int'];
 };
 
 export type CommunityResponse = {
@@ -275,7 +276,7 @@ export type VoteInput = {
 
 export type RegularCommunityFragment = (
   { __typename?: 'Community' }
-  & Pick<Community, 'id' | 'createdAt' | 'updatedAt' | 'name' | 'description'>
+  & Pick<Community, 'id' | 'createdAt' | 'updatedAt' | 'name' | 'description' | 'totalMemberships'>
   & { topics: Array<(
     { __typename?: 'Topic' }
     & Pick<Topic, 'title'>
@@ -639,6 +640,7 @@ export const RegularCommunityFragmentDoc = gql`
   topics {
     title
   }
+  totalMemberships
 }
     `;
 export const RegularUserFragmentDoc = gql`
@@ -1405,14 +1407,15 @@ export function useUserRolesLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<
 export type UserRolesQueryHookResult = ReturnType<typeof useUserRolesQuery>;
 export type UserRolesLazyQueryHookResult = ReturnType<typeof useUserRolesLazyQuery>;
 export type UserRolesQueryResult = Apollo.QueryResult<UserRolesQuery, UserRolesQueryVariables>;
-export type CommunityKeySpecifier = ('id' | 'createdAt' | 'updatedAt' | 'name' | 'description' | 'topics' | CommunityKeySpecifier)[];
+export type CommunityKeySpecifier = ('id' | 'createdAt' | 'updatedAt' | 'name' | 'description' | 'topics' | 'totalMemberships' | CommunityKeySpecifier)[];
 export type CommunityFieldPolicy = {
 	id?: FieldPolicy<any> | FieldReadFunction<any>,
 	createdAt?: FieldPolicy<any> | FieldReadFunction<any>,
 	updatedAt?: FieldPolicy<any> | FieldReadFunction<any>,
 	name?: FieldPolicy<any> | FieldReadFunction<any>,
 	description?: FieldPolicy<any> | FieldReadFunction<any>,
-	topics?: FieldPolicy<any> | FieldReadFunction<any>
+	topics?: FieldPolicy<any> | FieldReadFunction<any>,
+	totalMemberships?: FieldPolicy<any> | FieldReadFunction<any>
 };
 export type CommunityResponseKeySpecifier = ('errors' | 'community' | CommunityResponseKeySpecifier)[];
 export type CommunityResponseFieldPolicy = {

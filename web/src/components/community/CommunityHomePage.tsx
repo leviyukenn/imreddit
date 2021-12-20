@@ -5,6 +5,7 @@ import HomeLayout from "../HomeLayout";
 import CreatePostCard from "../post/CreatePostCard";
 import { LoadingPostCard } from "../post/PostCard";
 import { CommunityPostsInfiniteScroll } from "../post/PostInfiniteScroll";
+import CommunityBanner from "./CommunityBanner";
 import CommunityDescription from "./CommunityDescription";
 
 interface CommunityProps {
@@ -42,6 +43,7 @@ const CommunityHomePage = ({
     <HomeLayout
       mainContent={<CommunityHeartContent communityName={communityName} />}
       rightSideContent={<CommunityDescription community={community} />}
+      banner={<CommunityBanner />}
     />
   );
 };

@@ -7,4 +7,5 @@ fragment RegularCommunity on Community {
   topics {
     title
   }
+  totalMemberships
 }
