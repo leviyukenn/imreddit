@@ -9,6 +9,7 @@ import React from "react";
 import NavBar from "./navbar/NavBar";
 
 interface ContainerProps extends BoxProps {
+  banner?: JSX.Element;
   backgroundMode?: "light" | "grey";
 }
 
@@ -34,11 +35,16 @@ const useStyles = makeStyles((theme: Theme) =>
   })
 );
 
-const Container = ({ children, backgroundMode = "grey" }: ContainerProps) => {
+const Container = ({
+  children,
+  banner,
+  backgroundMode = "grey",
+}: ContainerProps) => {
   const classes = useStyles();
   return (
     <Box className={classes.root}>
       <NavBar />
+      {banner}
       <Box
         className={`${classes.mainContentBox} ${
           backgroundMode === "grey"

@@ -56,8 +56,7 @@ const HomeContainer = ({
   }, []);
 
   return (
-    <Container>
-      {banner}
+    <Container banner={banner}>
       <Box display="flex" justifyContent="center">
         <Box className={classes.heartContainer}>{mainContent}</Box>
         <Box className={classes.rightSideContainer}>
