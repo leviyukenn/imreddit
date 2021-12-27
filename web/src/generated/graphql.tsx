@@ -187,6 +187,7 @@ export type Query = {
   communities: Array<Community>;
   community?: Maybe<Community>;
   userRoles: Array<Maybe<Role>>;
+  userRole?: Maybe<Role>;
   topics: Array<Topic>;
 };
 
@@ -220,6 +221,12 @@ export type QueryCommunityArgs = {
 
 
 export type QueryUserRolesArgs = {
+  userId: Scalars['String'];
+};
+
+
+export type QueryUserRoleArgs = {
+  communityId: Scalars['String'];
   userId: Scalars['String'];
 };
 
@@ -614,6 +621,20 @@ export type TopicsQuery = (
   & { topics: Array<(
     { __typename?: 'Topic' }
     & Pick<Topic, 'title' | 'id'>
+  )> }
+);
+
+export type UserRoleQueryVariables = Exact<{
+  userId: Scalars['String'];
+  communityId: Scalars['String'];
+}>;
+
+
+export type UserRoleQuery = (
+  { __typename?: 'Query' }
+  & { userRole?: Maybe<(
+    { __typename?: 'Role' }
+    & Pick<Role, 'role'>
   )> }
 );
 
@@ -1371,6 +1392,42 @@ export function useTopicsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<Top
 export type TopicsQueryHookResult = ReturnType<typeof useTopicsQuery>;
 export type TopicsLazyQueryHookResult = ReturnType<typeof useTopicsLazyQuery>;
 export type TopicsQueryResult = Apollo.QueryResult<TopicsQuery, TopicsQueryVariables>;
+export const UserRoleDocument = gql`
+    query UserRole($userId: String!, $communityId: String!) {
+  userRole(userId: $userId, communityId: $communityId) {
+    role
+  }
+}
+    `;
+
+/**
+ * __useUserRoleQuery__
+ *
+ * To run a query within a React component, call `useUserRoleQuery` and pass it any options that fit your needs.
+ * When your component renders, `useUserRoleQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useUserRoleQuery({
+ *   variables: {
+ *      userId: // value for 'userId'
+ *      communityId: // value for 'communityId'
+ *   },
+ * });
+ */
+export function useUserRoleQuery(baseOptions: Apollo.QueryHookOptions<UserRoleQuery, UserRoleQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<UserRoleQuery, UserRoleQueryVariables>(UserRoleDocument, options);
+      }
+export function useUserRoleLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<UserRoleQuery, UserRoleQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<UserRoleQuery, UserRoleQueryVariables>(UserRoleDocument, options);
+        }
+export type UserRoleQueryHookResult = ReturnType<typeof useUserRoleQuery>;
+export type UserRoleLazyQueryHookResult = ReturnType<typeof useUserRoleLazyQuery>;
+export type UserRoleQueryResult = Apollo.QueryResult<UserRoleQuery, UserRoleQueryVariables>;
 export const UserRolesDocument = gql`
     query UserRoles($userId: String!) {
   userRoles(userId: $userId) {
@@ -1473,7 +1530,7 @@ export type PostFieldPolicy = {
 	children?: FieldPolicy<any> | FieldReadFunction<any>,
 	images?: FieldPolicy<any> | FieldReadFunction<any>
 };
-export type QueryKeySpecifier = ('me' | 'communityPosts' | 'paginatedPosts' | 'allPosts' | 'postDetail' | 'communities' | 'community' | 'userRoles' | 'topics' | QueryKeySpecifier)[];
+export type QueryKeySpecifier = ('me' | 'communityPosts' | 'paginatedPosts' | 'allPosts' | 'postDetail' | 'communities' | 'community' | 'userRoles' | 'userRole' | 'topics' | QueryKeySpecifier)[];
 export type QueryFieldPolicy = {
 	me?: FieldPolicy<any> | FieldReadFunction<any>,
 	communityPosts?: FieldPolicy<any> | FieldReadFunction<any>,
@@ -1483,6 +1540,7 @@ export type QueryFieldPolicy = {
 	communities?: FieldPolicy<any> | FieldReadFunction<any>,
 	community?: FieldPolicy<any> | FieldReadFunction<any>,
 	userRoles?: FieldPolicy<any> | FieldReadFunction<any>,
+	userRole?: FieldPolicy<any> | FieldReadFunction<any>,
 	topics?: FieldPolicy<any> | FieldReadFunction<any>
 };
 export type RoleKeySpecifier = ('userId' | 'communityId' | 'joinedAt' | 'role' | RoleKeySpecifier)[];

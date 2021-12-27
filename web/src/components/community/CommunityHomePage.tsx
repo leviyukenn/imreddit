@@ -1,5 +1,9 @@
 import React, { useMemo } from "react";
-import { CommunityQuery, useCommunityQuery } from "../../generated/graphql";
+import {
+  CommunityQuery,
+  useCommunityQuery,
+  useUserRoleQuery,
+} from "../../generated/graphql";
 import { useIsAuth } from "../../utils/hooks/useIsAuth";
 import HomeLayout from "../HomeLayout";
 import CreatePostCard from "../post/CreatePostCard";
@@ -29,21 +33,37 @@ const useCommunity = (
     serverSideCommunity,
   ]);
 
-  return { community };
+  const { me } = useIsAuth();
+
+  const { data: userRoleResponse } = useUserRoleQuery({
+    skip: typeof window === "undefined" || (!me?.id && !community?.id),
+    variables: { userId: me?.id!, communityId: community?.id! },
+  });
+
+  const userRole = useMemo(() => userRoleResponse?.userRole?.role, [
+    userRoleResponse,
+  ]);
+
+  return { community, userRole };
 };
 
 const CommunityHomePage = ({
   communityName,
   serverSideCommunity,
 }: CommunityProps) => {
-  const { community } = useCommunity(communityName, serverSideCommunity);
+  const { community, userRole } = useCommunity(
+    communityName,
+    serverSideCommunity
+  );
 
   if (!community) return <LoadingPostCard />;
   return (
     <HomeLayout
       mainContent={<CommunityHeartContent communityName={communityName} />}
       rightSideContent={<CommunityDescription community={community} />}
-      banner={<CommunityBanner />}
+      banner={
+        <CommunityBanner communityName={communityName} userRole={userRole} />
+      }
     />
   );
 };
