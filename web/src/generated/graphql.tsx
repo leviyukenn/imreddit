@@ -98,6 +98,8 @@ export type Mutation = {
   uploadImage: UploadResponse;
   createCommunity: CommunityResponse;
   vote: Scalars['Int'];
+  joinCommunity: RoleResponse;
+  leaveCommunity: RoleResponse;
   createTopic: Topic;
 };
 
@@ -150,6 +152,18 @@ export type MutationCreateCommunityArgs = {
 
 export type MutationVoteArgs = {
   voteInput: VoteInput;
+};
+
+
+export type MutationJoinCommunityArgs = {
+  userId: Scalars['String'];
+  communityId: Scalars['String'];
+};
+
+
+export type MutationLeaveCommunityArgs = {
+  userId: Scalars['String'];
+  communityId: Scalars['String'];
 };
 
 
@@ -241,7 +255,14 @@ export type Role = {
   userId: Scalars['String'];
   communityId: Scalars['String'];
   joinedAt: Scalars['String'];
-  role: Scalars['String'];
+  isMember: Scalars['Boolean'];
+  isModerator: Scalars['Boolean'];
+};
+
+export type RoleResponse = {
+  __typename?: 'RoleResponse';
+  errors?: Maybe<Array<FieldError>>;
+  role?: Maybe<Role>;
 };
 
 export type Topic = {
@@ -313,6 +334,11 @@ export type RegularPostDetailFragment = (
     { __typename?: 'Community' }
     & Pick<Community, 'name'>
   ) }
+);
+
+export type RegularRoleFragment = (
+  { __typename?: 'Role' }
+  & Pick<Role, 'userId' | 'communityId' | 'joinedAt' | 'isMember' | 'isModerator'>
 );
 
 export type RegularUserFragment = (
@@ -427,6 +453,46 @@ export type GoogleAuthenticationMutation = (
       { __typename?: 'User' }
       & RegularUserFragment
     )> }
+  ) }
+);
+
+export type JoinCommunityMutationVariables = Exact<{
+  userId: Scalars['String'];
+  communityId: Scalars['String'];
+}>;
+
+
+export type JoinCommunityMutation = (
+  { __typename?: 'Mutation' }
+  & { joinCommunity: (
+    { __typename?: 'RoleResponse' }
+    & { role?: Maybe<(
+      { __typename?: 'Role' }
+      & RegularRoleFragment
+    )>, errors?: Maybe<Array<(
+      { __typename?: 'FieldError' }
+      & RegularErrorsFragment
+    )>> }
+  ) }
+);
+
+export type LeaveCommunityMutationVariables = Exact<{
+  userId: Scalars['String'];
+  communityId: Scalars['String'];
+}>;
+
+
+export type LeaveCommunityMutation = (
+  { __typename?: 'Mutation' }
+  & { leaveCommunity: (
+    { __typename?: 'RoleResponse' }
+    & { role?: Maybe<(
+      { __typename?: 'Role' }
+      & RegularRoleFragment
+    )>, errors?: Maybe<Array<(
+      { __typename?: 'FieldError' }
+      & RegularErrorsFragment
+    )>> }
   ) }
 );
 
@@ -634,7 +700,7 @@ export type UserRoleQuery = (
   { __typename?: 'Query' }
   & { userRole?: Maybe<(
     { __typename?: 'Role' }
-    & Pick<Role, 'role'>
+    & Pick<Role, 'isMember' | 'isModerator'>
   )> }
 );
 
@@ -647,7 +713,7 @@ export type UserRolesQuery = (
   { __typename?: 'Query' }
   & { userRoles: Array<Maybe<(
     { __typename?: 'Role' }
-    & Pick<Role, 'role' | 'communityId'>
+    & Pick<Role, 'isMember' | 'isModerator' | 'communityId'>
   )>> }
 );
 
@@ -699,6 +765,15 @@ export const RegularPostDetailFragmentDoc = gql`
 }
     ${RegularUserFragmentDoc}
 ${RegularImageFragmentDoc}`;
+export const RegularRoleFragmentDoc = gql`
+    fragment RegularRole on Role {
+  userId
+  communityId
+  joinedAt
+  isMember
+  isModerator
+}
+    `;
 export const RegularErrorsFragmentDoc = gql`
     fragment RegularErrors on FieldError {
   field
@@ -918,6 +993,86 @@ export function useGoogleAuthenticationMutation(baseOptions?: Apollo.MutationHoo
 export type GoogleAuthenticationMutationHookResult = ReturnType<typeof useGoogleAuthenticationMutation>;
 export type GoogleAuthenticationMutationResult = Apollo.MutationResult<GoogleAuthenticationMutation>;
 export type GoogleAuthenticationMutationOptions = Apollo.BaseMutationOptions<GoogleAuthenticationMutation, GoogleAuthenticationMutationVariables>;
+export const JoinCommunityDocument = gql`
+    mutation JoinCommunity($userId: String!, $communityId: String!) {
+  joinCommunity(userId: $userId, communityId: $communityId) {
+    role {
+      ...RegularRole
+    }
+    errors {
+      ...RegularErrors
+    }
+  }
+}
+    ${RegularRoleFragmentDoc}
+${RegularErrorsFragmentDoc}`;
+export type JoinCommunityMutationFn = Apollo.MutationFunction<JoinCommunityMutation, JoinCommunityMutationVariables>;
+
+/**
+ * __useJoinCommunityMutation__
+ *
+ * To run a mutation, you first call `useJoinCommunityMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useJoinCommunityMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [joinCommunityMutation, { data, loading, error }] = useJoinCommunityMutation({
+ *   variables: {
+ *      userId: // value for 'userId'
+ *      communityId: // value for 'communityId'
+ *   },
+ * });
+ */
+export function useJoinCommunityMutation(baseOptions?: Apollo.MutationHookOptions<JoinCommunityMutation, JoinCommunityMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<JoinCommunityMutation, JoinCommunityMutationVariables>(JoinCommunityDocument, options);
+      }
+export type JoinCommunityMutationHookResult = ReturnType<typeof useJoinCommunityMutation>;
+export type JoinCommunityMutationResult = Apollo.MutationResult<JoinCommunityMutation>;
+export type JoinCommunityMutationOptions = Apollo.BaseMutationOptions<JoinCommunityMutation, JoinCommunityMutationVariables>;
+export const LeaveCommunityDocument = gql`
+    mutation LeaveCommunity($userId: String!, $communityId: String!) {
+  leaveCommunity(userId: $userId, communityId: $communityId) {
+    role {
+      ...RegularRole
+    }
+    errors {
+      ...RegularErrors
+    }
+  }
+}
+    ${RegularRoleFragmentDoc}
+${RegularErrorsFragmentDoc}`;
+export type LeaveCommunityMutationFn = Apollo.MutationFunction<LeaveCommunityMutation, LeaveCommunityMutationVariables>;
+
+/**
+ * __useLeaveCommunityMutation__
+ *
+ * To run a mutation, you first call `useLeaveCommunityMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useLeaveCommunityMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [leaveCommunityMutation, { data, loading, error }] = useLeaveCommunityMutation({
+ *   variables: {
+ *      userId: // value for 'userId'
+ *      communityId: // value for 'communityId'
+ *   },
+ * });
+ */
+export function useLeaveCommunityMutation(baseOptions?: Apollo.MutationHookOptions<LeaveCommunityMutation, LeaveCommunityMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<LeaveCommunityMutation, LeaveCommunityMutationVariables>(LeaveCommunityDocument, options);
+      }
+export type LeaveCommunityMutationHookResult = ReturnType<typeof useLeaveCommunityMutation>;
+export type LeaveCommunityMutationResult = Apollo.MutationResult<LeaveCommunityMutation>;
+export type LeaveCommunityMutationOptions = Apollo.BaseMutationOptions<LeaveCommunityMutation, LeaveCommunityMutationVariables>;
 export const LoginDocument = gql`
     mutation Login($username: String!, $password: String!) {
   login(userInput: {username: $username, password: $password}) {
@@ -1395,7 +1550,8 @@ export type TopicsQueryResult = Apollo.QueryResult<TopicsQuery, TopicsQueryVaria
 export const UserRoleDocument = gql`
     query UserRole($userId: String!, $communityId: String!) {
   userRole(userId: $userId, communityId: $communityId) {
-    role
+    isMember
+    isModerator
   }
 }
     `;
@@ -1431,7 +1587,8 @@ export type UserRoleQueryResult = Apollo.QueryResult<UserRoleQuery, UserRoleQuer
 export const UserRolesDocument = gql`
     query UserRoles($userId: String!) {
   userRoles(userId: $userId) {
-    role
+    isMember
+    isModerator
     communityId
   }
 }
@@ -1497,7 +1654,7 @@ export type ImageFieldPolicy = {
 	caption?: FieldPolicy<any> | FieldReadFunction<any>,
 	link?: FieldPolicy<any> | FieldReadFunction<any>
 };
-export type MutationKeySpecifier = ('changePassword' | 'forgotPassword' | 'register' | 'login' | 'logout' | 'googleAuthentication' | 'createPost' | 'deletePost' | 'uploadImage' | 'createCommunity' | 'vote' | 'createTopic' | MutationKeySpecifier)[];
+export type MutationKeySpecifier = ('changePassword' | 'forgotPassword' | 'register' | 'login' | 'logout' | 'googleAuthentication' | 'createPost' | 'deletePost' | 'uploadImage' | 'createCommunity' | 'vote' | 'joinCommunity' | 'leaveCommunity' | 'createTopic' | MutationKeySpecifier)[];
 export type MutationFieldPolicy = {
 	changePassword?: FieldPolicy<any> | FieldReadFunction<any>,
 	forgotPassword?: FieldPolicy<any> | FieldReadFunction<any>,
@@ -1510,6 +1667,8 @@ export type MutationFieldPolicy = {
 	uploadImage?: FieldPolicy<any> | FieldReadFunction<any>,
 	createCommunity?: FieldPolicy<any> | FieldReadFunction<any>,
 	vote?: FieldPolicy<any> | FieldReadFunction<any>,
+	joinCommunity?: FieldPolicy<any> | FieldReadFunction<any>,
+	leaveCommunity?: FieldPolicy<any> | FieldReadFunction<any>,
 	createTopic?: FieldPolicy<any> | FieldReadFunction<any>
 };
 export type PaginatedPostsKeySpecifier = ('posts' | 'hasMore' | PaginatedPostsKeySpecifier)[];
@@ -1543,11 +1702,17 @@ export type QueryFieldPolicy = {
 	userRole?: FieldPolicy<any> | FieldReadFunction<any>,
 	topics?: FieldPolicy<any> | FieldReadFunction<any>
 };
-export type RoleKeySpecifier = ('userId' | 'communityId' | 'joinedAt' | 'role' | RoleKeySpecifier)[];
+export type RoleKeySpecifier = ('userId' | 'communityId' | 'joinedAt' | 'isMember' | 'isModerator' | RoleKeySpecifier)[];
 export type RoleFieldPolicy = {
 	userId?: FieldPolicy<any> | FieldReadFunction<any>,
 	communityId?: FieldPolicy<any> | FieldReadFunction<any>,
 	joinedAt?: FieldPolicy<any> | FieldReadFunction<any>,
+	isMember?: FieldPolicy<any> | FieldReadFunction<any>,
+	isModerator?: FieldPolicy<any> | FieldReadFunction<any>
+};
+export type RoleResponseKeySpecifier = ('errors' | 'role' | RoleResponseKeySpecifier)[];
+export type RoleResponseFieldPolicy = {
+	errors?: FieldPolicy<any> | FieldReadFunction<any>,
 	role?: FieldPolicy<any> | FieldReadFunction<any>
 };
 export type TopicKeySpecifier = ('id' | 'createdAt' | 'updatedAt' | 'creator' | 'title' | TopicKeySpecifier)[];
@@ -1617,6 +1782,10 @@ export type TypedTypePolicies = TypePolicies & {
 	Role?: Omit<TypePolicy, "fields" | "keyFields"> & {
 		keyFields?: false | RoleKeySpecifier | (() => undefined | RoleKeySpecifier),
 		fields?: RoleFieldPolicy,
+	},
+	RoleResponse?: Omit<TypePolicy, "fields" | "keyFields"> & {
+		keyFields?: false | RoleResponseKeySpecifier | (() => undefined | RoleResponseKeySpecifier),
+		fields?: RoleResponseFieldPolicy,
 	},
 	Topic?: Omit<TypePolicy, "fields" | "keyFields"> & {
 		keyFields?: false | TopicKeySpecifier | (() => undefined | TopicKeySpecifier),

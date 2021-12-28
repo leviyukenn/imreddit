@@ -1,0 +1,7 @@
+fragment RegularRole on Role {
+  userId
+  communityId
+  joinedAt
+  isMember
+  isModerator
+}

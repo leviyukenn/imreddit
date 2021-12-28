@@ -165,7 +165,7 @@ function useCommunitySelectionOption(userId: string) {
       communities.filter(
         (community) =>
           userRoles.find((userRole) => userRole?.communityId == community.id)
-            ?.role === "moderator"
+            ?.isModerator
       ),
     [communities, userRoles]
   );

@@ -1,0 +1,10 @@
+mutation JoinCommunity($userId: String!, $communityId: String!) {
+  joinCommunity(userId: $userId, communityId: $communityId) {
+    role {
+        ...RegularRole
+    }
+    errors {
+      ...RegularErrors
+    }
+  }
+}

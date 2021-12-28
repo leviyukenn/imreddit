@@ -8,11 +8,17 @@ import {
 } from "@material-ui/core";
 import React, { useState } from "react";
 import { useInView } from "react-intersection-observer";
+import {
+  RegularCommunityFragment,
+  RegularRoleFragmentDoc,
+  useJoinCommunityMutation,
+  UserRoleQuery,
+} from "../../generated/graphql";
 import { useIsAuth } from "../../utils/hooks/useIsAuth";
 
 interface CommunityBannerProps {
-  communityName: string;
-  userRole: string | undefined;
+  community: RegularCommunityFragment;
+  userRole: UserRoleQuery["userRole"];
 }
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -67,11 +73,33 @@ const useStyles = makeStyles((theme: Theme) =>
   })
 );
 
-const CommunityBanner = ({ communityName, userRole }: CommunityBannerProps) => {
+function useJoinLeaveCommunity(userId: string, communityId: string) {
+  const [joinCommunity] = useJoinCommunityMutation({
+    update(cache, { data: roleResponse }) {
+      cache.modify({
+        fields: {
+          userRole() {
+            if (!roleResponse?.joinCommunity.role) {
+              return null;
+            }
+            const joinedUserRoleRef = cache.writeFragment({
+              fragment: RegularRoleFragmentDoc,
+              data: roleResponse?.joinCommunity.role,
+            });
+            return joinedUserRoleRef;
+          },
+        },
+      });
+    },
+  });
+}
+
+const CommunityBanner = ({ community, userRole }: CommunityBannerProps) => {
   const classes = useStyles();
   const { ref, inView } = useInView({ threshold: 0.5 });
   const [buttonLabel, setButtonLabel] = useState("Joined");
-  const { checkIsAuth } = useIsAuth();
+  const { me, checkIsAuth } = useIsAuth();
+
   return (
     <>
       <Box className={classes.bannerImage} />
@@ -85,26 +113,36 @@ const CommunityBanner = ({ communityName, userRole }: CommunityBannerProps) => {
             <Box className={classes.communityNameContainer}>
               <Box>
                 <Typography variant="h5" className={classes.communityName}>
-                  {communityName}
+                  {community.name}
                 </Typography>
                 <Typography
                   variant="subtitle2"
                   className={classes.communityPath}
-                >{`r/${communityName}`}</Typography>
+                >{`r/${community.name}`}</Typography>
               </Box>
-              <Button
-                variant="outlined"
-                color="primary"
-                className={classes.joinButton}
-                onMouseOver={() => {
-                  if (userRole) setButtonLabel("Leave");
-                }}
-                onMouseOut={() => {
-                  if (userRole) setButtonLabel("Joined");
-                }}
-              >
-                {userRole ? buttonLabel : "Join"}
-              </Button>
+              {userRole?.isMember ? (
+                <Button
+                  variant="outlined"
+                  color="primary"
+                  className={classes.joinButton}
+                  onMouseOver={() => {
+                    setButtonLabel("Leave");
+                  }}
+                  onMouseOut={() => {
+                    setButtonLabel("Joined");
+                  }}
+                >
+                  {buttonLabel}
+                </Button>
+              ) : (
+                <Button
+                  variant="contained"
+                  color="primary"
+                  className={classes.joinButton}
+                >
+                  Join
+                </Button>
+              )}
             </Box>
           </Box>
         </Box>

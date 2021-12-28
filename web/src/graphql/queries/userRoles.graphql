@@ -1,6 +1,7 @@
 query UserRoles($userId: String!) {
   userRoles(userId: $userId) {
-    role
+    isMember
+    isModerator
     communityId
   }
 }

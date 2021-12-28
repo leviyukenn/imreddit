@@ -40,7 +40,7 @@ const useCommunity = (
     variables: { userId: me?.id!, communityId: community?.id! },
   });
 
-  const userRole = useMemo(() => userRoleResponse?.userRole?.role, [
+  const userRole = useMemo(() => userRoleResponse?.userRole, [
     userRoleResponse,
   ]);
 
@@ -61,9 +61,7 @@ const CommunityHomePage = ({
     <HomeLayout
       mainContent={<CommunityHeartContent communityName={communityName} />}
       rightSideContent={<CommunityDescription community={community} />}
-      banner={
-        <CommunityBanner communityName={communityName} userRole={userRole} />
-      }
+      banner={<CommunityBanner community={community} userRole={userRole} />}
     />
   );
 };
