@@ -700,7 +700,7 @@ export type UserRoleQuery = (
   { __typename?: 'Query' }
   & { userRole?: Maybe<(
     { __typename?: 'Role' }
-    & Pick<Role, 'isMember' | 'isModerator'>
+    & RegularRoleFragment
   )> }
 );
 
@@ -713,7 +713,7 @@ export type UserRolesQuery = (
   { __typename?: 'Query' }
   & { userRoles: Array<Maybe<(
     { __typename?: 'Role' }
-    & Pick<Role, 'isMember' | 'isModerator' | 'communityId'>
+    & RegularRoleFragment
   )>> }
 );
 
@@ -1550,11 +1550,10 @@ export type TopicsQueryResult = Apollo.QueryResult<TopicsQuery, TopicsQueryVaria
 export const UserRoleDocument = gql`
     query UserRole($userId: String!, $communityId: String!) {
   userRole(userId: $userId, communityId: $communityId) {
-    isMember
-    isModerator
+    ...RegularRole
   }
 }
-    `;
+    ${RegularRoleFragmentDoc}`;
 
 /**
  * __useUserRoleQuery__
@@ -1587,12 +1586,10 @@ export type UserRoleQueryResult = Apollo.QueryResult<UserRoleQuery, UserRoleQuer
 export const UserRolesDocument = gql`
     query UserRoles($userId: String!) {
   userRoles(userId: $userId) {
-    isMember
-    isModerator
-    communityId
+    ...RegularRole
   }
 }
-    `;
+    ${RegularRoleFragmentDoc}`;
 
 /**
  * __useUserRolesQuery__

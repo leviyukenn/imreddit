@@ -110,6 +110,9 @@ const postsFieldPolicy: FieldPolicy<
 
 const cache = new InMemoryCache({
   typePolicies: {
+    Role: {
+      keyFields: ["userId", "communityId"],
+    },
     Query: {
       fields: {
         communityPosts: communityPostsFieldPolicy,

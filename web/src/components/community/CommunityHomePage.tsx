@@ -34,11 +34,14 @@ const useCommunity = (
   ]);
 
   const { me } = useIsAuth();
+  console.log(me)
+  console.log(community?.id)
 
   const { data: userRoleResponse } = useUserRoleQuery({
-    skip: typeof window === "undefined" || (!me?.id && !community?.id),
+    skip: typeof window === "undefined" || !me?.id || !community?.id,
     variables: { userId: me?.id!, communityId: community?.id! },
   });
+  console.log(userRoleResponse)
 
   const userRole = useMemo(() => userRoleResponse?.userRole, [
     userRoleResponse,
@@ -55,6 +58,7 @@ const CommunityHomePage = ({
     communityName,
     serverSideCommunity
   );
+  console.log(userRole);
 
   if (!community) return <LoadingPostCard />;
   return (
