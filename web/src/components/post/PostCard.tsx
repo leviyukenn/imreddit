@@ -117,6 +117,7 @@ export const PostCard = ({ post, ...props }: PostCardProps) => {
 
   const isTextPost = useMemo(() => post.images.length === 0, [post]);
   const router = useRouter();
+
   return (
     <Box className={classes.root}>
       <Box className={classes.upvoteBox}>
@@ -126,6 +127,7 @@ export const PostCard = ({ post, ...props }: PostCardProps) => {
         href={createPostDetailModalLink(router.asPath, post.id)}
         as={createPostDetailPageLink(post.community.name, post.id)}
         shallow
+        scroll={false}
       >
         <Card className={classes.card} {...props}>
           <CardHeader

@@ -14,6 +14,7 @@ import {
   PostDetailDocument,
   PostDetailQuery,
 } from "../../generated/graphql";
+import PostDetailModal from "../../components/post/PostDetailModal";
 
 export const getStaticPaths: GetStaticPaths = async () => {
   const {
@@ -115,6 +116,7 @@ const CommunityPostHome = ({
           serverSideCommunity={serverSideCommunity}
         />
       ) : null}
+      <PostDetailModal />
     </>
   );
 };

@@ -2,7 +2,6 @@ import { Box, createStyles, Fab, makeStyles, Theme } from "@material-ui/core";
 import NavigationIcon from "@material-ui/icons/Navigation";
 import { useCallback } from "react";
 import Container from "./Container";
-import PostDetailModal from "./post/PostDetailModal";
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -72,7 +71,7 @@ const HomeContainer = ({
           </Fab>
         </Box>
       </Box>
-      <PostDetailModal />
+      {/* <PostDetailModal /> */}
     </Container>
   );
 };

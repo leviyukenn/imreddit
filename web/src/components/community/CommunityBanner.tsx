@@ -1,22 +1,18 @@
 import {
   Box,
-  Button,
   createStyles,
   makeStyles,
   Theme,
   Typography,
 } from "@material-ui/core";
-import React, { useCallback, useState } from "react";
+import React, { useState } from "react";
 import { useInView } from "react-intersection-observer";
-import { FrontendError } from "../../const/errors";
 import {
   RegularCommunityFragment,
-  useJoinCommunityMutation,
-  useLeaveCommunityMutation,
   UserRoleQuery,
 } from "../../generated/graphql";
-import { useIsAuth } from "../../utils/hooks/useIsAuth";
-import { AlertSeverity, SnackbarAlert } from "../errorHandling/SnackbarAlert";
+import { SnackbarAlert } from "../errorHandling/SnackbarAlert";
+import CommunityJoinLeaveButton from "./CommunityJoinLeaveButton";
 
 interface CommunityBannerProps {
   community: RegularCommunityFragment;
@@ -65,137 +61,13 @@ const useStyles = makeStyles((theme: Theme) =>
       marginTop: "1.5em",
       paddingLeft: "1em",
     },
-    joinButton: {
-      borderRadius: "9999px",
-      textTransform: "none",
-      fontWeight: 700,
-      width: "96px",
-      lineHeight: "1.5em",
-    },
   })
 );
 
-function useJoinLeaveCommunity(communityId: string, communityName: string) {
-  const { me, checkIsAuth } = useIsAuth();
-  const [errorMessage, setErrorMessage] = useState("");
-  const [severity, setSeverity] = useState<AlertSeverity>(AlertSeverity.ERROR);
-  const [join] = useJoinCommunityMutation({
-    // update(cache, { data: roleResponse }) {
-    //   cache.modify({
-    //     id: cache.identify({ userId: me?.id!, communityId }),
-    //     fields: {
-    //       isMember(existing: boolean) {
-    //         console.log(existing);
-    //         if (!roleResponse?.joinCommunity.role) {
-    //           return existing;
-    //         }
-    //         return roleResponse.joinCommunity.role.isMember;
-    //       },
-    //       joinedAt(existing: string) {
-    //         if (!roleResponse?.joinCommunity.role) {
-    //           return existing;
-    //         }
-    //         return roleResponse.joinCommunity.role.joinedAt;
-    //       },
-    //     },
-    //   });
-    // },
-  });
-
-  const [leave] = useLeaveCommunityMutation({
-    // update(cache, { data: roleResponse }) {
-    //   cache.modify({
-    //     id: cache.identify({ userId: me?.id!, communityId }),
-    //     fields: {
-    //       isMember(existing: boolean) {
-    //         console.log(existing);
-    //         if (!roleResponse?.leaveCommunity.role) {
-    //           return existing;
-    //         }
-    //         return roleResponse.leaveCommunity.role.isMember;
-    //       },
-    //     },
-    //   });
-    // },
-  });
-
-  const joinCommunity = useCallback(async () => {
-    if (!checkIsAuth()) {
-      return;
-    }
-    const joinCommunityResponse = await join({
-      variables: { userId: me?.id!, communityId },
-    }).catch(() => null);
-    const userRole = joinCommunityResponse?.data?.joinCommunity;
-    if (!userRole) {
-      setErrorMessage(FrontendError.ERR0002);
-      setSeverity(AlertSeverity.ERROR);
-      return;
-    }
-
-    if (userRole?.errors?.length) {
-      setErrorMessage(userRole.errors[0].message);
-      setSeverity(AlertSeverity.ERROR);
-      return;
-    }
-
-    if (userRole.role?.isMember) {
-      setErrorMessage(`Successfully joined r/${communityName}`);
-      setSeverity(AlertSeverity.SUCCESS);
-      return;
-    }
-
-    setErrorMessage(FrontendError.ERR0002);
-    setSeverity(AlertSeverity.ERROR);
-  }, [me, communityId, communityName]);
-
-  const leaveCommunity = useCallback(async () => {
-    const leaveCommunityResponse = await leave({
-      variables: { userId: me?.id!, communityId },
-    }).catch(() => null);
-    const userRole = leaveCommunityResponse?.data?.leaveCommunity;
-    if (!userRole) {
-      setErrorMessage(FrontendError.ERR0002);
-      setSeverity(AlertSeverity.ERROR);
-      return;
-    }
-
-    if (userRole?.errors?.length) {
-      setErrorMessage(userRole.errors[0].message);
-      setSeverity(AlertSeverity.ERROR);
-      return;
-    }
-
-    if (userRole.role?.isMember === false) {
-      setErrorMessage(`Successfully left r/${communityName}`);
-      setSeverity(AlertSeverity.SUCCESS);
-      return;
-    }
-
-    setErrorMessage(FrontendError.ERR0002);
-    setSeverity(AlertSeverity.ERROR);
-  }, [me, communityId, communityName]);
-
-  return {
-    joinCommunity,
-    leaveCommunity,
-    errorMessage,
-    setErrorMessage,
-    severity,
-  };
-}
-
 const CommunityBanner = ({ community, userRole }: CommunityBannerProps) => {
+  console.log(userRole);
   const classes = useStyles();
   const { ref, inView } = useInView({ threshold: 0.5 });
-  const [buttonLabel, setButtonLabel] = useState("Joined");
-  const {
-    joinCommunity,
-    leaveCommunity,
-    errorMessage,
-    setErrorMessage,
-    severity,
-  } = useJoinLeaveCommunity(community.id, community.name);
 
   return (
     <>
@@ -217,43 +89,14 @@ const CommunityBanner = ({ community, userRole }: CommunityBannerProps) => {
                   className={classes.communityPath}
                 >{`r/${community.name}`}</Typography>
               </Box>
-              {userRole?.isMember ? (
-                <Button
-                  variant="outlined"
-                  color="primary"
-                  className={classes.joinButton}
-                  onMouseOver={() => {
-                    setButtonLabel("Leave");
-                  }}
-                  onMouseOut={() => {
-                    setButtonLabel("Joined");
-                  }}
-                  onClick={leaveCommunity}
-                >
-                  {buttonLabel}
-                </Button>
-              ) : (
-                <Button
-                  variant="contained"
-                  color="primary"
-                  className={classes.joinButton}
-                  onClick={joinCommunity}
-                >
-                  Join
-                </Button>
-              )}
+              <CommunityJoinLeaveButton
+                {...{ userRole, communityId:community.id, communityName:community.name }}
+              />
             </Box>
           </Box>
         </Box>
       </div>
       {!inView ? <div className={classes.pinndedHeader}></div> : null}
-      <SnackbarAlert
-        {...{
-          message: errorMessage,
-          setMessage: setErrorMessage,
-          severity: severity,
-        }}
-      />
     </>
   );
 };

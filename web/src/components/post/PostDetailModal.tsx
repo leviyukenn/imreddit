@@ -11,6 +11,7 @@ import CloseIcon from "@material-ui/icons/Close";
 import { useRouter } from "next/router";
 import React, { useCallback, useMemo } from "react";
 import { usePostDetailQuery } from "../../generated/graphql";
+import { createCommunityHomeLink } from "../../utils/links";
 import PostDetail from "./PostDetail";
 
 interface PostDetailModalProps {}
@@ -55,6 +56,14 @@ const PostDetailModal = ({}: PostDetailModalProps) => {
   const classes = useStyles();
 
   const handleClose = useCallback(() => {
+    if (router.query.postInfo) {
+      router.push(
+        createCommunityHomeLink(router.query.postInfo[0]),
+        undefined,
+        { shallow: true }
+      );
+      return;
+    }
     router.back();
   }, [router]);
 
