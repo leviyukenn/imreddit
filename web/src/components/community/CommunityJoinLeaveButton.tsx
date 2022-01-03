@@ -1,16 +1,16 @@
+import { Reference } from "@apollo/client/cache";
 import { Button, createStyles, makeStyles, Theme } from "@material-ui/core";
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useMemo, useState } from "react";
 import { FrontendError } from "../../const/errors";
 import {
   useJoinCommunityMutation,
   useLeaveCommunityMutation,
-  UserRoleQuery,
+  useUserRoleQuery,
 } from "../../generated/graphql";
 import { useIsAuth } from "../../utils/hooks/useIsAuth";
 import { AlertSeverity, SnackbarAlert } from "../errorHandling/SnackbarAlert";
 
 interface CommunityJoinLeaveButtonProps {
-  userRole: UserRoleQuery["userRole"];
   communityId: string;
   communityName: string;
 }
@@ -30,23 +30,42 @@ function useJoinLeaveCommunity(communityId: string, communityName: string) {
   const { me, checkIsAuth } = useIsAuth();
   const [errorMessage, setErrorMessage] = useState("");
   const [severity, setSeverity] = useState<AlertSeverity>(AlertSeverity.ERROR);
+
+  const { data: userRoleResponse } = useUserRoleQuery({
+    skip: typeof window === "undefined" || !me?.id || !communityId,
+    variables: { userId: me?.id!, communityId },
+  });
+
+  const userRole = useMemo(() => userRoleResponse?.userRole, [
+    userRoleResponse,
+  ]);
   const [join] = useJoinCommunityMutation({
     update(cache, { data: roleResponse }) {
       cache.modify({
-        id: cache.identify({ userId: me?.id!, communityId }),
         fields: {
-          isMember(existing: boolean) {
-            console.log(existing);
-            if (!roleResponse?.joinCommunity.role) {
+          userRoles(
+            existing: Reference[],
+            { storeFieldName, toReference, readField }
+          ) {
+            const userRole = roleResponse?.joinCommunity.role;
+            if (!userRole) {
               return existing;
             }
-            return roleResponse.joinCommunity.role.isMember;
-          },
-          joinedAt(existing: string) {
-            if (!roleResponse?.joinCommunity.role) {
+
+            if (!storeFieldName.includes(userRole.userId)) {
               return existing;
             }
-            return roleResponse.joinCommunity.role.joinedAt;
+
+            const existingUserRole = existing.find(
+              (userRoleRef) =>
+                readField("userId", userRoleRef) === userRole.userId &&
+                readField("communityId", userRoleRef) === userRole.communityId
+            );
+            if (existingUserRole) {
+              return existing;
+            }
+
+            return [...existing, toReference(userRole)];
           },
         },
       });
@@ -54,20 +73,32 @@ function useJoinLeaveCommunity(communityId: string, communityName: string) {
   });
 
   const [leave] = useLeaveCommunityMutation({
-    update(cache, { data: roleResponse }) {
-      cache.modify({
-        id: cache.identify({ userId: me?.id!, communityId }),
-        fields: {
-          isMember(existing: boolean) {
-            console.log(existing);
-            if (!roleResponse?.leaveCommunity.role) {
-              return existing;
-            }
-            return roleResponse.leaveCommunity.role.isMember;
-          },
-        },
-      });
-    },
+    // update(cache, { data: roleResponse }) {
+    //   cache.modify({
+    //     fields: {
+    //       userRoles(
+    //         existing: Reference[],
+    //         { storeFieldName, toReference, readField }
+    //       ) {
+    //         const userRole = roleResponse?.leaveCommunity.role;
+    //         if (!userRole) {
+    //           return existing;
+    //         }
+    //         if (!storeFieldName.includes(userRole.userId)) {
+    //           return existing;
+    //         }
+    //         const filteredExistingRefs = existing.filter(
+    //           (userRoleRef) =>
+    //             !(
+    //               readField("userId", userRoleRef) === userRole.userId &&
+    //               readField("communityId", userRoleRef) === userRole.communityId
+    //             )
+    //         );
+    //         return filteredExistingRefs;
+    //       },
+    //     },
+    //   });
+    // },
   });
 
   const joinCommunity = useCallback(async () => {
@@ -133,11 +164,11 @@ function useJoinLeaveCommunity(communityId: string, communityName: string) {
     errorMessage,
     setErrorMessage,
     severity,
+    userRole,
   };
 }
 
 const CommunityJoinLeaveButton = ({
-  userRole,
   communityId,
   communityName,
 }: CommunityJoinLeaveButtonProps) => {
@@ -149,7 +180,9 @@ const CommunityJoinLeaveButton = ({
     errorMessage,
     setErrorMessage,
     severity,
+    userRole,
   } = useJoinLeaveCommunity(communityId, communityName);
+
   return (
     <>
       {userRole?.isMember ? (

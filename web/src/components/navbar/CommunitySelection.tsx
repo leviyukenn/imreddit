@@ -139,9 +139,23 @@ function useCommunitySelectionOption(userId: string) {
   const communities = useMemo(() => communitiesResponse?.communities || [], [
     communitiesResponse,
   ]);
+  const userRoles = useMemo(() => userRolesResponse?.userRoles || [], [
+    userRolesResponse,
+  ]);
+  const myCommunities = useMemo(
+    () =>
+      communities.filter(
+        (community) =>
+          userRoles.find((userRole) => userRole?.communityId == community.id)
+            ?.isMember
+      ),
+    [communities, userRoles]
+  );
+
+  console.log(myCommunities);
   const myCommunitiesItems: CommunitySelectionOption[] = useMemo(() => {
     if (communities.length == 0) return [];
-    const myCommunities = communities.map((community) =>
+    const myCommunityOptions = myCommunities.map((community) =>
       CommunitySelectionOption.createOption({
         id: community.id,
         name: community.name,
@@ -150,7 +164,7 @@ function useCommunitySelectionOption(userId: string) {
         group: CommunitySelectionOptionGroupType.MY_COMMUNITIES,
       })
     );
-    const createCommunity = CommunitySelectionOption.createOption({
+    const createCommunityItem = CommunitySelectionOption.createOption({
       id: "createCommunity",
       name: "Create Community",
       icon: <AddIcon />,
@@ -158,12 +172,8 @@ function useCommunitySelectionOption(userId: string) {
       group: CommunitySelectionOptionGroupType.MY_COMMUNITIES,
     });
 
-    return [createCommunity, ...myCommunities];
-  }, [communities]);
-
-  const userRoles = useMemo(() => userRolesResponse?.userRoles || [], [
-    userRolesResponse,
-  ]);
+    return [createCommunityItem, ...myCommunityOptions];
+  }, [myCommunities]);
 
   const moderatingCommunities = useMemo(
     () =>

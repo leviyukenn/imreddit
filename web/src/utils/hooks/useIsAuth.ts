@@ -7,13 +7,10 @@ import { loginPageLink } from "../links";
 export function useIsAuth() {
   const { loading: meLoading, error, data: meResponse } = useMeQuery();
   const router = useRouter();
-
   const { showLoginModal } = useUserModalState();
   const checkIsAuth = useCallback(() => {
     if (meLoading) return false;
     if (meResponse?.me) return true;
-    // console.log("show");
-    console.log(meResponse?.me);
 
     showLoginModal();
     return false;
