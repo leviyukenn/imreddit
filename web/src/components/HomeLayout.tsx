@@ -2,15 +2,12 @@ import { Box, createStyles, Fab, makeStyles, Theme } from "@material-ui/core";
 import NavigationIcon from "@material-ui/icons/Navigation";
 import { useCallback } from "react";
 import Container from "./Container";
+import PostDetailModal from "./post/PostDetailModal";
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
     heartContainer: {
       flex: "1 1 100%",
-      // [theme.breakpoints.up("xs")]: {
-      //   width: "100%",
-      // },
-      // (960px,infinity)
       [theme.breakpoints.up("md")]: {
         maxWidth: "740px",
       },
@@ -18,7 +15,6 @@ const useStyles = makeStyles((theme: Theme) =>
     rightSideContainer: {
       marginLeft: "2rem",
       display: "none",
-      // width: "312px",
       flex: "0 0 312px",
       [theme.breakpoints.up("md")]: {
         display: "block",
@@ -71,7 +67,7 @@ const HomeContainer = ({
           </Fab>
         </Box>
       </Box>
-      {/* <PostDetailModal /> */}
+      <PostDetailModal />
     </Container>
   );
 };

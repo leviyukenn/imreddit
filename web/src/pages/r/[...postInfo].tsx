@@ -116,7 +116,6 @@ const CommunityPostHome = ({
           serverSideCommunity={serverSideCommunity}
         />
       ) : null}
-      <PostDetailModal />
     </>
   );
 };

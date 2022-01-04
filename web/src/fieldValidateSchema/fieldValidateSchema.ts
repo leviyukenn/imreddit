@@ -63,3 +63,7 @@ export const createCommunityValidationSchema = Yup.object({
   description: communityDescriptionValidation,
   topicIds: communityTopicsValidation,
 });
+
+export const editCommunityDescriptionValidationSchema = Yup.object({
+  description: communityDescriptionValidation,
+});
