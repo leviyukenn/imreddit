@@ -22,7 +22,7 @@ interface CommunityDescriptionProps {
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
     root: {
-      backgroundColor: "#edeff1",
+      backgroundColor: theme.palette.background.paper,
       border: "1px solid #bdbfc0",
       borderRadius: 4,
     },
