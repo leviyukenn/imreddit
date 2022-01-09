@@ -10,16 +10,17 @@ import {
 import Typography from "@material-ui/core/Typography";
 import { Field, Form, Formik, FormikHelpers } from "formik";
 import { useRouter } from "next/router";
-import React, { useCallback, useState } from "react";
+import React, { useCallback } from "react";
 import { FrontendError } from "../../const/errors";
 import { registerValidationSchema } from "../../fieldValidateSchema/fieldValidateSchema";
 import {
   RegularUserFragmentDoc,
   useRegisterMutation,
 } from "../../generated/graphql";
+import { useSnackbarAlert } from "../../redux/hooks/useSnackbarAlert";
 import { useUserModalState } from "../../redux/hooks/useUserModalState";
+import { AlertSeverity } from "../../redux/types/types";
 import { toErrorMap } from "../../utils/toErrorMap";
-import { AlertSeverity, SnackbarAlert } from "../errorHandling/SnackbarAlert";
 import { TextInputField } from "../InputField";
 
 interface FormData {
@@ -74,7 +75,7 @@ function useRegister(setIsSubmitting: (isSubmitting: boolean) => void) {
       });
     },
   });
-  const [errorMessage, setErrorMessage] = useState("");
+  const { onOpenSnackbarAlert } = useSnackbarAlert();
   const { isOpen, onClose } = useUserModalState();
   const router = useRouter();
 
@@ -89,7 +90,10 @@ function useRegister(setIsSubmitting: (isSubmitting: boolean) => void) {
 
       if (!registerResult) {
         setIsSubmitting(false);
-        setErrorMessage(FrontendError.ERR0002);
+        onOpenSnackbarAlert({
+          message: FrontendError.ERR0002,
+          severity: AlertSeverity.ERROR,
+        });
         return;
       }
 
@@ -109,15 +113,13 @@ function useRegister(setIsSubmitting: (isSubmitting: boolean) => void) {
     [register, isOpen, router]
   );
 
-  return { onRegister, errorMessage, setErrorMessage };
+  return { onRegister };
 }
 
 const RegisterForm = ({ isSubmitting, setIsSubmitting }: RegisterFormProps) => {
   const { isOpen, showLoginModal, showLoginPage } = useUserModalState();
 
-  const { onRegister, setErrorMessage, errorMessage } = useRegister(
-    setIsSubmitting
-  );
+  const { onRegister } = useRegister(setIsSubmitting);
 
   const classes = useStyles();
   return (
@@ -189,13 +191,6 @@ const RegisterForm = ({ isSubmitting, setIsSubmitting }: RegisterFormProps) => {
           </Form>
         )}
       </Formik>
-      <SnackbarAlert
-        {...{
-          message: errorMessage,
-          setMessage: setErrorMessage,
-          severity: AlertSeverity.ERROR,
-        }}
-      />
     </>
   );
 };

@@ -7,8 +7,9 @@ import {
   useLeaveCommunityMutation,
   useUserRoleQuery,
 } from "../../generated/graphql";
+import { useSnackbarAlert } from "../../redux/hooks/useSnackbarAlert";
 import { useIsAuth } from "../../utils/hooks/useIsAuth";
-import { AlertSeverity, SnackbarAlert } from "../errorHandling/SnackbarAlert";
+import { AlertSeverity } from "../../redux/types/types";
 
 interface CommunityJoinLeaveButtonProps {
   communityId: string;
@@ -28,9 +29,8 @@ const useStyles = makeStyles((theme: Theme) =>
 
 function useJoinLeaveCommunity(communityId: string, communityName: string) {
   const { me, checkIsAuth } = useIsAuth();
-  const [errorMessage, setErrorMessage] = useState("");
-  const [severity, setSeverity] = useState<AlertSeverity>(AlertSeverity.ERROR);
 
+  const { onOpenSnackbarAlert } = useSnackbarAlert();
   const { data: userRoleResponse } = useUserRoleQuery({
     skip: typeof window === "undefined" || !me?.id || !communityId,
     variables: { userId: me?.id!, communityId },
@@ -110,25 +110,33 @@ function useJoinLeaveCommunity(communityId: string, communityName: string) {
     }).catch(() => null);
     const userRole = joinCommunityResponse?.data?.joinCommunity;
     if (!userRole) {
-      setErrorMessage(FrontendError.ERR0002);
-      setSeverity(AlertSeverity.ERROR);
+      onOpenSnackbarAlert({
+        message: FrontendError.ERR0002,
+        severity: AlertSeverity.ERROR,
+      });
       return;
     }
 
     if (userRole?.errors?.length) {
-      setErrorMessage(userRole.errors[0].message);
-      setSeverity(AlertSeverity.ERROR);
+      onOpenSnackbarAlert({
+        message: userRole.errors[0].message,
+        severity: AlertSeverity.ERROR,
+      });
       return;
     }
 
     if (userRole.role?.isMember) {
-      setErrorMessage(`Successfully joined r/${communityName}`);
-      setSeverity(AlertSeverity.SUCCESS);
+      onOpenSnackbarAlert({
+        message: `Successfully joined r/${communityName}`,
+        severity: AlertSeverity.SUCCESS,
+      });
       return;
     }
 
-    setErrorMessage(FrontendError.ERR0002);
-    setSeverity(AlertSeverity.ERROR);
+    onOpenSnackbarAlert({
+      message: FrontendError.ERR0002,
+      severity: AlertSeverity.ERROR,
+    });
   }, [me, communityId, communityName]);
 
   const leaveCommunity = useCallback(async () => {
@@ -137,33 +145,38 @@ function useJoinLeaveCommunity(communityId: string, communityName: string) {
     }).catch(() => null);
     const userRole = leaveCommunityResponse?.data?.leaveCommunity;
     if (!userRole) {
-      setErrorMessage(FrontendError.ERR0002);
-      setSeverity(AlertSeverity.ERROR);
+      onOpenSnackbarAlert({
+        message: FrontendError.ERR0002,
+        severity: AlertSeverity.ERROR,
+      });
       return;
     }
 
     if (userRole?.errors?.length) {
-      setErrorMessage(userRole.errors[0].message);
-      setSeverity(AlertSeverity.ERROR);
+      onOpenSnackbarAlert({
+        message: userRole.errors[0].message,
+        severity: AlertSeverity.ERROR,
+      });
       return;
     }
 
     if (userRole.role?.isMember === false) {
-      setErrorMessage(`Successfully left r/${communityName}`);
-      setSeverity(AlertSeverity.SUCCESS);
+      onOpenSnackbarAlert({
+        message: `Successfully left r/${communityName}`,
+        severity: AlertSeverity.SUCCESS,
+      });
       return;
     }
 
-    setErrorMessage(FrontendError.ERR0002);
-    setSeverity(AlertSeverity.ERROR);
+    onOpenSnackbarAlert({
+      message: FrontendError.ERR0002,
+      severity: AlertSeverity.ERROR,
+    });
   }, [me, communityId, communityName]);
 
   return {
     joinCommunity,
     leaveCommunity,
-    errorMessage,
-    setErrorMessage,
-    severity,
     userRole,
   };
 }
@@ -174,14 +187,10 @@ const CommunityJoinLeaveButton = ({
 }: CommunityJoinLeaveButtonProps) => {
   const classes = useStyles();
   const [buttonLabel, setButtonLabel] = useState("Joined");
-  const {
-    joinCommunity,
-    leaveCommunity,
-    errorMessage,
-    setErrorMessage,
-    severity,
-    userRole,
-  } = useJoinLeaveCommunity(communityId, communityName);
+  const { joinCommunity, leaveCommunity, userRole } = useJoinLeaveCommunity(
+    communityId,
+    communityName
+  );
 
   return (
     <>
@@ -210,13 +219,6 @@ const CommunityJoinLeaveButton = ({
           Join
         </Button>
       )}
-      <SnackbarAlert
-        {...{
-          message: errorMessage,
-          setMessage: setErrorMessage,
-          severity: severity,
-        }}
-      />
     </>
   );
 };

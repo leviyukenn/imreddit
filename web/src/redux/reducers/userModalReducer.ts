@@ -22,22 +22,18 @@ export default function userModalReducer(
         ...preState,
         isOpen: data as boolean,
       };
-      break;
     case ACTION_TYPES.CLOSE_USER_MODAL:
       return {
         ...preState,
         isOpen: data as boolean,
       };
-      break;
 
     case ACTION_TYPES.CHANGE_USER_MODAL_CONTENT:
       return {
         ...preState,
         showWhichContent: data as USER_MODAL_CONTENT,
       };
-      break;
     default:
       return preState;
-      break;
   }
 }

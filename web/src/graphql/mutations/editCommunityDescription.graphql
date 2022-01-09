@@ -1,0 +1,16 @@
+mutation EditCommunityDescription(
+  $communityId: String!
+  $description: String!
+) {
+  editCommunityDescription(
+    communityId: $communityId
+    description: $description
+  ) {
+    community {
+      ...RegularCommunity
+    }
+    errors {
+      ...RegularErrors
+    }
+  }
+}

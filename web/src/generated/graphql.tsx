@@ -97,9 +97,10 @@ export type Mutation = {
   deletePost: Scalars['Boolean'];
   uploadImage: UploadResponse;
   createCommunity: CommunityResponse;
-  vote: Scalars['Int'];
+  editCommunityDescription: CommunityResponse;
   joinCommunity: RoleResponse;
   leaveCommunity: RoleResponse;
+  vote: Scalars['Int'];
   createTopic: Topic;
 };
 
@@ -150,8 +151,9 @@ export type MutationCreateCommunityArgs = {
 };
 
 
-export type MutationVoteArgs = {
-  voteInput: VoteInput;
+export type MutationEditCommunityDescriptionArgs = {
+  description: Scalars['String'];
+  communityId: Scalars['String'];
 };
 
 
@@ -164,6 +166,11 @@ export type MutationJoinCommunityArgs = {
 export type MutationLeaveCommunityArgs = {
   userId: Scalars['String'];
   communityId: Scalars['String'];
+};
+
+
+export type MutationVoteArgs = {
+  voteInput: VoteInput;
 };
 
 
@@ -416,6 +423,26 @@ export type CreatePostMutation = (
       { __typename?: 'Community' }
       & Pick<Community, 'name'>
     ) }
+  ) }
+);
+
+export type EditCommunityDescriptionMutationVariables = Exact<{
+  communityId: Scalars['String'];
+  description: Scalars['String'];
+}>;
+
+
+export type EditCommunityDescriptionMutation = (
+  { __typename?: 'Mutation' }
+  & { editCommunityDescription: (
+    { __typename?: 'CommunityResponse' }
+    & { community?: Maybe<(
+      { __typename?: 'Community' }
+      & RegularCommunityFragment
+    )>, errors?: Maybe<Array<(
+      { __typename?: 'FieldError' }
+      & RegularErrorsFragment
+    )>> }
   ) }
 );
 
@@ -917,6 +944,46 @@ export function useCreatePostMutation(baseOptions?: Apollo.MutationHookOptions<C
 export type CreatePostMutationHookResult = ReturnType<typeof useCreatePostMutation>;
 export type CreatePostMutationResult = Apollo.MutationResult<CreatePostMutation>;
 export type CreatePostMutationOptions = Apollo.BaseMutationOptions<CreatePostMutation, CreatePostMutationVariables>;
+export const EditCommunityDescriptionDocument = gql`
+    mutation EditCommunityDescription($communityId: String!, $description: String!) {
+  editCommunityDescription(communityId: $communityId, description: $description) {
+    community {
+      ...RegularCommunity
+    }
+    errors {
+      ...RegularErrors
+    }
+  }
+}
+    ${RegularCommunityFragmentDoc}
+${RegularErrorsFragmentDoc}`;
+export type EditCommunityDescriptionMutationFn = Apollo.MutationFunction<EditCommunityDescriptionMutation, EditCommunityDescriptionMutationVariables>;
+
+/**
+ * __useEditCommunityDescriptionMutation__
+ *
+ * To run a mutation, you first call `useEditCommunityDescriptionMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useEditCommunityDescriptionMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [editCommunityDescriptionMutation, { data, loading, error }] = useEditCommunityDescriptionMutation({
+ *   variables: {
+ *      communityId: // value for 'communityId'
+ *      description: // value for 'description'
+ *   },
+ * });
+ */
+export function useEditCommunityDescriptionMutation(baseOptions?: Apollo.MutationHookOptions<EditCommunityDescriptionMutation, EditCommunityDescriptionMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<EditCommunityDescriptionMutation, EditCommunityDescriptionMutationVariables>(EditCommunityDescriptionDocument, options);
+      }
+export type EditCommunityDescriptionMutationHookResult = ReturnType<typeof useEditCommunityDescriptionMutation>;
+export type EditCommunityDescriptionMutationResult = Apollo.MutationResult<EditCommunityDescriptionMutation>;
+export type EditCommunityDescriptionMutationOptions = Apollo.BaseMutationOptions<EditCommunityDescriptionMutation, EditCommunityDescriptionMutationVariables>;
 export const ForgotPasswordDocument = gql`
     mutation ForgotPassword($username: String!, $email: String!) {
   forgotPassword(forgotPasswordInput: {username: $username, email: $email}) {
@@ -1651,7 +1718,7 @@ export type ImageFieldPolicy = {
 	caption?: FieldPolicy<any> | FieldReadFunction<any>,
 	link?: FieldPolicy<any> | FieldReadFunction<any>
 };
-export type MutationKeySpecifier = ('changePassword' | 'forgotPassword' | 'register' | 'login' | 'logout' | 'googleAuthentication' | 'createPost' | 'deletePost' | 'uploadImage' | 'createCommunity' | 'vote' | 'joinCommunity' | 'leaveCommunity' | 'createTopic' | MutationKeySpecifier)[];
+export type MutationKeySpecifier = ('changePassword' | 'forgotPassword' | 'register' | 'login' | 'logout' | 'googleAuthentication' | 'createPost' | 'deletePost' | 'uploadImage' | 'createCommunity' | 'editCommunityDescription' | 'joinCommunity' | 'leaveCommunity' | 'vote' | 'createTopic' | MutationKeySpecifier)[];
 export type MutationFieldPolicy = {
 	changePassword?: FieldPolicy<any> | FieldReadFunction<any>,
 	forgotPassword?: FieldPolicy<any> | FieldReadFunction<any>,
@@ -1663,9 +1730,10 @@ export type MutationFieldPolicy = {
 	deletePost?: FieldPolicy<any> | FieldReadFunction<any>,
 	uploadImage?: FieldPolicy<any> | FieldReadFunction<any>,
 	createCommunity?: FieldPolicy<any> | FieldReadFunction<any>,
-	vote?: FieldPolicy<any> | FieldReadFunction<any>,
+	editCommunityDescription?: FieldPolicy<any> | FieldReadFunction<any>,
 	joinCommunity?: FieldPolicy<any> | FieldReadFunction<any>,
 	leaveCommunity?: FieldPolicy<any> | FieldReadFunction<any>,
+	vote?: FieldPolicy<any> | FieldReadFunction<any>,
 	createTopic?: FieldPolicy<any> | FieldReadFunction<any>
 };
 export type PaginatedPostsKeySpecifier = ('posts' | 'hasMore' | PaginatedPostsKeySpecifier)[];

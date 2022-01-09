@@ -8,23 +8,12 @@ import AddIcon from "@material-ui/icons/Add";
 import DoneIcon from "@material-ui/icons/Done";
 import ExpandMoreRoundedIcon from "@material-ui/icons/ExpandMoreRounded";
 import HomeIcon from "@material-ui/icons/Home";
-import Autocomplete, {
-  AutocompleteCloseReason,
-} from "@material-ui/lab/Autocomplete";
+import Autocomplete, { AutocompleteCloseReason } from "@material-ui/lab/Autocomplete";
 import NextLink from "next/link";
 import React, { useMemo, useState } from "react";
-import {
-  useCommunitiesQuery,
-  useUserRolesQuery,
-} from "../../generated/graphql";
-import {
-  CommunitySelectionOption,
-  CommunitySelectionOptionGroupType,
-} from "../../utils/factory/communitySelectionOption";
-import {
-  createCommunityHomeLink,
-  createCommunityPageLink,
-} from "../../utils/links";
+import { useCommunitiesQuery, useUserRolesQuery } from "../../generated/graphql";
+import { CommunitySelectionOption, CommunitySelectionOptionGroupType } from "../../utils/factory/communitySelectionOption";
+import { createCommunityHomeLink, createCommunityPageLink } from "../../utils/links";
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -139,9 +128,11 @@ function useCommunitySelectionOption(userId: string) {
   const communities = useMemo(() => communitiesResponse?.communities || [], [
     communitiesResponse,
   ]);
+
   const userRoles = useMemo(() => userRolesResponse?.userRoles || [], [
     userRolesResponse,
   ]);
+
   const myCommunities = useMemo(
     () =>
       communities.filter(
@@ -152,7 +143,6 @@ function useCommunitySelectionOption(userId: string) {
     [communities, userRoles]
   );
 
-  console.log(myCommunities);
   const myCommunitiesItems: CommunitySelectionOption[] = useMemo(() => {
     if (communities.length == 0) return [];
     const myCommunityOptions = myCommunities.map((community) =>

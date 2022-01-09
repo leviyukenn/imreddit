@@ -15,9 +15,10 @@ import React, { useCallback, useState } from "react";
 import { FrontendError } from "../../const/errors";
 import { forgotPasswordValidationSchema } from "../../fieldValidateSchema/fieldValidateSchema";
 import { useForgotPasswordMutation } from "../../generated/graphql";
+import { useSnackbarAlert } from "../../redux/hooks/useSnackbarAlert";
 import { useUserModalState } from "../../redux/hooks/useUserModalState";
+import { AlertSeverity } from "../../redux/types/types";
 import { toErrorMap } from "../../utils/toErrorMap";
-import { AlertSeverity, SnackbarAlert } from "../errorHandling/SnackbarAlert";
 import { TextInputField } from "../InputField";
 
 interface FormData {
@@ -51,7 +52,7 @@ function useForgotPassword() {
   const [forgotPassword] = useForgotPasswordMutation();
   const [completeSendingEmail, setCompleteSendingEmail] = useState(false);
 
-  const [errorMessage, setErrorMessage] = useState("");
+  const { onOpenSnackbarAlert } = useSnackbarAlert();
 
   const onForgotPassword = useCallback(
     async (values: FormData, actions: FormikHelpers<FormData>) => {
@@ -62,7 +63,10 @@ function useForgotPassword() {
       const result = response?.data?.forgotPassword;
 
       if (!result) {
-        setErrorMessage(FrontendError.ERR0002);
+        onOpenSnackbarAlert({
+          message: FrontendError.ERR0002,
+          severity: AlertSeverity.ERROR,
+        });
         return;
       }
       if (result.errors) {
@@ -78,8 +82,6 @@ function useForgotPassword() {
   return {
     onForgotPassword,
     completeSendingEmail,
-    errorMessage,
-    setErrorMessage,
   };
 }
 
@@ -94,12 +96,7 @@ const ForgotPasswordForm = () => {
 
   const classes = useStyles();
 
-  const {
-    onForgotPassword,
-    completeSendingEmail,
-    setErrorMessage,
-    errorMessage,
-  } = useForgotPassword();
+  const { onForgotPassword, completeSendingEmail } = useForgotPassword();
 
   return (
     <>
@@ -185,13 +182,6 @@ const ForgotPasswordForm = () => {
           </Form>
         )}
       </Formik>
-      <SnackbarAlert
-        {...{
-          message: errorMessage,
-          setMessage: setErrorMessage,
-          severity: AlertSeverity.ERROR,
-        }}
-      />
     </>
   );
 };

@@ -14,9 +14,14 @@ import {
 import { Field, Form, Formik } from "formik";
 import { TextField, TextFieldProps } from "formik-material-ui";
 import React, { useCallback, useState } from "react";
+import { FrontendError } from "../../const/errors";
 import { editCommunityDescriptionValidationSchema } from "../../fieldValidateSchema/fieldValidateSchema";
+import { useEditCommunityDescriptionMutation } from "../../generated/graphql";
+import { useSnackbarAlert } from "../../redux/hooks/useSnackbarAlert";
+import { AlertSeverity } from "../../redux/types/types";
 
 interface CommunityDescriptionEditorProps {
+  communityId: string;
   description: string;
   setShowDescriptionEditor: React.Dispatch<React.SetStateAction<boolean>>;
 }
@@ -62,11 +67,62 @@ const useStyles = makeStyles((theme: Theme) =>
   })
 );
 
+const useSaveDescription = () => {
+  const { onOpenSnackbarAlert } = useSnackbarAlert();
+  const [saveDescription] = useEditCommunityDescriptionMutation();
+  const onSaveDescription = useCallback(
+    async (communityId: string, description: string) => {
+      const result = await saveDescription({
+        variables: { communityId, description },
+      }).catch(() => null);
+      if (!result) {
+        onOpenSnackbarAlert({
+          message: FrontendError.ERR0002,
+          severity: AlertSeverity.ERROR,
+        });
+        return;
+      }
+
+      if (result.errors) {
+        onOpenSnackbarAlert({
+          message: result.errors[0].message,
+          severity: AlertSeverity.ERROR,
+        });
+        return;
+      }
+
+      const communityResponse = result.data?.editCommunityDescription;
+      if (communityResponse?.errors) {
+        onOpenSnackbarAlert({
+          message: communityResponse.errors[0].message,
+          severity: AlertSeverity.ERROR,
+        });
+        return;
+      }
+
+      if (communityResponse?.community) {
+        onOpenSnackbarAlert({
+          message: `Community settings updated successfully`,
+          severity: AlertSeverity.SUCCESS,
+        });
+        return;
+      }
+    },
+    []
+  );
+
+  return {
+    onSaveDescription,
+  };
+};
+
 const CommunityDescriptionEditor = ({
+  communityId,
   description,
   setShowDescriptionEditor,
 }: CommunityDescriptionEditorProps) => {
   const classes = useStyles();
+  const [isButtonClicked, setIsButtonClicked] = useState(false);
 
   const [openSaveOrNotDialog, setOpenSaveOrNotDialog] = useState<boolean>(
     false
@@ -77,12 +133,28 @@ const CommunityDescriptionEditor = ({
     setShowDescriptionEditor(false);
   }, []);
 
+  const { onSaveDescription } = useSaveDescription();
+
+  const handleSave = useCallback(
+    (values: FormData) => {
+      onSaveDescription(communityId, values.description);
+      setOpenSaveOrNotDialog(false);
+      setShowDescriptionEditor(false);
+    },
+    [communityId]
+  );
+
+  //   const onSaveDescription = useCallback(() => {
+  //     callback;
+  //   }, [input]);
+  //   const remainingCharacterNumber = 300 - values.description.length;
+
   return (
     <>
       <Formik<FormData>
         initialValues={{ description }}
         validationSchema={editCommunityDescriptionValidationSchema}
-        onSubmit={() => {}}
+        onSubmit={handleSave}
       >
         {({ submitForm, isSubmitting, values, handleBlur }) => (
           <Form>
@@ -94,6 +166,14 @@ const CommunityDescriptionEditor = ({
                 onBlur={(
                   e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>
                 ) => {
+                  if (isButtonClicked) {
+                    return;
+                  }
+                  if (description === values.description) {
+                    setShowDescriptionEditor(false);
+                    handleBlur(e);
+                    return;
+                  }
                   setOpenSaveOrNotDialog(true);
                   handleBlur(e);
                 }}
@@ -106,6 +186,8 @@ const CommunityDescriptionEditor = ({
                   size="small"
                   className={classes.cancelButton}
                   onClick={() => setShowDescriptionEditor(false)}
+                  onMouseDown={() => setIsButtonClicked(true)}
+                  onMouseUp={() => setIsButtonClicked(false)}
                 >
                   Cancel
                 </Button>
@@ -115,25 +197,21 @@ const CommunityDescriptionEditor = ({
                   disabled={isSubmitting}
                   onClick={submitForm}
                   className={classes.saveButton}
+                  onMouseDown={() => setIsButtonClicked(true)}
+                  onMouseUp={() => setIsButtonClicked(false)}
                 >
                   Save
                 </Button>
               </Box>
             </Box>
+            <AlertDialog
+              open={openSaveOrNotDialog}
+              handleClose={handleCloseSaveOrNotDialog}
+              handleSave={submitForm}
+            />
           </Form>
         )}
       </Formik>
-      <AlertDialog
-        open={openSaveOrNotDialog}
-        handleClose={handleCloseSaveOrNotDialog}
-      />
-      {/* <SnackbarAlert
-        {...{
-          message: errorMessage,
-          setMessage: setErrorMessage,
-          severity: AlertSeverity.ERROR,
-        }}
-      /> */}
     </>
   );
 };
@@ -144,6 +222,7 @@ const TextAreaField = ({ children, ...props }: TextFieldProps) => {
     <TextField
       autoFocus
       multiline
+      inputProps={{ maxLength: 300 }}
       {...props}
       className={classes.field}
       InputProps={{
@@ -159,9 +238,10 @@ const TextAreaField = ({ children, ...props }: TextFieldProps) => {
 interface AlertDialogProps {
   open: boolean;
   handleClose: () => void;
+  handleSave: () => void;
 }
 
-function AlertDialog({ open, handleClose }: AlertDialogProps) {
+function AlertDialog({ open, handleClose, handleSave }: AlertDialogProps) {
   return (
     <Dialog
       open={open}
@@ -179,10 +259,15 @@ function AlertDialog({ open, handleClose }: AlertDialogProps) {
         </DialogContentText>
       </DialogContent>
       <DialogActions>
-        <Button onClick={handleClose} color="primary">
+        <Button onClick={handleClose} color="primary" variant="outlined">
           Cancel
         </Button>
-        <Button onClick={handleClose} color="primary" autoFocus>
+        <Button
+          onClick={handleSave}
+          color="primary"
+          autoFocus
+          variant="outlined"
+        >
           Save
         </Button>
       </DialogActions>

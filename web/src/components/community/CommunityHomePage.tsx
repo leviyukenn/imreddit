@@ -64,7 +64,7 @@ const CommunityHomePage = ({
       return <CommunityDescriptionModeratorMode community={community} />;
     }
     return <CommunityDescription community={community} />;
-  }, [userRole]);
+  }, [userRole, community]);
 
   return (
     <HomeLayout

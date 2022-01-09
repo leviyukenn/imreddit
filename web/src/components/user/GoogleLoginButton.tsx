@@ -6,7 +6,7 @@ import {
   Theme,
 } from "@material-ui/core";
 import { useRouter } from "next/router";
-import { useCallback, useState } from "react";
+import { useCallback } from "react";
 import GoogleLogin, {
   GoogleLoginResponse,
   GoogleLoginResponseOffline,
@@ -18,8 +18,9 @@ import {
   useGoogleAuthenticationMutation,
 } from "../../generated/graphql";
 import GoogleIcon from "../../images/icons/google_icon.svg";
+import { useSnackbarAlert } from "../../redux/hooks/useSnackbarAlert";
 import { useUserModalState } from "../../redux/hooks/useUserModalState";
-import { AlertSeverity, SnackbarAlert } from "../errorHandling/SnackbarAlert";
+import { AlertSeverity } from "../../redux/types/types";
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -81,7 +82,7 @@ function useGoogleAuthentication(
       });
     },
   });
-  const [errorMessage, setErrorMessage] = useState("");
+  const { onOpenSnackbarAlert } = useSnackbarAlert();
 
   const { isOpen, onClose } = useUserModalState();
   const router = useRouter();
@@ -97,13 +98,18 @@ function useGoogleAuthentication(
       const loginResult = loginResponse.data?.googleAuthentication;
 
       if (!loginResult) {
-        setErrorMessage(FrontendError.ERR0002);
-        setIsSubmitting(false);
+        onOpenSnackbarAlert({
+          message: FrontendError.ERR0002,
+          severity: AlertSeverity.ERROR,
+        });
         return;
       }
 
       if ((loginResult.errors?.length || 0) > 0) {
-        setErrorMessage(loginResult.errors![0].message);
+        onOpenSnackbarAlert({
+          message: loginResult.errors![0].message,
+          severity: AlertSeverity.ERROR,
+        });
         setIsSubmitting(false);
         return;
       }
@@ -119,29 +125,27 @@ function useGoogleAuthentication(
     [isOpen, login, router, onClose]
   );
 
-  return { onLogin, errorMessage, setErrorMessage };
+  return { onLogin, onOpenSnackbarAlert };
 }
 
 function GoogleButton({ isSubmitting, setIsSubmitting }: GoogleButtonProps) {
   const clientId = GOOGLE_AUTH_CLIENT_ID;
-  const { onLogin, errorMessage, setErrorMessage } = useGoogleAuthentication(
+  const { onLogin, onOpenSnackbarAlert } = useGoogleAuthentication(
     setIsSubmitting
   );
   const classes = useStyles();
 
   return (
     <>
-      <SnackbarAlert
-        {...{
-          message: errorMessage,
-          setMessage: setErrorMessage,
-          severity: AlertSeverity.ERROR,
-        }}
-      />
       <GoogleLogin
         clientId={clientId}
         onSuccess={onLogin}
-        onFailure={() => setErrorMessage(FrontendError.ERR0001)}
+        onFailure={() =>
+          onOpenSnackbarAlert({
+            message: FrontendError.ERR0001,
+            severity: AlertSeverity.ERROR,
+          })
+        }
         disabled={isSubmitting}
         uxMode="redirect"
         render={({ onClick }: { onClick: () => void }) => (

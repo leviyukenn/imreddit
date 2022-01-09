@@ -5,6 +5,7 @@ import { AppProps } from "next/app";
 import React, { useEffect } from "react";
 import { Provider } from "react-redux";
 import apolloClient from "../apollo-client/apollo-client";
+import { SnackbarAlert } from "../components/errorHandling/SnackbarAlert";
 import store from "../redux/store";
 import theme from "../theme";
 
@@ -23,6 +24,7 @@ function MyApp({ Component, pageProps }: AppProps) {
         <CssBaseline />
         <ThemeProvider theme={theme}>
           <Component {...pageProps} />
+          <SnackbarAlert />
         </ThemeProvider>
       </ApolloProvider>
     </Provider>

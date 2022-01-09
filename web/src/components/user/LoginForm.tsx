@@ -10,16 +10,17 @@ import {
 import Typography from "@material-ui/core/Typography";
 import { Field, Form, Formik, FormikHelpers } from "formik";
 import { useRouter } from "next/router";
-import React, { useCallback, useState } from "react";
+import React, { useCallback } from "react";
 import { FrontendError } from "../../const/errors";
 import { loginValidationSchema } from "../../fieldValidateSchema/fieldValidateSchema";
 import {
   RegularUserFragmentDoc,
   useLoginMutation,
 } from "../../generated/graphql";
+import { useSnackbarAlert } from "../../redux/hooks/useSnackbarAlert";
 import { useUserModalState } from "../../redux/hooks/useUserModalState";
+import { AlertSeverity } from "../../redux/types/types";
 import { toErrorMap } from "../../utils/toErrorMap";
-import { AlertSeverity, SnackbarAlert } from "../errorHandling/SnackbarAlert";
 import { TextInputField } from "../InputField";
 
 interface FormData {
@@ -77,7 +78,7 @@ function useLogin(setIsSubmitting: (isSubmitting: boolean) => void) {
 
   const { isOpen, onClose } = useUserModalState();
 
-  const [errorMessage, setErrorMessage] = useState("");
+  const { onOpenSnackbarAlert } = useSnackbarAlert();
   const router = useRouter();
 
   const onLogin = useCallback(
@@ -89,8 +90,10 @@ function useLogin(setIsSubmitting: (isSubmitting: boolean) => void) {
       const loginResult = loginResponse?.data?.login;
 
       if (!loginResult) {
-        setErrorMessage(FrontendError.ERR0002);
-        setIsSubmitting(false);
+        onOpenSnackbarAlert({
+          message: FrontendError.ERR0002,
+          severity: AlertSeverity.ERROR,
+        });
         return;
       }
       if (loginResult.errors) {
@@ -109,7 +112,7 @@ function useLogin(setIsSubmitting: (isSubmitting: boolean) => void) {
     [login, isOpen, router]
   );
 
-  return { onLogin, errorMessage, setErrorMessage };
+  return { onLogin };
 }
 
 const LoginForm = ({ isSubmitting, setIsSubmitting }: LoginFormProps) => {
@@ -121,7 +124,7 @@ const LoginForm = ({ isSubmitting, setIsSubmitting }: LoginFormProps) => {
     showForgotPasswordPage,
   } = useUserModalState();
 
-  const { onLogin, errorMessage, setErrorMessage } = useLogin(setIsSubmitting);
+  const { onLogin } = useLogin(setIsSubmitting);
 
   const classes = useStyles();
   return (
@@ -196,13 +199,6 @@ const LoginForm = ({ isSubmitting, setIsSubmitting }: LoginFormProps) => {
           </Form>
         )}
       </Formik>
-      <SnackbarAlert
-        {...{
-          message: errorMessage,
-          setMessage: setErrorMessage,
-          severity: AlertSeverity.ERROR,
-        }}
-      />
     </>
   );
 };

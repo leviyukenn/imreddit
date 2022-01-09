@@ -10,17 +10,18 @@ import {
 } from "@material-ui/core";
 import { Field, Form, Formik, FormikHelpers } from "formik";
 import { useRouter } from "next/router";
-import React, { useCallback, useMemo, useState } from "react";
+import React, { useCallback, useMemo } from "react";
 import { FrontendError } from "../../const/errors";
 import { createCommunityValidationSchema } from "../../fieldValidateSchema/fieldValidateSchema";
 import {
   useCreateCommunityMutation,
   useTopicsQuery,
 } from "../../generated/graphql";
+import { AlertSeverity } from "../../redux/types/types";
 import { createCommunityHomeLink } from "../../utils/links";
 import { toErrorMap } from "../../utils/toErrorMap";
-import { AlertSeverity, SnackbarAlert } from "../errorHandling/SnackbarAlert";
 import { SelectField, TextAreaField, TextInputField } from "../InputField";
+import { useSnackbarAlert } from "../../redux/hooks/useSnackbarAlert";
 
 interface FormData {
   name: string;
@@ -53,8 +54,8 @@ const useStyles = makeStyles((theme: Theme) =>
 const useCreateCommunity = () => {
   const [createCommunity] = useCreateCommunityMutation();
   const router = useRouter();
+  const { onOpenSnackbarAlert } = useSnackbarAlert();
 
-  const [errorMessage, setErrorMessage] = useState("");
   const onCreateCommunity = useCallback(
     async (values: FormData, actions: FormikHelpers<FormData>) => {
       const response = await createCommunity({ variables: values }).catch(
@@ -63,7 +64,11 @@ const useCreateCommunity = () => {
       const createCommunityResult = response?.data?.createCommunity;
 
       if (!createCommunityResult) {
-        setErrorMessage(FrontendError.ERR0002);
+        onOpenSnackbarAlert({
+          message: FrontendError.ERR0002,
+          severity: AlertSeverity.ERROR,
+        });
+
         return;
       }
 
@@ -88,19 +93,12 @@ const useCreateCommunity = () => {
 
   return {
     onCreateCommunity,
-    errorMessage,
-    setErrorMessage,
     topics,
   };
 };
 
 const CreateCommunityForm = () => {
-  const {
-    onCreateCommunity,
-    errorMessage,
-    setErrorMessage,
-    topics,
-  } = useCreateCommunity();
+  const { onCreateCommunity, topics } = useCreateCommunity();
 
   const classes = useStyles();
   return (
@@ -188,13 +186,6 @@ const CreateCommunityForm = () => {
           </Form>
         )}
       </Formik>
-      <SnackbarAlert
-        {...{
-          message: errorMessage,
-          setMessage: setErrorMessage,
-          severity: AlertSeverity.ERROR,
-        }}
-      />
     </>
   );
 };

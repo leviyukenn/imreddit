@@ -8,11 +8,7 @@ import {
 } from "@material-ui/core";
 import { Field, Form, Formik, FormikHelpers } from "formik";
 import { useRouter } from "next/router";
-import React, { useCallback, useState } from "react";
-import {
-  AlertSeverity,
-  SnackbarAlert,
-} from "../../components/errorHandling/SnackbarAlert";
+import React, { useCallback } from "react";
 import { TextInputField } from "../../components/InputField";
 import { FrontendError } from "../../const/errors";
 import { changePasswordValidationSchema } from "../../fieldValidateSchema/fieldValidateSchema";
@@ -20,6 +16,8 @@ import {
   RegularUserFragmentDoc,
   useChangePasswordMutation,
 } from "../../generated/graphql";
+import { useSnackbarAlert } from "../../redux/hooks/useSnackbarAlert";
+import { AlertSeverity } from "../../redux/types/types";
 import { toErrorMap } from "../../utils/toErrorMap";
 
 interface FormData {
@@ -66,8 +64,8 @@ const useChangePassword = () => {
     },
   });
 
-  const [errorMessage, setErrorMessage] = useState("");
   const router = useRouter();
+  const { onOpenSnackbarAlert } = useSnackbarAlert();
 
   const onChangePassword = useCallback(
     async (values: FormData, actions: FormikHelpers<FormData>) => {
@@ -78,7 +76,10 @@ const useChangePassword = () => {
       const changePasswordResult = changePasswordResponse?.data?.changePassword;
 
       if (!changePasswordResult) {
-        setErrorMessage(FrontendError.ERR0002);
+        onOpenSnackbarAlert({
+          message: FrontendError.ERR0002,
+          severity: AlertSeverity.ERROR,
+        });
         return;
       }
 
@@ -88,7 +89,10 @@ const useChangePassword = () => {
           (fieldError) => fieldError.field === "token"
         );
         if (tokenError) {
-          setErrorMessage(tokenError.message);
+          onOpenSnackbarAlert({
+            message: tokenError.message,
+            severity: AlertSeverity.ERROR,
+          });
         }
         return;
       }
@@ -98,16 +102,12 @@ const useChangePassword = () => {
     },
     [changePassword, router]
   );
-  return { onChangePassword, errorMessage, setErrorMessage };
+  return { onChangePassword };
 };
 
 const ChangePasswordForm = () => {
   const classes = useStyles();
-  const {
-    onChangePassword,
-    errorMessage,
-    setErrorMessage,
-  } = useChangePassword();
+  const { onChangePassword } = useChangePassword();
 
   return (
     <>
@@ -150,13 +150,6 @@ const ChangePasswordForm = () => {
           </Form>
         )}
       </Formik>
-      <SnackbarAlert
-        {...{
-          message: errorMessage,
-          setMessage: setErrorMessage,
-          severity: AlertSeverity.ERROR,
-        }}
-      />
     </>
   );
 };

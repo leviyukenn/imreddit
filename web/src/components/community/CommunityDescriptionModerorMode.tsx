@@ -82,6 +82,7 @@ const CommunityDescriptionModeratorMode = ({
           {showDescriptionEditor ? (
             <CommunityDescriptionEditor
               {...{
+                communityId: community.id,
                 description: community.description,
                 setShowDescriptionEditor,
               }}
