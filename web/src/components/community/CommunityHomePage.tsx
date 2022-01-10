@@ -9,6 +9,7 @@ import HomeLayout from "../HomeLayout";
 import CreatePostCard from "../post/CreatePostCard";
 import { LoadingPostCard } from "../post/PostCard";
 import { CommunityPostsInfiniteScroll } from "../post/PostInfiniteScroll";
+import CommunityAppearanceDrawer from "./CommunityAppearanceDrawer";
 import CommunityBanner from "./CommunityBanner";
 import CommunityDescription from "./CommunityDescription";
 import CommunityDescriptionModeratorMode from "./CommunityDescriptionModerorMode";
@@ -60,7 +61,6 @@ const CommunityHomePage = ({
 
   const communityDescription = useMemo(() => {
     if (userRole?.isModerator) {
-      console.log(userRole);
       return <CommunityDescriptionModeratorMode community={community} />;
     }
     return <CommunityDescription community={community} />;
@@ -71,6 +71,7 @@ const CommunityHomePage = ({
       mainContent={<CommunityHeartContent communityName={communityName} />}
       rightSideContent={communityDescription}
       banner={<CommunityBanner community={community} />}
+      drawer={<CommunityAppearanceDrawer />}
     />
   );
 };

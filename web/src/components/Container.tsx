@@ -9,6 +9,7 @@ import React from "react";
 import NavBar from "./navbar/NavBar";
 
 interface ContainerProps extends BoxProps {
+  drawer?: JSX.Element;
   banner?: JSX.Element;
   backgroundMode?: "light" | "grey";
 }
@@ -17,6 +18,7 @@ const useStyles = makeStyles((theme: Theme) =>
   createStyles({
     root: {
       position: "relative",
+      flex:1
     },
     mainContentBox: {
       padding: "1.25rem 0",
@@ -37,22 +39,26 @@ const useStyles = makeStyles((theme: Theme) =>
 
 const Container = ({
   children,
+  drawer,
   banner,
   backgroundMode = "grey",
 }: ContainerProps) => {
   const classes = useStyles();
   return (
-    <Box className={classes.root}>
-      <NavBar />
-      {banner}
-      <Box
-        className={`${classes.mainContentBox} ${
-          backgroundMode === "grey"
-            ? classes.greyBackground
-            : classes.lightBackground
-        }`}
-      >
-        {children}
+    <Box display="flex">
+      {drawer}
+      <Box className={classes.root}>
+        <NavBar />
+        {banner}
+        <Box
+          className={`${classes.mainContentBox} ${
+            backgroundMode === "grey"
+              ? classes.greyBackground
+              : classes.lightBackground
+          }`}
+        >
+          {children}
+        </Box>
       </Box>
     </Box>
   );

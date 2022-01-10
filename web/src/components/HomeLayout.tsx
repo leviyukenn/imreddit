@@ -37,12 +37,14 @@ interface HomeContainerProps {
   mainContent: JSX.Element;
   rightSideContent?: JSX.Element;
   banner?: JSX.Element;
+  drawer?: JSX.Element;
 }
 
 const HomeContainer = ({
   mainContent,
   rightSideContent,
   banner,
+  drawer,
 }: HomeContainerProps) => {
   const classes = useStyles();
 
@@ -51,7 +53,7 @@ const HomeContainer = ({
   }, []);
 
   return (
-    <Container banner={banner}>
+    <Container banner={banner} drawer={drawer}>
       <Box display="flex" justifyContent="center">
         <Box className={classes.heartContainer}>{mainContent}</Box>
         <Box className={classes.rightSideContainer}>
