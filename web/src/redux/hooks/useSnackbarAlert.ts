@@ -19,10 +19,8 @@ export function useSnackbarAlert() {
       if (reason === "clickaway") {
         return;
       }
-      dispatch(clearSnackbarAlertMessage());
-    },
-    []
-  );
+    dispatch(clearSnackbarAlertMessage());
+  }, []);
 
   const onOpenSnackbarAlert = useCallback((data: SnackbarAlertState) => {
     dispatch(setSnackbarAlertMessage(data));

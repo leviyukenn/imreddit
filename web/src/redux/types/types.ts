@@ -4,6 +4,7 @@ export enum ACTION_TYPES {
   CHANGE_USER_MODAL_CONTENT,
   SET_SNACKBAR_ALERT_MESSAGE,
   CLEAR_SNACKBAR_ALERT_MESSAGE,
+  SET_COMMUNITY_BACKGROUND_IMAGE,
 }
 
 export interface Action<T> {
@@ -32,4 +33,8 @@ export enum AlertSeverity {
 export interface SnackbarAlertState {
   message: string;
   severity: AlertSeverity;
+}
+
+export interface CommunityImagesState {
+  background: string;
 }

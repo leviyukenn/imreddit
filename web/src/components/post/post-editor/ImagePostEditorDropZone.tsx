@@ -32,7 +32,7 @@ const useStyles = makeStyles((theme: Theme) =>
       textDecoration: "",
       fontWeight: 700,
     },
-    activedDropzone: {
+    activeDropzone: {
       borderColor: theme.palette.primary.main,
       borderWidth: "3px",
     },
@@ -54,7 +54,7 @@ const ImagePostEditorDropZone = ({ onDrop }: ImagePostEditorDropZoneProps) => {
     <Box
       {...getRootProps({
         className: `${classes.dropzone} ${
-          isDragActive ? classes.activedDropzone : ""
+          isDragActive ? classes.activeDropzone : ""
         }`,
       })}
     >

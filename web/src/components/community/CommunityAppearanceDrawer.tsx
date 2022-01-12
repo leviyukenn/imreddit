@@ -14,7 +14,7 @@ import CommunityApearanceMenuList from "./CommunityApearanceMenuList";
 import CommunityBackgroudEditor from "./CommunityBackgroudEditor";
 
 interface CommunityAppearanceDrawerProps {}
-const drawerWidth = 240;
+const drawerWidth = 284;
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({

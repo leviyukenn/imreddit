@@ -87,7 +87,7 @@ export const PostDetailCard = ({ post, ...props }: PostDetailProps) => {
         }
         subheader={
           <Box display="flex" alignItems="center">
-            <NextLink href={`/c/${post.community.name}`}>
+            <NextLink href={`/r/${post.community.name}`}>
               <Link
                 className={classes.communityLink}
                 onMouseDown={(

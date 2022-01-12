@@ -1,11 +1,12 @@
 import { combineReducers } from "redux";
-import userModalState from "./userModalReducer";
+import communityImagesState from "./communityImagesReducer";
 import snackbarAlertState from "./snackbarAlertReducer";
+import userModalState from "./userModalReducer";
 
 export const rootReducer = combineReducers({
   userModalState,
-  snackbarAlertState
+  snackbarAlertState,
+  communityImagesState,
 });
 
-//根据rootReducer的type生成RootState的type
 export type RootState = ReturnType<typeof rootReducer>;

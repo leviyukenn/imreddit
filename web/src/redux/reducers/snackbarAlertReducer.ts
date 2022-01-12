@@ -10,7 +10,7 @@ const initState: SnackbarAlertState = {
   severity: AlertSeverity.INFO,
 };
 
-export default function userModalReducer(
+export default function snackbarAlertReducer(
   preState: SnackbarAlertState = initState,
   action: Action<SnackbarAlertState | null>
 ): SnackbarAlertState {

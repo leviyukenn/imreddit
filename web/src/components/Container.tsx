@@ -6,6 +6,8 @@ import {
   Theme,
 } from "@material-ui/core";
 import React from "react";
+import { SERVER_URL } from "../const/const";
+import { useCommunityImages } from "../redux/hooks/useCommunityImages";
 import NavBar from "./navbar/NavBar";
 
 interface ContainerProps extends BoxProps {
@@ -18,7 +20,9 @@ const useStyles = makeStyles((theme: Theme) =>
   createStyles({
     root: {
       position: "relative",
-      flex:1
+      flex: 1,
+      height: "100%",
+      backgroundAttachment: "fixed",
     },
     mainContentBox: {
       padding: "1.25rem 0",
@@ -44,21 +48,30 @@ const Container = ({
   backgroundMode = "grey",
 }: ContainerProps) => {
   const classes = useStyles();
+  const { background } = useCommunityImages();
+
   return (
     <Box display="flex">
       {drawer}
-      <Box className={classes.root}>
+      <Box
+        className={`${classes.root} ${
+          backgroundMode === "grey"
+            ? classes.greyBackground
+            : classes.lightBackground
+        }`}
+        style={
+          background
+            ? {
+                background: `url(${
+                  SERVER_URL + background
+                }) center center / cover no-repeat fixed`,
+              }
+            : undefined
+        }
+      >
         <NavBar />
         {banner}
-        <Box
-          className={`${classes.mainContentBox} ${
-            backgroundMode === "grey"
-              ? classes.greyBackground
-              : classes.lightBackground
-          }`}
-        >
-          {children}
-        </Box>
+        <Box className={classes.mainContentBox}>{children}</Box>
       </Box>
     </Box>
   );

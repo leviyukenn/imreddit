@@ -9,7 +9,7 @@ import {
 } from "@material-ui/core";
 import AddOutlinedIcon from "@material-ui/icons/AddOutlined";
 import HighlightOffTwoToneIcon from "@material-ui/icons/HighlightOffTwoTone";
-import React, { ChangeEvent, useCallback } from "react";
+import React, { ChangeEvent, useCallback, useEffect } from "react";
 import { useDropzone } from "react-dropzone";
 import { SERVER_URL } from "../../../const/const";
 import { UploadedImage } from "../../types/types";
@@ -149,12 +149,13 @@ const ImagePostEditorPreview = ({
 
   const onImageDeleted = useCallback(
     (path: string) => {
-      return () =>
+      return () => {
         setUploadedImages((prevState) =>
           prevState.filter((img) => img.path !== path)
         );
+      };
     },
-    [selectedImage]
+    [uploadedImages, selectedImage, setSelectedImage]
   );
 
   const onCaptionChange = useCallback(
@@ -184,6 +185,11 @@ const ImagePostEditorPreview = ({
     },
     [selectedImage]
   );
+  useEffect(() => {
+    if (!uploadedImages.find((img) => img.path === selectedImage)) {
+      setSelectedImage(uploadedImages[uploadedImages.length - 1]?.path || "");
+    }
+  }, [selectedImage, uploadedImages]);
 
   const classes = useStyles();
 
