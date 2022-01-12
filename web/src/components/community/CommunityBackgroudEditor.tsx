@@ -8,7 +8,7 @@ import {
   Theme,
 } from "@material-ui/core";
 import React from "react";
-import { useCommunityImages } from "../../redux/hooks/useCommunityImages";
+import { useCommunityAppearance } from "../../redux/hooks/useCommunityAppearance";
 import CommunityColorPicker from "./CommunityColorPicker";
 import CommunityImageDropzone from "./CommunityImageDropzone";
 import CommunityImagePreview from "./CommunityImagePreview";
@@ -24,7 +24,7 @@ interface CommunityBackgroudEditoProps {}
 
 const CommunityBackgroudEditor = ({}: CommunityBackgroudEditoProps) => {
   const classes = useStyles();
-  const { background, setCommunityBackgroundImage } = useCommunityImages();
+  const { background, setCommunityBackgroundImage } = useCommunityAppearance();
 
   return (
     <List>

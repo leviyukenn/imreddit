@@ -5,6 +5,7 @@ export enum ACTION_TYPES {
   SET_SNACKBAR_ALERT_MESSAGE,
   CLEAR_SNACKBAR_ALERT_MESSAGE,
   SET_COMMUNITY_BACKGROUND_IMAGE,
+  SET_COMMUNITY_BACKGROUND_COLOR,
 }
 
 export interface Action<T> {
@@ -37,4 +38,5 @@ export interface SnackbarAlertState {
 
 export interface CommunityImagesState {
   background: string;
+  backgroundColor: string;
 }

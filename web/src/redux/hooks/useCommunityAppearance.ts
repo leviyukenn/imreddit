@@ -1,9 +1,12 @@
 import { useCallback } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { changeCommunityBackgroundImage } from "../actions/communityImages";
+import {
+  changeCommunityBackgroundColor,
+  changeCommunityBackgroundImage,
+} from "../actions/communityImages";
 import { RootState } from "../reducers/combinedReducer";
 
-export function useCommunityImages() {
+export function useCommunityAppearance() {
   const communityImagesState = useSelector(
     (state: RootState) => state.communityImagesState
   );
@@ -14,8 +17,13 @@ export function useCommunityImages() {
     dispatch(changeCommunityBackgroundImage(path));
   }, []);
 
+  const setCommunityBackgroundColor = useCallback((colorHex: string) => {
+    dispatch(changeCommunityBackgroundColor(colorHex));
+  }, []);
+
   return {
     ...communityImagesState,
     setCommunityBackgroundImage,
+    setCommunityBackgroundColor,
   };
 }

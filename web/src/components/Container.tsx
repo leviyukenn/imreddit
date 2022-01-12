@@ -7,7 +7,7 @@ import {
 } from "@material-ui/core";
 import React from "react";
 import { SERVER_URL } from "../const/const";
-import { useCommunityImages } from "../redux/hooks/useCommunityImages";
+import { useCommunityAppearance } from "../redux/hooks/useCommunityAppearance";
 import NavBar from "./navbar/NavBar";
 
 interface ContainerProps extends BoxProps {
@@ -48,7 +48,8 @@ const Container = ({
   backgroundMode = "grey",
 }: ContainerProps) => {
   const classes = useStyles();
-  const { background } = useCommunityImages();
+  const { background, backgroundColor } = useCommunityAppearance();
+  console.log(backgroundColor);
 
   return (
     <Box display="flex">
@@ -60,9 +61,9 @@ const Container = ({
             : classes.lightBackground
         }`}
         style={
-          background
+          background || backgroundColor
             ? {
-                background: `url(${
+                background: `${backgroundColor} url(${
                   SERVER_URL + background
                 }) center center / cover no-repeat fixed`,
               }

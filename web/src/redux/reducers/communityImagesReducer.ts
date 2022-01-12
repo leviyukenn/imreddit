@@ -2,6 +2,7 @@ import { Action, ACTION_TYPES, CommunityImagesState } from "../types/types";
 
 const initState: CommunityImagesState = {
   background: "",
+  backgroundColor: "#DAE0E6",
 };
 
 export default function communityImagesReducer(
@@ -13,6 +14,8 @@ export default function communityImagesReducer(
   switch (type) {
     case ACTION_TYPES.SET_COMMUNITY_BACKGROUND_IMAGE:
       return { ...preState, background: data };
+    case ACTION_TYPES.SET_COMMUNITY_BACKGROUND_COLOR:
+      return { ...preState, backgroundColor: data };
     default:
       return preState;
   }
