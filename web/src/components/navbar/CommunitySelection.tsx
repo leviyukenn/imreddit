@@ -139,7 +139,6 @@ function useCommunitySelectionOption(userId: string) {
   const communities = useMemo(() => communitiesResponse?.communities || [], [
     communitiesResponse,
   ]);
-  console.log(communities);
 
   const userRoles = useMemo(() => userRolesResponse?.userRoles || [], [
     userRolesResponse,

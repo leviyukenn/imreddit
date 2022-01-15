@@ -58,24 +58,15 @@ const CommunityHomePage = ({
     communityName,
     serverSideCommunity
   );
-  const { onInit, onSave } = useSaveOrInitCommunityAppearance(
-    community?.id,
+  const { initiateCommunityAppearance } = useSaveOrInitCommunityAppearance(
     community
-      ? {
-          background: community.background,
-          backgroundColor: community.backgroundColor,
-          banner: community.banner,
-          bannerColor: community.bannerColor,
-          icon: community.icon,
-        }
-      : undefined
   );
 
   useEffect(() => {
     if (!community) {
       return;
     }
-    onInit();
+    initiateCommunityAppearance();
   }, [community]);
 
   const communityDescription = useMemo(() => {
@@ -92,7 +83,7 @@ const CommunityHomePage = ({
     if (!community || !userRole?.isModerator) {
       return undefined;
     }
-    return <CommunityAppearanceDrawer {...{ onSave, onInit }} />;
+    return <CommunityAppearanceDrawer community={community} />;
   }, [userRole, community]);
 
   return community ? (

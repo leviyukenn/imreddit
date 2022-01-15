@@ -1,7 +1,10 @@
-import { useCallback, useMemo } from "react";
+import { useCallback, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { FrontendError } from "../../const/errors";
-import { useSetCommunityAppearanceMutation } from "../../generated/graphql";
+import {
+  CommunityQuery,
+  useSetCommunityAppearanceMutation,
+} from "../../generated/graphql";
 import { compareCommunityAppearance } from "../../utils/utils";
 import {
   changeCommunityBackgroundColor,
@@ -12,7 +15,8 @@ import {
   initCommunityAppearance,
 } from "../actions/communityAppearance";
 import { RootState } from "../reducers/combinedReducer";
-import { AlertSeverity, CommunityAppearanceState } from "../types/types";
+import { AlertSeverity } from "../types/types";
+import { useAlertDialog } from "./useAlertDialog";
 import { useSnackbarAlert } from "./useSnackbarAlert";
 
 export function useCommunityAppearance() {
@@ -53,9 +57,15 @@ export function useCommunityAppearance() {
 }
 
 export function useSaveOrInitCommunityAppearance(
-  communityId?: string,
-  communityAppearance?: CommunityAppearanceState
+  community?: CommunityQuery["community"]
 ) {
+  const communityInitAppearance = community && {
+    background: community.background,
+    backgroundColor: community.backgroundColor,
+    banner: community.banner,
+    bannerColor: community.bannerColor,
+    icon: community.icon,
+  };
   const communityAppearanceState = useSelector(
     (state: RootState) => state.communityAppearanceState
   );
@@ -63,33 +73,34 @@ export function useSaveOrInitCommunityAppearance(
 
   const dispatch = useDispatch();
   const [setCommunityAppearance] = useSetCommunityAppearanceMutation();
+  const [uploading, setUploading] = useState(false);
 
-  const onInit = useCallback(() => {
-    if (!communityAppearance) return;
-    dispatch(initCommunityAppearance(communityAppearance));
-  }, [communityAppearance]);
+  const initiateCommunityAppearance = useCallback(() => {
+    if (!communityInitAppearance) return;
+    dispatch(initCommunityAppearance(communityInitAppearance));
+  }, [communityInitAppearance]);
 
-  const hasSettingsChanged = useMemo(
-    () =>
-      communityAppearance &&
-      !compareCommunityAppearance(
-        communityAppearance,
-        communityAppearanceState
-      ),
-    [communityAppearanceState, communityAppearance]
-  );
+  const hasSettingsChanged =
+    communityInitAppearance &&
+    !compareCommunityAppearance(
+      communityInitAppearance,
+      communityAppearanceState
+    );
 
-  const onSave = useCallback(async () => {
-    if (!communityAppearance || !communityId) return;
+  const saveCommunityAppearance = async () => {
+    if (uploading) return;
+    if (!community?.id) return;
     if (!hasSettingsChanged) return;
+    setUploading(true);
     const result = await setCommunityAppearance({
-      variables: { communityId, ...communityAppearanceState },
+      variables: { communityId: community.id, ...communityAppearanceState },
     }).catch(() => null);
     if (!result) {
       onOpenSnackbarAlert({
         message: FrontendError.ERR0002,
         severity: AlertSeverity.ERROR,
       });
+      setUploading(false);
       return;
     }
 
@@ -98,6 +109,7 @@ export function useSaveOrInitCommunityAppearance(
         message: result.errors[0].message,
         severity: AlertSeverity.ERROR,
       });
+      setUploading(false);
       return;
     }
 
@@ -107,6 +119,7 @@ export function useSaveOrInitCommunityAppearance(
         message: communityResponse.errors[0].message,
         severity: AlertSeverity.ERROR,
       });
+      setUploading(false);
       return;
     }
 
@@ -115,9 +128,29 @@ export function useSaveOrInitCommunityAppearance(
         message: `Community settings updated successfully`,
         severity: AlertSeverity.SUCCESS,
       });
+      setUploading(false);
       return;
     }
-  }, [communityAppearance, communityAppearanceState]);
+  };
 
-  return { onInit, onSave, hasSettingsChanged };
+  const { open } = useAlertDialog({
+    title: "Discard unsaved changes before leaving?",
+    text:
+      "You have made some changes to your community, do you wish to leave this menu without saving?",
+    confirmButtonName: "Discard",
+    onConfirm: initiateCommunityAppearance,
+  });
+
+  const confirmDiscardAppearanceChange = useCallback(() => {
+    if (hasSettingsChanged) {
+      open();
+    }
+  }, [hasSettingsChanged, initiateCommunityAppearance, open]);
+
+  return {
+    initiateCommunityAppearance,
+    saveCommunityAppearance,
+    confirmDiscardAppearanceChange,
+    hasSettingsChanged,
+  };
 }

@@ -10,6 +10,8 @@ export enum ACTION_TYPES {
   SET_COMMUNITY_BANNER_COLOR,
   SET_COMMUNITY_ICON_IMAGE,
   INIT_COMMUNITY_APPEARANCE,
+  OPEN_ALERT_DIALOG,
+  CLOSE_ALERT_DIALOG,
 }
 
 export interface Action<T> {
@@ -46,4 +48,11 @@ export interface CommunityAppearanceState {
   banner: string;
   bannerColor: string;
   icon: string;
+}
+
+export interface AlertDialogState {
+  title: string;
+  text: string;
+  onConfirm: () => void;
+  confirmButtonName: string;
 }

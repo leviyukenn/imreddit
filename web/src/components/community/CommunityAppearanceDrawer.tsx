@@ -10,11 +10,13 @@ import {
   Typography,
 } from "@material-ui/core";
 import CloseIcon from "@material-ui/icons/Close";
+import { useCallback } from "react";
+import { CommunityQuery } from "../../generated/graphql";
+import { useSaveOrInitCommunityAppearance } from "../../redux/hooks/useCommunityAppearance";
 import CommunityAppearanceEditor from "./CommunityAppearanceEditor";
 
 interface CommunityAppearanceDrawerProps {
-  onInit: () => void;
-  onSave: () => void;
+  community: CommunityQuery["community"];
 }
 const drawerWidth = 284;
 
@@ -55,10 +57,20 @@ export enum AppearanceContent {
   BACKGROUND,
 }
 
-const CommunityAppearanceDrawer = ({}: // onInit,
+const CommunityAppearanceDrawer = ({
+  community,
+}: // onInit,
 // onSave,
 CommunityAppearanceDrawerProps) => {
   const classes = useStyles();
+
+  const {
+    initiateCommunityAppearance,
+    saveCommunityAppearance,
+    confirmDiscardAppearanceChange,
+    hasSettingsChanged,
+  } = useSaveOrInitCommunityAppearance(community);
+  const onCloseDrawer = useCallback(() => {}, []);
 
   return (
     <Drawer
@@ -69,6 +81,7 @@ CommunityAppearanceDrawerProps) => {
       classes={{
         paper: classes.drawerPaper,
       }}
+      onClose={confirmDiscardAppearanceChange}
     >
       <Box className={classes.drawerHeader} justifyContent="space-between">
         <Typography variant="h6">Appearance</Typography>
@@ -85,6 +98,8 @@ CommunityAppearanceDrawerProps) => {
           variant="contained"
           color="primary"
           className={classes.saveButton}
+          onClick={saveCommunityAppearance}
+          disabled={!hasSettingsChanged}
         >
           Save
         </Button>
@@ -93,6 +108,7 @@ CommunityAppearanceDrawerProps) => {
           variant="contained"
           color="primary"
           className={classes.cancelButton}
+          onClick={initiateCommunityAppearance}
         >
           Cancel
         </Button>
