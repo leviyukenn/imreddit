@@ -11,8 +11,8 @@ mutation CreateCommunity(
     }
   ) {
     community {
-      name
       id
+      name
     }
     errors {
       ...RegularErrors

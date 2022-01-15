@@ -6,7 +6,9 @@ import {
   Typography,
 } from "@material-ui/core";
 import React from "react";
+import { SERVER_URL } from "../../const/const";
 import { RegularCommunityFragment } from "../../generated/graphql";
+import { useCommunityAppearance } from "../../redux/hooks/useCommunityAppearance";
 import CommunityJoinLeaveButton from "./CommunityJoinLeaveButton";
 
 interface CommunityHeaderProps {
@@ -45,12 +47,14 @@ const useStyles = makeStyles((theme: Theme) =>
       border: "4px solid #fff",
       height: "72px",
       width: "72px",
+      background: "#0E75D2",
     },
     pinnedCommunityIcon: {
       borderRadius: "100%",
       border: "4px solid #fff",
       height: "56px",
       width: "56px",
+      background: "#0E75D2",
     },
 
     communityName: {
@@ -80,6 +84,8 @@ const useStyles = makeStyles((theme: Theme) =>
 const CommunityHeader = React.forwardRef<HTMLDivElement, CommunityHeaderProps>(
   ({ community, pinnedHeader }, ref) => {
     const classes = useStyles();
+    const { icon } = useCommunityAppearance();
+
     return (
       <div
         ref={ref}
@@ -94,7 +100,7 @@ const CommunityHeader = React.forwardRef<HTMLDivElement, CommunityHeaderProps>(
             }
           >
             <img
-              src="https://styles.redditmedia.com/t5_12p4l2/styles/communityIcon_buxnyc6v9pq61.png?width=256&s=88c56db4f5865262d369b99d559922921b8d2991"
+              src={icon ? SERVER_URL + icon : undefined}
               className={
                 pinnedHeader
                   ? classes.pinnedCommunityIcon

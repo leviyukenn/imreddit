@@ -6,6 +6,10 @@ export enum ACTION_TYPES {
   CLEAR_SNACKBAR_ALERT_MESSAGE,
   SET_COMMUNITY_BACKGROUND_IMAGE,
   SET_COMMUNITY_BACKGROUND_COLOR,
+  SET_COMMUNITY_BANNER_IMAGE,
+  SET_COMMUNITY_BANNER_COLOR,
+  SET_COMMUNITY_ICON_IMAGE,
+  INIT_COMMUNITY_APPEARANCE,
 }
 
 export interface Action<T> {
@@ -36,7 +40,10 @@ export interface SnackbarAlertState {
   severity: AlertSeverity;
 }
 
-export interface CommunityImagesState {
+export interface CommunityAppearanceState {
   background: string;
   backgroundColor: string;
+  banner: string;
+  bannerColor: string;
+  icon: string;
 }

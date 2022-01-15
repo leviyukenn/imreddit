@@ -1,19 +1,21 @@
 import {
   Box,
+  Button,
   createStyles,
   Divider,
   Drawer,
   IconButton,
   makeStyles,
   Theme,
+  Typography,
 } from "@material-ui/core";
-import ChevronLeftIcon from "@material-ui/icons/ChevronLeft";
 import CloseIcon from "@material-ui/icons/Close";
-import { useMemo, useState } from "react";
-import CommunityApearanceMenuList from "./CommunityApearanceMenuList";
-import CommunityBackgroudEditor from "./CommunityBackgroudEditor";
+import CommunityAppearanceEditor from "./CommunityAppearanceEditor";
 
-interface CommunityAppearanceDrawerProps {}
+interface CommunityAppearanceDrawerProps {
+  onInit: () => void;
+  onSave: () => void;
+}
 const drawerWidth = 284;
 
 const useStyles = makeStyles((theme: Theme) =>
@@ -31,6 +33,20 @@ const useStyles = makeStyles((theme: Theme) =>
       padding: theme.spacing(0, 1),
       // necessary for content to be below app bar
     },
+    saveButton: {
+      borderRadius: "9999px",
+      fontWeight: 700,
+      textTransform: "none",
+    },
+    cancelButton: {
+      marginTop: "1em",
+      borderRadius: "9999px",
+      fontWeight: 700,
+      textTransform: "none",
+    },
+    buttonContainer: {
+      padding: "0.5rem 1rem",
+    },
   })
 );
 
@@ -39,30 +55,11 @@ export enum AppearanceContent {
   BACKGROUND,
 }
 
-const CommunityAppearanceDrawer = ({}: CommunityAppearanceDrawerProps) => {
+const CommunityAppearanceDrawer = ({}: // onInit,
+// onSave,
+CommunityAppearanceDrawerProps) => {
   const classes = useStyles();
 
-  const [showWhichContent, setShowWhichContent] = useState<AppearanceContent>(
-    AppearanceContent.MENU
-  );
-
-  const content = useMemo(() => {
-    switch (showWhichContent) {
-      case AppearanceContent.MENU:
-        return (
-          <CommunityApearanceMenuList
-            setShowWhichContent={setShowWhichContent}
-          />
-        );
-      case AppearanceContent.BACKGROUND:
-        return <CommunityBackgroudEditor />;
-
-      default:
-        return null;
-    }
-  }, [showWhichContent]);
-
-  const isMenu = showWhichContent === AppearanceContent.MENU;
   return (
     <Drawer
       className={classes.drawer}
@@ -73,24 +70,33 @@ const CommunityAppearanceDrawer = ({}: CommunityAppearanceDrawerProps) => {
         paper: classes.drawerPaper,
       }}
     >
-      <Box
-        className={classes.drawerHeader}
-        justifyContent={isMenu ? "flex-end" : "space-between"}
-      >
-        {!isMenu ? (
-          <IconButton
-            onClick={() => setShowWhichContent(AppearanceContent.MENU)}
-          >
-            <ChevronLeftIcon />
-          </IconButton>
-        ) : null}
+      <Box className={classes.drawerHeader} justifyContent="space-between">
+        <Typography variant="h6">Appearance</Typography>
         <IconButton onClick={() => {}}>
           <CloseIcon />
         </IconButton>
       </Box>
       <Divider />
-      {content}
+      <CommunityAppearanceEditor />
       <Divider />
+      <Box className={classes.buttonContainer}>
+        <Button
+          fullWidth
+          variant="contained"
+          color="primary"
+          className={classes.saveButton}
+        >
+          Save
+        </Button>
+        <Button
+          fullWidth
+          variant="contained"
+          color="primary"
+          className={classes.cancelButton}
+        >
+          Cancel
+        </Button>
+      </Box>
     </Drawer>
   );
 };

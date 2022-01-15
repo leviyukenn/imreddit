@@ -1,11 +1,12 @@
-import React, { useMemo } from "react";
+import React, { useEffect, useMemo } from "react";
 import {
   CommunityQuery,
   useCommunityQuery,
   useUserRoleQuery,
 } from "../../generated/graphql";
+import { useSaveOrInitCommunityAppearance } from "../../redux/hooks/useCommunityAppearance";
 import { useIsAuth } from "../../utils/hooks/useIsAuth";
-import HomeLayout from "../HomeLayout";
+import ContentLayout from "../ContentLayout";
 import CreatePostCard from "../post/CreatePostCard";
 import { LoadingPostCard } from "../post/PostCard";
 import { CommunityPostsInfiniteScroll } from "../post/PostInfiniteScroll";
@@ -13,6 +14,7 @@ import CommunityAppearanceDrawer from "./CommunityAppearanceDrawer";
 import CommunityBanner from "./CommunityBanner";
 import CommunityDescription from "./CommunityDescription";
 import CommunityDescriptionModeratorMode from "./CommunityDescriptionModerorMode";
+import CommunityHomeContainer from "./CommunityHomeContainer";
 
 interface CommunityProps {
   communityName: string;
@@ -56,23 +58,55 @@ const CommunityHomePage = ({
     communityName,
     serverSideCommunity
   );
+  const { onInit, onSave } = useSaveOrInitCommunityAppearance(
+    community?.id,
+    community
+      ? {
+          background: community.background,
+          backgroundColor: community.backgroundColor,
+          banner: community.banner,
+          bannerColor: community.bannerColor,
+          icon: community.icon,
+        }
+      : undefined
+  );
 
-  if (!community) return <LoadingPostCard />;
+  useEffect(() => {
+    if (!community) {
+      return;
+    }
+    onInit();
+  }, [community]);
 
   const communityDescription = useMemo(() => {
+    if (!community) {
+      return undefined;
+    }
     if (userRole?.isModerator) {
       return <CommunityDescriptionModeratorMode community={community} />;
     }
     return <CommunityDescription community={community} />;
   }, [userRole, community]);
 
-  return (
-    <HomeLayout
-      mainContent={<CommunityHeartContent communityName={communityName} />}
-      rightSideContent={communityDescription}
+  const communityAppearanceDrawer = useMemo(() => {
+    if (!community || !userRole?.isModerator) {
+      return undefined;
+    }
+    return <CommunityAppearanceDrawer {...{ onSave, onInit }} />;
+  }, [userRole, community]);
+
+  return community ? (
+    <CommunityHomeContainer
       banner={<CommunityBanner community={community} />}
-      drawer={<CommunityAppearanceDrawer />}
-    />
+      drawer={communityAppearanceDrawer}
+    >
+      <ContentLayout
+        mainContent={<CommunityHeartContent communityName={communityName} />}
+        rightSideContent={communityDescription}
+      />
+    </CommunityHomeContainer>
+  ) : (
+    <LoadingPostCard />
   );
 };
 

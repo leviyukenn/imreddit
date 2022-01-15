@@ -4,6 +4,11 @@ fragment RegularCommunity on Community {
   updatedAt
   name
   description
+  background
+  banner
+  icon
+  backgroundColor
+  bannerColor
   topics {
     title
   }

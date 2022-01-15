@@ -6,8 +6,6 @@ import {
   Theme,
 } from "@material-ui/core";
 import React from "react";
-import { SERVER_URL } from "../const/const";
-import { useCommunityAppearance } from "../redux/hooks/useCommunityAppearance";
 import NavBar from "./navbar/NavBar";
 
 interface ContainerProps extends BoxProps {
@@ -41,40 +39,27 @@ const useStyles = makeStyles((theme: Theme) =>
   })
 );
 
-const Container = ({
+const HomeContainer = ({
   children,
-  drawer,
-  banner,
   backgroundMode = "grey",
 }: ContainerProps) => {
   const classes = useStyles();
-  const { background, backgroundColor } = useCommunityAppearance();
-  console.log(backgroundColor);
 
   return (
     <Box display="flex">
-      {drawer}
-      <Box
-        className={`${classes.root} ${
-          backgroundMode === "grey"
-            ? classes.greyBackground
-            : classes.lightBackground
-        }`}
-        style={
-          background || backgroundColor
-            ? {
-                background: `${backgroundColor} url(${
-                  SERVER_URL + background
-                }) center center / cover no-repeat fixed`,
-              }
-            : undefined
-        }
-      >
+      <Box className={classes.root}>
         <NavBar />
-        {banner}
-        <Box className={classes.mainContentBox}>{children}</Box>
+        <Box
+          className={`${classes.mainContentBox} ${
+            backgroundMode === "grey"
+              ? classes.greyBackground
+              : classes.lightBackground
+          }`}
+        >
+          {children}
+        </Box>
       </Box>
     </Box>
   );
 };
-export default Container;
+export default HomeContainer;

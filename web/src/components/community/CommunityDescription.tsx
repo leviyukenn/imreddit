@@ -11,7 +11,8 @@ import {
   Typography,
 } from "@material-ui/core";
 import CakeIcon from "@material-ui/icons/Cake";
-import React from "react";
+import { useRouter } from "next/router";
+import React, { useCallback } from "react";
 import { RegularCommunityFragment } from "../../generated/graphql";
 
 interface CommunityDescriptionProps {
@@ -54,6 +55,11 @@ const useStyles = makeStyles((theme: Theme) =>
 
 const CommunityDescription = ({ community }: CommunityDescriptionProps) => {
   const classes = useStyles();
+  const router = useRouter();
+
+  const goToCreatePost = useCallback(() => {
+    router.push("/create-post");
+  }, [router]);
 
   return (
     <Card className={classes.root}>
@@ -93,6 +99,7 @@ const CommunityDescription = ({ community }: CommunityDescriptionProps) => {
           variant="contained"
           color="primary"
           className={classes.createPostButton}
+          onClick={goToCreatePost}
         >
           Create Post
         </Button>

@@ -1,7 +1,6 @@
 import { Box, createStyles, Fab, makeStyles, Theme } from "@material-ui/core";
 import NavigationIcon from "@material-ui/icons/Navigation";
 import { useCallback } from "react";
-import Container from "./Container";
 import PostDetailModal from "./post/PostDetailModal";
 
 const useStyles = makeStyles((theme: Theme) =>
@@ -36,15 +35,11 @@ const useStyles = makeStyles((theme: Theme) =>
 interface HomeContainerProps {
   mainContent: JSX.Element;
   rightSideContent?: JSX.Element;
-  banner?: JSX.Element;
-  drawer?: JSX.Element;
 }
 
-const HomeContainer = ({
+const ContentLayout = ({
   mainContent,
   rightSideContent,
-  banner,
-  drawer,
 }: HomeContainerProps) => {
   const classes = useStyles();
 
@@ -53,7 +48,7 @@ const HomeContainer = ({
   }, []);
 
   return (
-    <Container banner={banner} drawer={drawer}>
+    <>
       <Box display="flex" justifyContent="center">
         <Box className={classes.heartContainer}>{mainContent}</Box>
         <Box className={classes.rightSideContainer}>
@@ -70,8 +65,8 @@ const HomeContainer = ({
         </Box>
       </Box>
       <PostDetailModal />
-    </Container>
+    </>
   );
 };
 
-export default HomeContainer;
+export default ContentLayout;

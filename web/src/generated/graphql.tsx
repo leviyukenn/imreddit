@@ -24,8 +24,21 @@ export type Community = {
   updatedAt: Scalars['String'];
   name: Scalars['String'];
   description: Scalars['String'];
+  background: Scalars['String'];
+  backgroundColor: Scalars['String'];
+  bannerColor: Scalars['String'];
+  icon: Scalars['String'];
+  banner: Scalars['String'];
   topics: Array<Topic>;
   totalMemberships: Scalars['Int'];
+};
+
+export type CommunityAppearanceInput = {
+  background: Scalars['String'];
+  banner: Scalars['String'];
+  icon: Scalars['String'];
+  backgroundColor: Scalars['String'];
+  bannerColor: Scalars['String'];
 };
 
 export type CommunityResponse = {
@@ -98,6 +111,7 @@ export type Mutation = {
   uploadImage: UploadResponse;
   createCommunity: CommunityResponse;
   editCommunityDescription: CommunityResponse;
+  setCommunityAppearance: CommunityResponse;
   joinCommunity: RoleResponse;
   leaveCommunity: RoleResponse;
   vote: Scalars['Int'];
@@ -153,6 +167,12 @@ export type MutationCreateCommunityArgs = {
 
 export type MutationEditCommunityDescriptionArgs = {
   description: Scalars['String'];
+  communityId: Scalars['String'];
+};
+
+
+export type MutationSetCommunityAppearanceArgs = {
+  communityAppearance: CommunityAppearanceInput;
   communityId: Scalars['String'];
 };
 
@@ -311,7 +331,7 @@ export type VoteInput = {
 
 export type RegularCommunityFragment = (
   { __typename?: 'Community' }
-  & Pick<Community, 'id' | 'createdAt' | 'updatedAt' | 'name' | 'description' | 'totalMemberships'>
+  & Pick<Community, 'id' | 'createdAt' | 'updatedAt' | 'name' | 'description' | 'background' | 'banner' | 'icon' | 'backgroundColor' | 'bannerColor' | 'totalMemberships'>
   & { topics: Array<(
     { __typename?: 'Topic' }
     & Pick<Topic, 'title'>
@@ -397,7 +417,7 @@ export type CreateCommunityMutation = (
     { __typename?: 'CommunityResponse' }
     & { community?: Maybe<(
       { __typename?: 'Community' }
-      & Pick<Community, 'name' | 'id'>
+      & Pick<Community, 'id' | 'name'>
     )>, errors?: Maybe<Array<(
       { __typename?: 'FieldError' }
       & RegularErrorsFragment
@@ -572,6 +592,30 @@ export type RegisterMutation = (
   ) }
 );
 
+export type SetCommunityAppearanceMutationVariables = Exact<{
+  communityId: Scalars['String'];
+  background: Scalars['String'];
+  backgroundColor: Scalars['String'];
+  bannerColor: Scalars['String'];
+  banner: Scalars['String'];
+  icon: Scalars['String'];
+}>;
+
+
+export type SetCommunityAppearanceMutation = (
+  { __typename?: 'Mutation' }
+  & { setCommunityAppearance: (
+    { __typename?: 'CommunityResponse' }
+    & { community?: Maybe<(
+      { __typename?: 'Community' }
+      & RegularCommunityFragment
+    )>, errors?: Maybe<Array<(
+      { __typename?: 'FieldError' }
+      & RegularErrorsFragment
+    )>> }
+  ) }
+);
+
 export type UploadImageMutationVariables = Exact<{
   file: Scalars['Upload'];
 }>;
@@ -624,7 +668,7 @@ export type CommunitiesQuery = (
   { __typename?: 'Query' }
   & { communities: Array<(
     { __typename?: 'Community' }
-    & Pick<Community, 'id' | 'name'>
+    & Pick<Community, 'id' | 'name' | 'icon'>
   )> }
 );
 
@@ -751,6 +795,11 @@ export const RegularCommunityFragmentDoc = gql`
   updatedAt
   name
   description
+  background
+  banner
+  icon
+  backgroundColor
+  bannerColor
   topics {
     title
   }
@@ -865,8 +914,8 @@ export const CreateCommunityDocument = gql`
     createCommunityInput: {name: $name, description: $description, topicIds: $topicIds}
   ) {
     community {
-      name
       id
+      name
     }
     errors {
       ...RegularErrors
@@ -1251,6 +1300,53 @@ export function useRegisterMutation(baseOptions?: Apollo.MutationHookOptions<Reg
 export type RegisterMutationHookResult = ReturnType<typeof useRegisterMutation>;
 export type RegisterMutationResult = Apollo.MutationResult<RegisterMutation>;
 export type RegisterMutationOptions = Apollo.BaseMutationOptions<RegisterMutation, RegisterMutationVariables>;
+export const SetCommunityAppearanceDocument = gql`
+    mutation SetCommunityAppearance($communityId: String!, $background: String!, $backgroundColor: String!, $bannerColor: String!, $banner: String!, $icon: String!) {
+  setCommunityAppearance(
+    communityId: $communityId
+    communityAppearance: {background: $background, banner: $banner, backgroundColor: $backgroundColor, bannerColor: $bannerColor, icon: $icon}
+  ) {
+    community {
+      ...RegularCommunity
+    }
+    errors {
+      ...RegularErrors
+    }
+  }
+}
+    ${RegularCommunityFragmentDoc}
+${RegularErrorsFragmentDoc}`;
+export type SetCommunityAppearanceMutationFn = Apollo.MutationFunction<SetCommunityAppearanceMutation, SetCommunityAppearanceMutationVariables>;
+
+/**
+ * __useSetCommunityAppearanceMutation__
+ *
+ * To run a mutation, you first call `useSetCommunityAppearanceMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useSetCommunityAppearanceMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [setCommunityAppearanceMutation, { data, loading, error }] = useSetCommunityAppearanceMutation({
+ *   variables: {
+ *      communityId: // value for 'communityId'
+ *      background: // value for 'background'
+ *      backgroundColor: // value for 'backgroundColor'
+ *      bannerColor: // value for 'bannerColor'
+ *      banner: // value for 'banner'
+ *      icon: // value for 'icon'
+ *   },
+ * });
+ */
+export function useSetCommunityAppearanceMutation(baseOptions?: Apollo.MutationHookOptions<SetCommunityAppearanceMutation, SetCommunityAppearanceMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<SetCommunityAppearanceMutation, SetCommunityAppearanceMutationVariables>(SetCommunityAppearanceDocument, options);
+      }
+export type SetCommunityAppearanceMutationHookResult = ReturnType<typeof useSetCommunityAppearanceMutation>;
+export type SetCommunityAppearanceMutationResult = Apollo.MutationResult<SetCommunityAppearanceMutation>;
+export type SetCommunityAppearanceMutationOptions = Apollo.BaseMutationOptions<SetCommunityAppearanceMutation, SetCommunityAppearanceMutationVariables>;
 export const UploadImageDocument = gql`
     mutation UploadImage($file: Upload!) {
   uploadImage(image: $file) {
@@ -1362,6 +1458,7 @@ export const CommunitiesDocument = gql`
   communities(userId: $userId) {
     id
     name
+    icon
   }
 }
     `;
@@ -1685,13 +1782,18 @@ export function useUserRolesLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<
 export type UserRolesQueryHookResult = ReturnType<typeof useUserRolesQuery>;
 export type UserRolesLazyQueryHookResult = ReturnType<typeof useUserRolesLazyQuery>;
 export type UserRolesQueryResult = Apollo.QueryResult<UserRolesQuery, UserRolesQueryVariables>;
-export type CommunityKeySpecifier = ('id' | 'createdAt' | 'updatedAt' | 'name' | 'description' | 'topics' | 'totalMemberships' | CommunityKeySpecifier)[];
+export type CommunityKeySpecifier = ('id' | 'createdAt' | 'updatedAt' | 'name' | 'description' | 'background' | 'backgroundColor' | 'bannerColor' | 'icon' | 'banner' | 'topics' | 'totalMemberships' | CommunityKeySpecifier)[];
 export type CommunityFieldPolicy = {
 	id?: FieldPolicy<any> | FieldReadFunction<any>,
 	createdAt?: FieldPolicy<any> | FieldReadFunction<any>,
 	updatedAt?: FieldPolicy<any> | FieldReadFunction<any>,
 	name?: FieldPolicy<any> | FieldReadFunction<any>,
 	description?: FieldPolicy<any> | FieldReadFunction<any>,
+	background?: FieldPolicy<any> | FieldReadFunction<any>,
+	backgroundColor?: FieldPolicy<any> | FieldReadFunction<any>,
+	bannerColor?: FieldPolicy<any> | FieldReadFunction<any>,
+	icon?: FieldPolicy<any> | FieldReadFunction<any>,
+	banner?: FieldPolicy<any> | FieldReadFunction<any>,
 	topics?: FieldPolicy<any> | FieldReadFunction<any>,
 	totalMemberships?: FieldPolicy<any> | FieldReadFunction<any>
 };
@@ -1718,7 +1820,7 @@ export type ImageFieldPolicy = {
 	caption?: FieldPolicy<any> | FieldReadFunction<any>,
 	link?: FieldPolicy<any> | FieldReadFunction<any>
 };
-export type MutationKeySpecifier = ('changePassword' | 'forgotPassword' | 'register' | 'login' | 'logout' | 'googleAuthentication' | 'createPost' | 'deletePost' | 'uploadImage' | 'createCommunity' | 'editCommunityDescription' | 'joinCommunity' | 'leaveCommunity' | 'vote' | 'createTopic' | MutationKeySpecifier)[];
+export type MutationKeySpecifier = ('changePassword' | 'forgotPassword' | 'register' | 'login' | 'logout' | 'googleAuthentication' | 'createPost' | 'deletePost' | 'uploadImage' | 'createCommunity' | 'editCommunityDescription' | 'setCommunityAppearance' | 'joinCommunity' | 'leaveCommunity' | 'vote' | 'createTopic' | MutationKeySpecifier)[];
 export type MutationFieldPolicy = {
 	changePassword?: FieldPolicy<any> | FieldReadFunction<any>,
 	forgotPassword?: FieldPolicy<any> | FieldReadFunction<any>,
@@ -1731,6 +1833,7 @@ export type MutationFieldPolicy = {
 	uploadImage?: FieldPolicy<any> | FieldReadFunction<any>,
 	createCommunity?: FieldPolicy<any> | FieldReadFunction<any>,
 	editCommunityDescription?: FieldPolicy<any> | FieldReadFunction<any>,
+	setCommunityAppearance?: FieldPolicy<any> | FieldReadFunction<any>,
 	joinCommunity?: FieldPolicy<any> | FieldReadFunction<any>,
 	leaveCommunity?: FieldPolicy<any> | FieldReadFunction<any>,
 	vote?: FieldPolicy<any> | FieldReadFunction<any>,

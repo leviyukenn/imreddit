@@ -5,7 +5,8 @@ import {
   usePostDetailQuery,
 } from "../../generated/graphql";
 import CommunityDescription from "../community/CommunityDescription";
-import HomeContainer from "../HomeLayout";
+import CommunityHomeContainer from "../community/CommunityHomeContainer";
+import ContentLayout from "../ContentLayout";
 import PostDetail from "./PostDetail";
 
 interface PostDetaiPageProps {
@@ -46,12 +47,14 @@ const PostDetailPage = ({ postId, serverSidePost }: PostDetaiPageProps) => {
   const { post, community } = usePostDetail(postId, serverSidePost);
 
   return (
-    <HomeContainer
-      mainContent={<PostDetail post={post} />}
-      rightSideContent={
-        community ? <CommunityDescription community={community} /> : undefined
-      }
-    />
+    <CommunityHomeContainer>
+      <ContentLayout
+        mainContent={<PostDetail post={post} />}
+        rightSideContent={
+          community ? <CommunityDescription community={community} /> : undefined
+        }
+      />
+    </CommunityHomeContainer>
   );
 };
 

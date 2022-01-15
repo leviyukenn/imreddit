@@ -1,4 +1,5 @@
-import HomeLayout from "../components/HomeLayout";
+import ContentLayout from "../components/ContentLayout";
+import HomeContainer from "../components/HomeContainer";
 import CreatePostCard from "../components/post/CreatePostCard";
 import { HomePostsInfiniteScroll } from "../components/post/PostInfiniteScroll";
 import { useIsAuth } from "../utils/hooks/useIsAuth";
@@ -13,7 +14,11 @@ const Index = () => {
       <HomePostsInfiniteScroll />
     </>
   );
-  return <HomeLayout mainContent={<MainContent />} />;
+  return (
+    <HomeContainer>
+      <ContentLayout mainContent={<MainContent />} />
+    </HomeContainer>
+  );
 };
 
 export default Index;

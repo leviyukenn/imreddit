@@ -1,0 +1,26 @@
+mutation SetCommunityAppearance(
+  $communityId: String!
+  $background: String!
+  $backgroundColor: String!
+  $bannerColor: String!
+  $banner: String!
+  $icon: String!
+) {
+  setCommunityAppearance(
+    communityId: $communityId
+    communityAppearance: {
+      background: $background
+      banner: $banner
+      backgroundColor: $backgroundColor
+      bannerColor: $bannerColor
+      icon: $icon
+    }
+  ) {
+    community {
+      ...RegularCommunity
+    }
+    errors {
+      ...RegularErrors
+    }
+  }
+}

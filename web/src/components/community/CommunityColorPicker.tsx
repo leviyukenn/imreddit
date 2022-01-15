@@ -13,7 +13,6 @@ import KeyboardArrowDownIcon from "@material-ui/icons/KeyboardArrowDown";
 import KeyboardArrowUpIcon from "@material-ui/icons/KeyboardArrowUp";
 import React, { useCallback, useRef } from "react";
 import { ColorResult, TwitterPicker } from "react-color";
-import { useCommunityAppearance } from "../../redux/hooks/useCommunityAppearance";
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
     colorPickerContainer: {
@@ -38,10 +37,28 @@ const useStyles = makeStyles((theme: Theme) =>
     },
   })
 );
+const colorList = [
+  "#FF6900",
+  "#FCB900",
+  "#7BDCB5",
+  "#00D084",
+  "#8ED1FC",
+  "#0693E3",
+  "#DAE0E6",
+  "#EB144C",
+  "#F78DA7",
+  "#9900EF",
+];
 
-interface CommunityColorPickerProps {}
+interface CommunityColorPickerProps {
+  color: string;
+  setColor: (colorHex: string) => void;
+}
 
-const CommunityColorPicker = ({}: CommunityColorPickerProps) => {
+const CommunityColorPicker = ({
+  color,
+  setColor,
+}: CommunityColorPickerProps) => {
   const classes = useStyles();
   const divElementRef = useRef<HTMLDivElement>(null);
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
@@ -49,10 +66,6 @@ const CommunityColorPicker = ({}: CommunityColorPickerProps) => {
   const handleClick = useCallback(() => {
     setAnchorEl((prev) => (prev ? null : divElementRef.current));
   }, [divElementRef]);
-  const {
-    backgroundColor: color,
-    setCommunityBackgroundColor: setColor,
-  } = useCommunityAppearance();
 
   return (
     <>
@@ -87,6 +100,7 @@ const CommunityColorPicker = ({}: CommunityColorPickerProps) => {
             <Paper>
               <ClickAwayListener onClickAway={() => !open || setAnchorEl(null)}>
                 <TwitterPicker
+                  colors={colorList}
                   triangle="top-right"
                   color={color}
                   onChangeComplete={(color: ColorResult) => setColor(color.hex)}

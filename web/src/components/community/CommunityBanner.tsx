@@ -1,7 +1,9 @@
 import { Box, createStyles, makeStyles, Theme } from "@material-ui/core";
-import React from "react";
+import React, { useMemo } from "react";
 import { useInView } from "react-intersection-observer";
+import { SERVER_URL } from "../../const/const";
 import { RegularCommunityFragment } from "../../generated/graphql";
+import { useCommunityAppearance } from "../../redux/hooks/useCommunityAppearance";
 import CommunityHeader from "./CommunityHeader";
 
 interface CommunityBannerProps {
@@ -10,8 +12,6 @@ interface CommunityBannerProps {
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
     bannerImage: {
-      background:
-        'url("https://styles.redditmedia.com/t5_12p4l2/styles/bannerBackgroundImage_w5jk6fw1kg181.png?width=4000&s=681933d1131c611f797fa5827040908dadb60ffa") center center / cover no-repeat',
       height: 228,
     },
   })
@@ -20,10 +20,24 @@ const useStyles = makeStyles((theme: Theme) =>
 const CommunityBanner = ({ community }: CommunityBannerProps) => {
   const classes = useStyles();
   const { ref, inView } = useInView({ threshold: 0.5 });
+  const { banner, bannerColor } = useCommunityAppearance();
+  const bannerStyle = useMemo(() => {
+    if (banner)
+      return {
+        background: `url(${
+          SERVER_URL + banner
+        }) center center / cover no-repeat ${bannerColor}`,
+      };
+
+    if (bannerColor)
+      return {
+        background: bannerColor,
+      };
+  }, [banner, bannerColor]);
 
   return (
     <>
-      <Box className={classes.bannerImage} />
+      <Box className={classes.bannerImage} style={bannerStyle} />
       <CommunityHeader ref={ref} community={community} pinnedHeader={false} />
       {!inView ? (
         <CommunityHeader community={community} pinnedHeader={true} />
