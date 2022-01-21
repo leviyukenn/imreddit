@@ -12,12 +12,14 @@ import SearchIcon from "@material-ui/icons/Search";
 import { Autocomplete } from "@material-ui/lab";
 import NextLink from "next/link";
 import React, { useEffect, useMemo } from "react";
+import { SERVER_URL } from "../../const/const";
 import { useCommunitiesQuery } from "../../generated/graphql";
 import {
   CommunitySelectionOption,
   CommunitySelectionOptionGroupType,
 } from "../../utils/factory/communitySelectionOption";
 import { createCommunityPageLink } from "../../utils/links";
+import DefaultCommunityIcon from "../utility/DefaultCommunityIcon";
 
 interface SelectCommunityProps {
   setCommunityId: React.Dispatch<React.SetStateAction<string>>;
@@ -80,6 +82,13 @@ const useStyles = makeStyles((theme: Theme) =>
     },
     text: {
       flexGrow: 1,
+      marginLeft: "0.5rem",
+    },
+    iconImage: {
+      width: 20,
+      height: 20,
+      backgroundColor: "rgb(0 121 211)",
+      borderRadius: "100%",
     },
   })
 );
@@ -97,8 +106,8 @@ function useCommunitySelectionOption(userId: string) {
     const myCommunities = communities.map((community) =>
       CommunitySelectionOption.createOption({
         id: community.id,
-        name: community.name,
-        icon: "",
+        name: "r/" + community.name,
+        icon: community.icon || <DefaultCommunityIcon />,
         link: "",
         group: CommunitySelectionOptionGroupType.MY_COMMUNITIES,
       })
@@ -130,6 +139,21 @@ export default function SelectCommunity({
     setPendingValue,
   ] = React.useState<CommunitySelectionOption | null>(null);
 
+  const inputIcon = useMemo(() => {
+    if (!pendingValue?.icon) {
+      return <span className={classes.circle}></span>;
+    }
+    if (typeof pendingValue.icon === "string") {
+      return (
+        <img
+          src={SERVER_URL + pendingValue.icon}
+          className={classes.iconImage}
+        />
+      );
+    }
+    return pendingValue.icon;
+  }, [pendingValue]);
+
   useEffect(() => {
     if (!pendingValue) {
       setCommunityId("");
@@ -154,7 +178,11 @@ export default function SelectCommunity({
       groupBy={(option) => option.group}
       renderOption={(option) => (
         <React.Fragment>
-          {option.icon ? option.icon : null}
+          {option.icon && typeof option.icon === "string" ? (
+            <img src={SERVER_URL + option.icon} className={classes.iconImage} />
+          ) : (
+            option.icon
+          )}
           {option.link ? (
             <NextLink href={option.link} passHref>
               <Link
@@ -188,7 +216,7 @@ export default function SelectCommunity({
               ] ? (
                 <SearchIcon />
               ) : (
-                <span className={classes.circle}></span>
+                inputIcon
               )
             }
             endAdornment={

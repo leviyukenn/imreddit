@@ -2,6 +2,7 @@ import { GetStaticPaths, GetStaticProps } from "next";
 import { useRouter } from "next/router";
 import { useMemo } from "react";
 import client from "../../apollo-client/apollo-client";
+import CommunityHomeHeartContent from "../../components/community/CommunityHomeHeartContent";
 import CommunityHomePage from "../../components/community/CommunityHomePage";
 import PostDetailPage from "../../components/post/PostDetailPage";
 import {
@@ -14,7 +15,6 @@ import {
   PostDetailDocument,
   PostDetailQuery,
 } from "../../generated/graphql";
-import PostDetailModal from "../../components/post/PostDetailModal";
 
 export const getStaticPaths: GetStaticPaths = async () => {
   const {
@@ -109,12 +109,19 @@ const CommunityPostHome = ({
   return (
     <>
       {isPostDetailPage ? (
-        <PostDetailPage postId={postId} serverSidePost={serverSidePost} />
+        <CommunityHomePage
+          communityName={communityName}
+          serverSideCommunity={serverSideCommunity}
+        >
+          <PostDetailPage postId={postId} serverSidePost={serverSidePost} />
+        </CommunityHomePage>
       ) : communityName ? (
         <CommunityHomePage
           communityName={communityName}
           serverSideCommunity={serverSideCommunity}
-        />
+        >
+          <CommunityHomeHeartContent communityName={communityName} />
+        </CommunityHomePage>
       ) : null}
     </>
   );

@@ -9,6 +9,7 @@ import React from "react";
 import { SERVER_URL } from "../../const/const";
 import { RegularCommunityFragment } from "../../generated/graphql";
 import { useCommunityAppearance } from "../../redux/hooks/useCommunityAppearance";
+import DefaultCommunityIcon from "../utility/DefaultCommunityIcon";
 import CommunityJoinLeaveButton from "./CommunityJoinLeaveButton";
 
 interface CommunityHeaderProps {
@@ -42,19 +43,39 @@ const useStyles = makeStyles((theme: Theme) =>
     pinnedCommunityInfoContainer: {
       display: "flex",
     },
-    communityIcon: {
+    communityIconImage: {
       borderRadius: "100%",
       border: "4px solid #fff",
       height: "72px",
       width: "72px",
       background: "#0E75D2",
     },
-    pinnedCommunityIcon: {
+    pinnedCommunityIconImage: {
       borderRadius: "100%",
       border: "4px solid #fff",
       height: "56px",
       width: "56px",
       background: "#0E75D2",
+    },
+    communityIcon: {
+      borderRadius: "100%",
+      border: "4px solid #fff",
+      height: "72px",
+      width: "72px",
+      boxSizing: "border-box",
+      background: "#ffffff",
+      display: "inline-block",
+      fill: "#0079d3",
+    },
+    pinnedCommunityIcon: {
+      borderRadius: "100%",
+      border: "4px solid #fff",
+      height: "56px",
+      width: "56px",
+      boxSizing: "border-box",
+      background: "#ffffff",
+      display: "inline-block",
+      fill: "#0079d3",
     },
 
     communityName: {
@@ -99,14 +120,24 @@ const CommunityHeader = React.forwardRef<HTMLDivElement, CommunityHeaderProps>(
                 : classes.communityInfoContainer
             }
           >
-            <img
-              src={icon ? SERVER_URL + icon : undefined}
-              className={
-                pinnedHeader
-                  ? classes.pinnedCommunityIcon
-                  : classes.communityIcon
-              }
-            />
+            {icon ? (
+              <img
+                src={SERVER_URL + icon}
+                className={
+                  pinnedHeader
+                    ? classes.pinnedCommunityIconImage
+                    : classes.communityIconImage
+                }
+              />
+            ) : (
+              <DefaultCommunityIcon
+                className={
+                  pinnedHeader
+                    ? classes.pinnedCommunityIcon
+                    : classes.communityIcon
+                }
+              />
+            )}
             <Box
               className={
                 pinnedHeader

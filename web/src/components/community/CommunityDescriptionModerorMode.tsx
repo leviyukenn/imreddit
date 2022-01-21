@@ -6,6 +6,7 @@ import {
   CardContent,
   CardHeader,
   createStyles,
+  IconButton,
   makeStyles,
   Theme,
   Typography,
@@ -18,6 +19,7 @@ import CommunityDescriptionEditor from "./CommunityDescriptionEditor";
 
 interface CommunityDescriptionProps {
   community: RegularCommunityFragment;
+  setOpenDrawer: React.Dispatch<React.SetStateAction<boolean>>;
 }
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -27,12 +29,17 @@ const useStyles = makeStyles((theme: Theme) =>
       borderRadius: 4,
     },
     headerRoot: {
-      backgroundColor: "#373c3f",
+      backgroundColor: "#0079d3",
       padding: "0.75rem",
     },
     title: {
       fontSize: "0.875rem",
       fontWeight: 700,
+      color: "#fff",
+    },
+    appearanceButton: {
+      borderRadius: "2px",
+      fontSize: "0.75rem",
       color: "#fff",
     },
     communityDescriptionContainer: {
@@ -65,6 +72,7 @@ const useStyles = makeStyles((theme: Theme) =>
 
 const CommunityDescriptionModeratorMode = ({
   community,
+  setOpenDrawer,
 }: CommunityDescriptionProps) => {
   const classes = useStyles();
   const [showDescriptionEditor, setShowDescriptionEditor] = useState<boolean>(
@@ -74,7 +82,25 @@ const CommunityDescriptionModeratorMode = ({
   return (
     <Card className={classes.root}>
       <CardHeader
-        title={"About Community"}
+        title={
+          <Box
+            display="flex"
+            justifyContent="space-between"
+            alignItems="center"
+          >
+            <Box>About Community</Box>
+            <Box>
+              <IconButton
+                size="small"
+                className={classes.appearanceButton}
+                onClick={() => setOpenDrawer(true)}
+              >
+                <EditIcon fontSize="small" />
+                Appearance
+              </IconButton>
+            </Box>
+          </Box>
+        }
         classes={{ root: classes.headerRoot, title: classes.title }}
       />
       <CardContent>

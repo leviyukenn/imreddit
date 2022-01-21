@@ -16,7 +16,9 @@ const Index = () => {
   );
   return (
     <HomeContainer>
-      <ContentLayout mainContent={<MainContent />} />
+      <ContentLayout>
+        <MainContent />
+      </ContentLayout>
     </HomeContainer>
   );
 };

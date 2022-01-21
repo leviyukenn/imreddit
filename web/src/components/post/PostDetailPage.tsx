@@ -1,12 +1,5 @@
 import React, { useMemo } from "react";
-import {
-  PostDetailQuery,
-  useCommunityQuery,
-  usePostDetailQuery,
-} from "../../generated/graphql";
-import CommunityDescription from "../community/CommunityDescription";
-import CommunityHomeContainer from "../community/CommunityHomeContainer";
-import ContentLayout from "../ContentLayout";
+import { PostDetailQuery, usePostDetailQuery } from "../../generated/graphql";
 import PostDetail from "./PostDetail";
 
 interface PostDetaiPageProps {
@@ -32,30 +25,21 @@ const usePostDetail = (
     serverSidePost,
   ]);
 
-  const { data: communityResponse } = useCommunityQuery({
-    skip: typeof window === "undefined" || !post?.community.name,
-    variables: { communityName: post?.community.name! },
-  });
+  // const { data: communityResponse } = useCommunityQuery({
+  //   skip: typeof window === "undefined" || !post?.community.name,
+  //   variables: { communityName: post?.community.name! },
+  // });
 
-  const community = useMemo(() => communityResponse?.community, [
-    communityResponse,
-  ]);
-  return { post, community };
+  // const community = useMemo(() => communityResponse?.community, [
+  //   communityResponse,
+  // ]);
+  return { post };
 };
 
 const PostDetailPage = ({ postId, serverSidePost }: PostDetaiPageProps) => {
-  const { post, community } = usePostDetail(postId, serverSidePost);
+  const { post } = usePostDetail(postId, serverSidePost);
 
-  return (
-    <CommunityHomeContainer>
-      <ContentLayout
-        mainContent={<PostDetail post={post} />}
-        rightSideContent={
-          community ? <CommunityDescription community={community} /> : undefined
-        }
-      />
-    </CommunityHomeContainer>
-  );
+  return <PostDetail post={post} />;
 };
 
 export default PostDetailPage;

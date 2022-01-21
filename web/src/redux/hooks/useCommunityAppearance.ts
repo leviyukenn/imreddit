@@ -133,24 +133,10 @@ export function useSaveOrInitCommunityAppearance(
     }
   };
 
-  const { open } = useAlertDialog({
-    title: "Discard unsaved changes before leaving?",
-    text:
-      "You have made some changes to your community, do you wish to leave this menu without saving?",
-    confirmButtonName: "Discard",
-    onConfirm: initiateCommunityAppearance,
-  });
-
-  const confirmDiscardAppearanceChange = useCallback(() => {
-    if (hasSettingsChanged) {
-      open();
-    }
-  }, [hasSettingsChanged, initiateCommunityAppearance, open]);
 
   return {
     initiateCommunityAppearance,
     saveCommunityAppearance,
-    confirmDiscardAppearanceChange,
     hasSettingsChanged,
   };
 }

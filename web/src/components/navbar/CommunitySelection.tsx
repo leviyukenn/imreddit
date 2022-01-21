@@ -5,7 +5,6 @@ import InputBase from "@material-ui/core/InputBase";
 import Popper from "@material-ui/core/Popper";
 import { createStyles, makeStyles, Theme } from "@material-ui/core/styles";
 import AddIcon from "@material-ui/icons/Add";
-import DoneIcon from "@material-ui/icons/Done";
 import ExpandMoreRoundedIcon from "@material-ui/icons/ExpandMoreRounded";
 import HomeIcon from "@material-ui/icons/Home";
 import Autocomplete, {
@@ -13,6 +12,7 @@ import Autocomplete, {
 } from "@material-ui/lab/Autocomplete";
 import NextLink from "next/link";
 import React, { useMemo, useState } from "react";
+import { SERVER_URL } from "../../const/const";
 import {
   useCommunitiesQuery,
   useUserRolesQuery,
@@ -25,6 +25,7 @@ import {
   createCommunityHomeLink,
   createCommunityPageLink,
 } from "../../utils/links";
+import DefaultCommunityIcon from "../utility/DefaultCommunityIcon";
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -97,7 +98,7 @@ const useStyles = makeStyles((theme: Theme) =>
     option: {
       minHeight: "auto",
       alignItems: "flex-start",
-      padding: 8,
+      padding: "0.5rem 0.25rem",
       '&[aria-selected="true"]': {
         backgroundColor: "transparent",
       },
@@ -124,6 +125,16 @@ const useStyles = makeStyles((theme: Theme) =>
     },
     text: {
       flexGrow: 1,
+      marginLeft: "0.5rem",
+    },
+    iconImage: {
+      width: 20,
+      height: 20,
+      backgroundColor: "rgb(0 121 211)",
+      borderRadius: "100%",
+    },
+    defaultCommunityIcon: {
+      fill: "#0079d3",
     },
   })
 );
@@ -159,8 +170,8 @@ function useCommunitySelectionOption(userId: string) {
     const myCommunityOptions = myCommunities.map((community) =>
       CommunitySelectionOption.createOption({
         id: community.id,
-        name: community.name,
-        icon: "",
+        name: "r/" + community.name,
+        icon: community.icon || <DefaultCommunityIcon />,
         link: createCommunityHomeLink(community.name),
         group: CommunitySelectionOptionGroupType.MY_COMMUNITIES,
       })
@@ -191,8 +202,8 @@ function useCommunitySelectionOption(userId: string) {
       moderatingCommunities.map((community) =>
         CommunitySelectionOption.createOption({
           id: community.id,
-          name: community.name,
-          icon: "",
+          name: "r/" + community.name,
+          icon: community.icon || <DefaultCommunityIcon />,
           link: createCommunityHomeLink(community.name),
           group: CommunitySelectionOptionGroupType.MODERATING,
         })
@@ -288,12 +299,17 @@ export default function CommunitySelection({ userId }: { userId: string }) {
           noOptionsText="Nothing found"
           groupBy={(option) => option.group}
           renderOption={(option, { selected }) => (
-            <React.Fragment>
-              <DoneIcon
-                className={classes.iconSelected}
-                style={{ visibility: selected ? "visible" : "hidden" }}
-              />
-              {option.icon ? option.icon : null}
+            <Box display="flex" alignItems="center">
+              {option.icon && typeof option.icon === "string" ? (
+                <img
+                  src={SERVER_URL + option.icon}
+                  className={classes.iconImage}
+                />
+              ) : (
+                option.icon
+              )}
+
+              {/* {option.icon ? option.icon : null} */}
               <NextLink href={option.link} passHref>
                 <Link
                   key={option.id}
@@ -304,7 +320,7 @@ export default function CommunitySelection({ userId }: { userId: string }) {
                   {option.name}
                 </Link>
               </NextLink>
-            </React.Fragment>
+            </Box>
           )}
           options={communitySelectionOptions}
           getOptionLabel={(option) => option.name}

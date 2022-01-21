@@ -10,7 +10,9 @@ import {
 import CloseIcon from "@material-ui/icons/Close";
 import { useRouter } from "next/router";
 import React, { useCallback, useMemo } from "react";
+import { SERVER_URL } from "../../const/const";
 import { usePostDetailQuery } from "../../generated/graphql";
+import { useCommunityAppearance } from "../../redux/hooks/useCommunityAppearance";
 import { createCommunityHomeLink } from "../../utils/links";
 import PostDetail from "./PostDetail";
 
@@ -80,6 +82,21 @@ const PostDetailModal = ({}: PostDetailModalProps) => {
     postDetailResponse,
   ]);
 
+  const { background, backgroundColor } = useCommunityAppearance();
+  const backgroundStyle = useMemo(() => {
+    if (background)
+      return {
+        background: `url(${
+          SERVER_URL + background
+        }) center center / cover no-repeat fixed ${backgroundColor}`,
+      };
+
+    if (backgroundColor)
+      return {
+        background: backgroundColor,
+      };
+  }, [background, backgroundColor]);
+
   return (
     <Dialog
       open={!!router.query.modalPostId}
@@ -109,7 +126,11 @@ const PostDetailModal = ({}: PostDetailModalProps) => {
           </Box>
         </Box>
       </Box>
-      <DialogContent dividers className={classes.content}>
+      <DialogContent
+        dividers
+        className={classes.content}
+        style={backgroundStyle}
+      >
         <Box className={classes.heart}>
           <PostDetail post={post}></PostDetail>
         </Box>

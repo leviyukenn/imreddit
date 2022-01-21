@@ -31,7 +31,10 @@ function AlertDialog({}: AlertDialogProps) {
           Cancel
         </Button>
         <Button
-          onClick={onConfirm}
+          onClick={() => {
+            onConfirm();
+            close();
+          }}
           color="primary"
           autoFocus
           variant="outlined"

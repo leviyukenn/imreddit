@@ -12,11 +12,14 @@ import {
 import CloseIcon from "@material-ui/icons/Close";
 import { useCallback } from "react";
 import { CommunityQuery } from "../../generated/graphql";
+import { useAlertDialog } from "../../redux/hooks/useAlertDialog";
 import { useSaveOrInitCommunityAppearance } from "../../redux/hooks/useCommunityAppearance";
 import CommunityAppearanceEditor from "./CommunityAppearanceEditor";
 
 interface CommunityAppearanceDrawerProps {
   community: CommunityQuery["community"];
+  openDrawer: boolean;
+  setOpenDrawer: React.Dispatch<React.SetStateAction<boolean>>;
 }
 const drawerWidth = 284;
 
@@ -59,6 +62,8 @@ export enum AppearanceContent {
 
 const CommunityAppearanceDrawer = ({
   community,
+  openDrawer,
+  setOpenDrawer,
 }: // onInit,
 // onSave,
 CommunityAppearanceDrawerProps) => {
@@ -67,17 +72,36 @@ CommunityAppearanceDrawerProps) => {
   const {
     initiateCommunityAppearance,
     saveCommunityAppearance,
-    confirmDiscardAppearanceChange,
     hasSettingsChanged,
   } = useSaveOrInitCommunityAppearance(community);
-  const onCloseDrawer = useCallback(() => {}, []);
+
+  const discardChangesAndCloseDrawer = useCallback(() => {
+    initiateCommunityAppearance();
+    setOpenDrawer(false);
+  }, [initiateCommunityAppearance, setOpenDrawer]);
+
+  const { open } = useAlertDialog({
+    title: "Discard unsaved changes before leaving?",
+    text:
+      "You have made some changes to your community, do you wish to leave this menu without saving?",
+    confirmButtonName: "Discard",
+    onConfirm: discardChangesAndCloseDrawer,
+  });
+
+  const confirmDiscardAppearanceChange = useCallback(() => {
+    if (hasSettingsChanged) {
+      open();
+      return;
+    }
+    setOpenDrawer(false);
+  }, [hasSettingsChanged, open, setOpenDrawer]);
 
   return (
     <Drawer
       className={classes.drawer}
-      variant="persistent"
+      variant="temporary"
       anchor="left"
-      open={true}
+      open={openDrawer}
       classes={{
         paper: classes.drawerPaper,
       }}
@@ -85,7 +109,7 @@ CommunityAppearanceDrawerProps) => {
     >
       <Box className={classes.drawerHeader} justifyContent="space-between">
         <Typography variant="h6">Appearance</Typography>
-        <IconButton onClick={() => {}}>
+        <IconButton onClick={confirmDiscardAppearanceChange}>
           <CloseIcon />
         </IconButton>
       </Box>

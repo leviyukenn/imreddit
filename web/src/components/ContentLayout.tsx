@@ -1,6 +1,6 @@
 import { Box, createStyles, Fab, makeStyles, Theme } from "@material-ui/core";
 import NavigationIcon from "@material-ui/icons/Navigation";
-import { useCallback } from "react";
+import { ReactNode, useCallback } from "react";
 import PostDetailModal from "./post/PostDetailModal";
 
 const useStyles = makeStyles((theme: Theme) =>
@@ -33,14 +33,11 @@ const useStyles = makeStyles((theme: Theme) =>
 );
 
 interface HomeContainerProps {
-  mainContent: JSX.Element;
   rightSideContent?: JSX.Element;
+  children: ReactNode;
 }
 
-const ContentLayout = ({
-  mainContent,
-  rightSideContent,
-}: HomeContainerProps) => {
+const ContentLayout = ({ rightSideContent, children }: HomeContainerProps) => {
   const classes = useStyles();
 
   const backToTop = useCallback(() => {
@@ -50,13 +47,14 @@ const ContentLayout = ({
   return (
     <>
       <Box display="flex" justifyContent="center">
-        <Box className={classes.heartContainer}>{mainContent}</Box>
+        <Box className={classes.heartContainer}>{children}</Box>
         <Box className={classes.rightSideContainer}>
           {rightSideContent}
           <Fab
             variant="extended"
             color="primary"
             onClick={backToTop}
+            size="small"
             className={classes.backToTopButton}
           >
             <NavigationIcon className={classes.backToTopButtonIcon} />

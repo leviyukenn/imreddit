@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo } from "react";
+import React, { ReactNode, useEffect, useMemo, useState } from "react";
 import {
   CommunityQuery,
   useCommunityQuery,
@@ -7,9 +7,7 @@ import {
 import { useSaveOrInitCommunityAppearance } from "../../redux/hooks/useCommunityAppearance";
 import { useIsAuth } from "../../utils/hooks/useIsAuth";
 import ContentLayout from "../ContentLayout";
-import CreatePostCard from "../post/CreatePostCard";
 import { LoadingPostCard } from "../post/PostCard";
-import { CommunityPostsInfiniteScroll } from "../post/PostInfiniteScroll";
 import CommunityAppearanceDrawer from "./CommunityAppearanceDrawer";
 import CommunityBanner from "./CommunityBanner";
 import CommunityDescription from "./CommunityDescription";
@@ -19,6 +17,7 @@ import CommunityHomeContainer from "./CommunityHomeContainer";
 interface CommunityProps {
   communityName: string;
   serverSideCommunity?: CommunityQuery["community"];
+  children: ReactNode;
 }
 
 const useCommunity = (
@@ -53,6 +52,7 @@ const useCommunity = (
 const CommunityHomePage = ({
   communityName,
   serverSideCommunity,
+  children,
 }: CommunityProps) => {
   const { community, userRole } = useCommunity(
     communityName,
@@ -61,6 +61,7 @@ const CommunityHomePage = ({
   const { initiateCommunityAppearance } = useSaveOrInitCommunityAppearance(
     community
   );
+  const [openDrawer, setOpenDrawer] = useState(false);
 
   useEffect(() => {
     if (!community) {
@@ -74,44 +75,40 @@ const CommunityHomePage = ({
       return undefined;
     }
     if (userRole?.isModerator) {
-      return <CommunityDescriptionModeratorMode community={community} />;
+      return (
+        <CommunityDescriptionModeratorMode
+          community={community}
+          setOpenDrawer={setOpenDrawer}
+        />
+      );
     }
     return <CommunityDescription community={community} />;
-  }, [userRole, community]);
+  }, [userRole, community, setOpenDrawer]);
 
   const communityAppearanceDrawer = useMemo(() => {
     if (!community || !userRole?.isModerator) {
       return undefined;
     }
-    return <CommunityAppearanceDrawer community={community} />;
-  }, [userRole, community]);
+    return (
+      <CommunityAppearanceDrawer
+        community={community}
+        setOpenDrawer={setOpenDrawer}
+        openDrawer={openDrawer}
+      />
+    );
+  }, [userRole, community, openDrawer, setOpenDrawer]);
 
   return community ? (
     <CommunityHomeContainer
       banner={<CommunityBanner community={community} />}
       drawer={communityAppearanceDrawer}
     >
-      <ContentLayout
-        mainContent={<CommunityHeartContent communityName={communityName} />}
-        rightSideContent={communityDescription}
-      />
+      <ContentLayout rightSideContent={communityDescription}>
+        {children}
+      </ContentLayout>
     </CommunityHomeContainer>
   ) : (
     <LoadingPostCard />
-  );
-};
-
-const CommunityHeartContent = ({
-  communityName,
-}: {
-  communityName: string;
-}) => {
-  const { isAuth } = useIsAuth();
-  return (
-    <>
-      {isAuth ? <CreatePostCard /> : null}
-      <CommunityPostsInfiniteScroll communityName={communityName} />
-    </>
   );
 };
 
