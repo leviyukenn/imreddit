@@ -1,6 +1,4 @@
 import { GetStaticPaths, GetStaticProps } from "next";
-import { useRouter } from "next/router";
-import { useMemo } from "react";
 import client from "../../apollo-client/apollo-client";
 import CommunityHomeHeartContent from "../../components/community/CommunityHomeHeartContent";
 import CommunityHomePage from "../../components/community/CommunityHomePage";
@@ -15,6 +13,7 @@ import {
   PostDetailDocument,
   PostDetailQuery,
 } from "../../generated/graphql";
+import { usePostInfoRoute } from "../../utils/hooks/usePostInfoRoute";
 
 export const getStaticPaths: GetStaticPaths = async () => {
   const {
@@ -80,50 +79,23 @@ interface CommunityPostHomeProps {
   community: CommunityQuery["community"];
 }
 
-const useIsPostDetailPage = () => {
-  const router = useRouter();
-
-  const postInfo = useMemo(() => (router.query.postInfo || []) as string[], [
-    router,
-  ]);
-
-  const communityName = useMemo(() => postInfo[0] || "", [postInfo]);
-  const postId = useMemo(() => postInfo[1] || "", [postInfo]);
-  const modalPostId = useMemo(() => router.query.modalPostId || "", [router]);
-
-  const isPostDetailPage = useMemo(
-    () => !!(communityName && postId && !modalPostId),
-
-    [postId, communityName, modalPostId]
-  );
-
-  return { isPostDetailPage, postId, communityName };
-};
-
 const CommunityPostHome = ({
   postDetail: serverSidePost,
   community: serverSideCommunity,
 }: CommunityPostHomeProps) => {
-  const { isPostDetailPage, postId, communityName } = useIsPostDetailPage();
+  const { isPostDetailPage, postId, communityName } = usePostInfoRoute();
 
   return (
-    <>
+    <CommunityHomePage
+      communityName={communityName}
+      serverSideCommunity={serverSideCommunity}
+    >
       {isPostDetailPage ? (
-        <CommunityHomePage
-          communityName={communityName}
-          serverSideCommunity={serverSideCommunity}
-        >
-          <PostDetailPage postId={postId} serverSidePost={serverSidePost} />
-        </CommunityHomePage>
+        <PostDetailPage postId={postId} serverSidePost={serverSidePost} />
       ) : communityName ? (
-        <CommunityHomePage
-          communityName={communityName}
-          serverSideCommunity={serverSideCommunity}
-        >
-          <CommunityHomeHeartContent communityName={communityName} />
-        </CommunityHomePage>
+        <CommunityHomeHeartContent communityName={communityName} />
       ) : null}
-    </>
+    </CommunityHomePage>
   );
 };
 

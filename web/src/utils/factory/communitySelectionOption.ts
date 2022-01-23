@@ -1,12 +1,18 @@
 export enum CommunitySelectionOptionGroupType {
   MY_COMMUNITIES = "MY COMMUNITIES",
   MODERATING = "MODERATING",
+  OTHERS = "OTHERS",
 }
 
-interface ICommunitySelectionOption {
+export enum CommunitySelectionOptionIconType {
+  HOME,
+  CREATE_COMMUNITY,
+}
+
+export interface ICommunitySelectionOption {
   readonly id: string;
   readonly name: string;
-  readonly icon: JSX.Element | string;
+  readonly icon: CommunitySelectionOptionIconType | string;
   readonly link: string;
   readonly group: CommunitySelectionOptionGroupType;
 }
@@ -14,14 +20,14 @@ interface ICommunitySelectionOption {
 export class CommunitySelectionOption implements ICommunitySelectionOption {
   readonly id: string;
   readonly name: string;
-  readonly icon: JSX.Element | string;
+  readonly icon: CommunitySelectionOptionIconType | string;
   readonly link: string;
   readonly group: CommunitySelectionOptionGroupType;
 
   private constructor(
     id: string,
     name: string,
-    icon: JSX.Element | string,
+    icon: CommunitySelectionOptionIconType | string,
     link: string,
     group: CommunitySelectionOptionGroupType
   ) {

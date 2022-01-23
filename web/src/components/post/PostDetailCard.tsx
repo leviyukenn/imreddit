@@ -95,7 +95,7 @@ export const PostDetailCard = ({ post, ...props }: PostDetailProps) => {
                 ) => {
                   e.stopPropagation();
                 }}
-              >{`c/${post.community.name}`}</Link>
+              >{`r/${post.community.name}`}</Link>
             </NextLink>
             <span>&nbsp;&#183;&nbsp;</span>
             <Typography variant="caption">{`Posted by ${post.creator.username} ${timeago}`}</Typography>

@@ -6,10 +6,9 @@ import {
   Typography,
 } from "@material-ui/core";
 import React from "react";
-import { SERVER_URL } from "../../const/const";
 import { RegularCommunityFragment } from "../../generated/graphql";
 import { useCommunityAppearance } from "../../redux/hooks/useCommunityAppearance";
-import DefaultCommunityIcon from "../utility/DefaultCommunityIcon";
+import CommunityIcon from "./CommunityIcon";
 import CommunityJoinLeaveButton from "./CommunityJoinLeaveButton";
 
 interface CommunityHeaderProps {
@@ -43,41 +42,6 @@ const useStyles = makeStyles((theme: Theme) =>
     pinnedCommunityInfoContainer: {
       display: "flex",
     },
-    communityIconImage: {
-      borderRadius: "100%",
-      border: "4px solid #fff",
-      height: "72px",
-      width: "72px",
-      background: "#0E75D2",
-    },
-    pinnedCommunityIconImage: {
-      borderRadius: "100%",
-      border: "4px solid #fff",
-      height: "56px",
-      width: "56px",
-      background: "#0E75D2",
-    },
-    communityIcon: {
-      borderRadius: "100%",
-      border: "4px solid #fff",
-      height: "72px",
-      width: "72px",
-      boxSizing: "border-box",
-      background: "#ffffff",
-      display: "inline-block",
-      fill: "#0079d3",
-    },
-    pinnedCommunityIcon: {
-      borderRadius: "100%",
-      border: "4px solid #fff",
-      height: "56px",
-      width: "56px",
-      boxSizing: "border-box",
-      background: "#ffffff",
-      display: "inline-block",
-      fill: "#0079d3",
-    },
-
     communityName: {
       fontWeight: 700,
     },
@@ -102,71 +66,49 @@ const useStyles = makeStyles((theme: Theme) =>
   })
 );
 
-const CommunityHeader = React.forwardRef<HTMLDivElement, CommunityHeaderProps>(
-  ({ community, pinnedHeader }, ref) => {
-    const classes = useStyles();
-    const { icon } = useCommunityAppearance();
+const CommunityHeader = ({ community, pinnedHeader }: CommunityHeaderProps) => {
+  const classes = useStyles();
+  const { icon } = useCommunityAppearance();
 
-    return (
-      <div
-        ref={ref}
-        className={pinnedHeader ? classes.pinndedHeader : classes.header}
-      >
-        <Box className={classes.headerContent}>
+  return (
+    <div className={pinnedHeader ? classes.pinndedHeader : classes.header}>
+      <Box className={classes.headerContent}>
+        <Box
+          className={
+            pinnedHeader
+              ? classes.pinnedCommunityInfoContainer
+              : classes.communityInfoContainer
+          }
+        >
+          <CommunityIcon icon={icon} size={pinnedHeader ? "medium" : "large"} />
           <Box
             className={
               pinnedHeader
-                ? classes.pinnedCommunityInfoContainer
-                : classes.communityInfoContainer
+                ? classes.pinnedCommunityNameContainer
+                : classes.communityNameContainer
             }
           >
-            {icon ? (
-              <img
-                src={SERVER_URL + icon}
-                className={
-                  pinnedHeader
-                    ? classes.pinnedCommunityIconImage
-                    : classes.communityIconImage
-                }
-              />
-            ) : (
-              <DefaultCommunityIcon
-                className={
-                  pinnedHeader
-                    ? classes.pinnedCommunityIcon
-                    : classes.communityIcon
-                }
-              />
-            )}
-            <Box
-              className={
-                pinnedHeader
-                  ? classes.pinnedCommunityNameContainer
-                  : classes.communityNameContainer
-              }
-            >
-              <Box>
-                <Typography variant="h5" className={classes.communityName}>
-                  {community.name}
-                </Typography>
-                {pinnedHeader ? null : (
-                  <Typography
-                    variant="subtitle2"
-                    className={classes.communityPath}
-                  >{`r/${community.name}`}</Typography>
-                )}
-              </Box>
-              <CommunityJoinLeaveButton
-                {...{
-                  communityId: community.id,
-                  communityName: community.name,
-                }}
-              />
+            <Box>
+              <Typography variant="h5" className={classes.communityName}>
+                {community.name}
+              </Typography>
+              {pinnedHeader ? null : (
+                <Typography
+                  variant="subtitle2"
+                  className={classes.communityPath}
+                >{`r/${community.name}`}</Typography>
+              )}
             </Box>
+            <CommunityJoinLeaveButton
+              {...{
+                communityId: community.id,
+                communityName: community.name,
+              }}
+            />
           </Box>
         </Box>
-      </div>
-    );
-  }
-);
+      </Box>
+    </div>
+  );
+};
 export default CommunityHeader;

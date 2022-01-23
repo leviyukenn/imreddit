@@ -38,10 +38,8 @@ const CommunityBanner = ({ community }: CommunityBannerProps) => {
   return (
     <>
       <Box className={classes.bannerImage} style={bannerStyle} />
-      <CommunityHeader ref={ref} community={community} pinnedHeader={false} />
-      {!inView ? (
-        <CommunityHeader community={community} pinnedHeader={true} />
-      ) : null}
+      <div ref={ref}></div>
+      <CommunityHeader community={community} pinnedHeader={!inView} />
     </>
   );
 };

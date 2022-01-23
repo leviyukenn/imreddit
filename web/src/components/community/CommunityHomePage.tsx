@@ -1,11 +1,8 @@
 import React, { ReactNode, useEffect, useMemo, useState } from "react";
-import {
-  CommunityQuery,
-  useCommunityQuery,
-  useUserRoleQuery,
-} from "../../generated/graphql";
+import { CommunityQuery } from "../../generated/graphql";
+import { useCommunity } from "../../graphql/hooks/useCommunity";
+import { useUserCommunityRole } from "../../graphql/hooks/useUserCommunityRole";
 import { useSaveOrInitCommunityAppearance } from "../../redux/hooks/useCommunityAppearance";
-import { useIsAuth } from "../../utils/hooks/useIsAuth";
 import ContentLayout from "../ContentLayout";
 import { LoadingPostCard } from "../post/PostCard";
 import CommunityAppearanceDrawer from "./CommunityAppearanceDrawer";
@@ -20,44 +17,13 @@ interface CommunityProps {
   children: ReactNode;
 }
 
-const useCommunity = (
-  communityName: string,
-  serverSideCommunity?: CommunityQuery["community"]
-) => {
-  const { data: communityResponse } = useCommunityQuery({
-    skip: typeof window === "undefined",
-    variables: { communityName },
-  });
-  const clientSideCommunity = useMemo(() => communityResponse?.community, [
-    communityResponse,
-  ]);
-  const community = useMemo(() => clientSideCommunity || serverSideCommunity, [
-    clientSideCommunity,
-    serverSideCommunity,
-  ]);
-
-  const { me } = useIsAuth();
-  const { data: userRoleResponse } = useUserRoleQuery({
-    skip: typeof window === "undefined" || !me?.id || !community?.id,
-    variables: { userId: me?.id!, communityId: community?.id! },
-  });
-
-  const userRole = useMemo(() => userRoleResponse?.userRole, [
-    userRoleResponse,
-  ]);
-
-  return { community, userRole };
-};
-
 const CommunityHomePage = ({
   communityName,
   serverSideCommunity,
   children,
 }: CommunityProps) => {
-  const { community, userRole } = useCommunity(
-    communityName,
-    serverSideCommunity
-  );
+  const { community } = useCommunity(communityName, serverSideCommunity);
+  const { userRole } = useUserCommunityRole(community?.id);
   const { initiateCommunityAppearance } = useSaveOrInitCommunityAppearance(
     community
   );
@@ -71,9 +37,7 @@ const CommunityHomePage = ({
   }, [community]);
 
   const communityDescription = useMemo(() => {
-    if (!community) {
-      return undefined;
-    }
+    if (!community) return undefined;
     if (userRole?.isModerator) {
       return (
         <CommunityDescriptionModeratorMode

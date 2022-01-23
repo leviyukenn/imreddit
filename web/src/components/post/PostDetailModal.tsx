@@ -11,8 +11,9 @@ import CloseIcon from "@material-ui/icons/Close";
 import { useRouter } from "next/router";
 import React, { useCallback, useMemo } from "react";
 import { SERVER_URL } from "../../const/const";
-import { usePostDetailQuery } from "../../generated/graphql";
-import { useCommunityAppearance } from "../../redux/hooks/useCommunityAppearance";
+import { useCommunity } from "../../graphql/hooks/useCommunity";
+import { usePostDetail } from "../../graphql/hooks/usePostDetail";
+import { usePostInfoRoute } from "../../utils/hooks/usePostInfoRoute";
 import { createCommunityHomeLink } from "../../utils/links";
 import PostDetail from "./PostDetail";
 
@@ -69,21 +70,13 @@ const PostDetailModal = ({}: PostDetailModalProps) => {
     router.back();
   }, [router]);
 
-  const postId = useMemo(() => (router.query.modalPostId || "") as string, [
-    router,
-  ]);
+  const { modalPostId } = usePostInfoRoute();
+  const { post } = usePostDetail(modalPostId);
+  const { community } = useCommunity(post?.community.name);
 
-  const { data: postDetailResponse } = usePostDetailQuery({
-    skip: typeof window === "undefined" || !postId,
-    variables: { postId },
-  });
-
-  const post = useMemo(() => postDetailResponse?.postDetail, [
-    postDetailResponse,
-  ]);
-
-  const { background, backgroundColor } = useCommunityAppearance();
   const backgroundStyle = useMemo(() => {
+    if (!community) return undefined;
+    const { background, backgroundColor } = community;
     if (background)
       return {
         background: `url(${
@@ -95,7 +88,7 @@ const PostDetailModal = ({}: PostDetailModalProps) => {
       return {
         background: backgroundColor,
       };
-  }, [background, backgroundColor]);
+  }, [community]);
 
   return (
     <Dialog

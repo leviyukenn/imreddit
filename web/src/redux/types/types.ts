@@ -1,3 +1,5 @@
+import { ICommunitySelectionOption } from "../../utils/factory/communitySelectionOption";
+
 export enum ACTION_TYPES {
   OPEN_USER_MODAL,
   CLOSE_USER_MODAL,
@@ -12,6 +14,7 @@ export enum ACTION_TYPES {
   INIT_COMMUNITY_APPEARANCE,
   OPEN_ALERT_DIALOG,
   CLOSE_ALERT_DIALOG,
+  SET_COMMUNITY_SELECTION,
 }
 
 export interface Action<T> {
@@ -56,3 +59,5 @@ export interface AlertDialogState {
   onConfirm: () => void;
   confirmButtonName: string;
 }
+
+export interface CommunitySelectionState extends ICommunitySelectionOption {}
