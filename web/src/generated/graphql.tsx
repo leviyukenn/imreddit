@@ -221,6 +221,7 @@ export type Post = {
 export type Query = {
   __typename?: 'Query';
   me?: Maybe<User>;
+  userPosts: PaginatedPosts;
   communityPosts: PaginatedPosts;
   paginatedPosts: PaginatedPosts;
   allPosts: Array<Post>;
@@ -230,6 +231,13 @@ export type Query = {
   userRoles: Array<Maybe<Role>>;
   userRole?: Maybe<Role>;
   topics: Array<Topic>;
+};
+
+
+export type QueryUserPostsArgs = {
+  userName: Scalars['String'];
+  cursor?: Maybe<Scalars['String']>;
+  limit?: Maybe<Scalars['Int']>;
 };
 
 
@@ -759,6 +767,25 @@ export type TopicsQuery = (
     { __typename?: 'Topic' }
     & Pick<Topic, 'title' | 'id'>
   )> }
+);
+
+export type UserPostsQueryVariables = Exact<{
+  userName: Scalars['String'];
+  limit?: Maybe<Scalars['Int']>;
+  cursor?: Maybe<Scalars['String']>;
+}>;
+
+
+export type UserPostsQuery = (
+  { __typename?: 'Query' }
+  & { userPosts: (
+    { __typename?: 'PaginatedPosts' }
+    & Pick<PaginatedPosts, 'hasMore'>
+    & { posts: Array<(
+      { __typename?: 'Post' }
+      & RegularPostDetailFragment
+    )> }
+  ) }
 );
 
 export type UserRoleQueryVariables = Exact<{
@@ -1711,6 +1738,46 @@ export function useTopicsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<Top
 export type TopicsQueryHookResult = ReturnType<typeof useTopicsQuery>;
 export type TopicsLazyQueryHookResult = ReturnType<typeof useTopicsLazyQuery>;
 export type TopicsQueryResult = Apollo.QueryResult<TopicsQuery, TopicsQueryVariables>;
+export const UserPostsDocument = gql`
+    query UserPosts($userName: String!, $limit: Int, $cursor: String) {
+  userPosts(userName: $userName, limit: $limit, cursor: $cursor) {
+    hasMore
+    posts {
+      ...RegularPostDetail
+    }
+  }
+}
+    ${RegularPostDetailFragmentDoc}`;
+
+/**
+ * __useUserPostsQuery__
+ *
+ * To run a query within a React component, call `useUserPostsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useUserPostsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useUserPostsQuery({
+ *   variables: {
+ *      userName: // value for 'userName'
+ *      limit: // value for 'limit'
+ *      cursor: // value for 'cursor'
+ *   },
+ * });
+ */
+export function useUserPostsQuery(baseOptions: Apollo.QueryHookOptions<UserPostsQuery, UserPostsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<UserPostsQuery, UserPostsQueryVariables>(UserPostsDocument, options);
+      }
+export function useUserPostsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<UserPostsQuery, UserPostsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<UserPostsQuery, UserPostsQueryVariables>(UserPostsDocument, options);
+        }
+export type UserPostsQueryHookResult = ReturnType<typeof useUserPostsQuery>;
+export type UserPostsLazyQueryHookResult = ReturnType<typeof useUserPostsLazyQuery>;
+export type UserPostsQueryResult = Apollo.QueryResult<UserPostsQuery, UserPostsQueryVariables>;
 export const UserRoleDocument = gql`
     query UserRole($userId: String!, $communityId: String!) {
   userRole(userId: $userId, communityId: $communityId) {
@@ -1857,9 +1924,10 @@ export type PostFieldPolicy = {
 	children?: FieldPolicy<any> | FieldReadFunction<any>,
 	images?: FieldPolicy<any> | FieldReadFunction<any>
 };
-export type QueryKeySpecifier = ('me' | 'communityPosts' | 'paginatedPosts' | 'allPosts' | 'postDetail' | 'communities' | 'community' | 'userRoles' | 'userRole' | 'topics' | QueryKeySpecifier)[];
+export type QueryKeySpecifier = ('me' | 'userPosts' | 'communityPosts' | 'paginatedPosts' | 'allPosts' | 'postDetail' | 'communities' | 'community' | 'userRoles' | 'userRole' | 'topics' | QueryKeySpecifier)[];
 export type QueryFieldPolicy = {
 	me?: FieldPolicy<any> | FieldReadFunction<any>,
+	userPosts?: FieldPolicy<any> | FieldReadFunction<any>,
 	communityPosts?: FieldPolicy<any> | FieldReadFunction<any>,
 	paginatedPosts?: FieldPolicy<any> | FieldReadFunction<any>,
 	allPosts?: FieldPolicy<any> | FieldReadFunction<any>,

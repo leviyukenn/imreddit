@@ -8,6 +8,7 @@ import {
 } from "@material-ui/core";
 import AddIcon from "@material-ui/icons/Add";
 import ExpandMoreRoundedIcon from "@material-ui/icons/ExpandMoreRounded";
+import HomeIcon from "@material-ui/icons/Home";
 import SearchIcon from "@material-ui/icons/Search";
 import { Autocomplete } from "@material-ui/lab";
 import NextLink from "next/link";
@@ -17,15 +18,20 @@ import { useCommunitiesQuery } from "../../generated/graphql";
 import {
   CommunitySelectionOption,
   CommunitySelectionOptionGroupType,
+  CommunitySelectionOptionIconType,
 } from "../../utils/factory/communitySelectionOption";
 import { createCommunityPageLink } from "../../utils/links";
-import DefaultCommunityIcon from "../utility/DefaultCommunityIcon";
 
 interface SelectCommunityProps {
   setCommunityId: React.Dispatch<React.SetStateAction<string>>;
   communityId: string;
   userId: string;
 }
+
+const iconMap = new Map<CommunitySelectionOptionIconType, JSX.Element>([
+  [CommunitySelectionOptionIconType.HOME, <HomeIcon />],
+  [CommunitySelectionOptionIconType.CREATE_COMMUNITY, <AddIcon />],
+]);
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -107,7 +113,7 @@ function useCommunitySelectionOption(userId: string) {
       CommunitySelectionOption.createOption({
         id: community.id,
         name: "r/" + community.name,
-        icon: community.icon || <DefaultCommunityIcon />,
+        icon: community.icon,
         link: "",
         group: CommunitySelectionOptionGroupType.MY_COMMUNITIES,
       })
@@ -115,7 +121,7 @@ function useCommunitySelectionOption(userId: string) {
     const createCommunity = CommunitySelectionOption.createOption({
       id: "createCommunity",
       name: "Create Community",
-      icon: <AddIcon />,
+      icon: CommunitySelectionOptionIconType.CREATE_COMMUNITY,
       link: createCommunityPageLink,
       group: CommunitySelectionOptionGroupType.MY_COMMUNITIES,
     });
@@ -178,10 +184,10 @@ export default function SelectCommunity({
       groupBy={(option) => option.group}
       renderOption={(option) => (
         <React.Fragment>
-          {option.icon && typeof option.icon === "string" ? (
+          {typeof option.icon === "string" ? (
             <img src={SERVER_URL + option.icon} className={classes.iconImage} />
           ) : (
-            option.icon
+            iconMap.get(option.icon)
           )}
           {option.link ? (
             <NextLink href={option.link} passHref>

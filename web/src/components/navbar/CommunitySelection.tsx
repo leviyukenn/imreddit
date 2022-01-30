@@ -57,6 +57,7 @@ const useStyles = makeStyles((theme: Theme) =>
       marginLeft: "0.75em",
     },
     tag: {
+      marginLeft: "0.5rem",
       padding: ".15em 4px",
       fontWeight: 600,
     },
@@ -235,11 +236,20 @@ export default function CommunitySelection({ userId }: { userId: string }) {
     );
     return selectedCommunity || null;
   });
+
   useEffect(() => {
     if (!pendingValue) return;
     if (pendingValue.name === `r/${communityName}`) return;
     router.push(pendingValue.link);
   }, [pendingValue, communityName]);
+
+  const inputIcon = useMemo(() => {
+    if (!pendingValue) return null;
+    if (typeof pendingValue.icon === "string") {
+      return <CommunityIcon icon={pendingValue.icon} size={"small"} />;
+    }
+    return iconMap.get(pendingValue.icon);
+  }, [pendingValue]);
 
   const handleClick = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(anchorEl ? null : event.currentTarget);
@@ -283,7 +293,10 @@ export default function CommunitySelection({ userId }: { userId: string }) {
                 <Box className={classes.placeholder}>Home</Box>
               </>
             ) : (
-              <div className={classes.tag}>{pendingValue.name}</div>
+              <>
+                {inputIcon}
+                <div className={classes.tag}>{pendingValue.name}</div>
+              </>
             )}
           </Box>
           <ExpandMoreRoundedIcon className={classes.icon} />

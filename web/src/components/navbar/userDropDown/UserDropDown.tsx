@@ -2,21 +2,14 @@ import {
   Box,
   ButtonBase,
   createStyles,
-  Divider,
-  List,
-  ListItem,
-  ListItemIcon,
-  ListItemText,
   makeStyles,
   Popper,
   Theme,
 } from "@material-ui/core";
-import AccountCircleIcon from "@material-ui/icons/AccountCircle";
-import ExitToAppIcon from "@material-ui/icons/ExitToApp";
 import ExpandMoreRoundedIcon from "@material-ui/icons/ExpandMoreRounded";
 import React, { useState } from "react";
-import { useLogout } from "../../graphql/hooks/useLogout";
-import { useIsAuth } from "../../utils/hooks/useIsAuth";
+import { useIsAuth } from "../../../utils/hooks/useIsAuth";
+import UserDropDownList from "./UserDropDownList";
 
 interface UserDropDownProps {}
 const useStyles = makeStyles((theme: Theme) =>
@@ -52,23 +45,11 @@ const useStyles = makeStyles((theme: Theme) =>
       zIndex: 10000,
       backgroundColor: "#ffffff",
     },
-    icon: {},
-    menuTitle: {
-      color: "#878a8c",
-    },
-    listItemText: {
-      fontWeight: 700,
-      color: "rgb(28,28,28)",
-    },
-    listItemIcon: {
-      color: "rgb(28,28,28)",
-    },
   })
 );
 
 const UserDropDown = ({}: UserDropDownProps) => {
   const { me } = useIsAuth();
-  const { logout, loading } = useLogout();
   const classes = useStyles();
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const handleClick = (event: React.MouseEvent<HTMLElement>) => {
@@ -87,7 +68,7 @@ const UserDropDown = ({}: UserDropDownProps) => {
           <Box display="flex" alignItems="center">
             {me?.username}
           </Box>
-          <ExpandMoreRoundedIcon className={classes.icon} />
+          <ExpandMoreRoundedIcon />
         </ButtonBase>
       </div>
       <Popper
@@ -96,40 +77,7 @@ const UserDropDown = ({}: UserDropDownProps) => {
         placement="bottom-start"
         className={classes.popper}
       >
-        <List>
-          <ListItem>
-            <ListItemText
-              primary="MY STUFF"
-              primaryTypographyProps={{ variant: "caption" }}
-              className={classes.menuTitle}
-            />
-          </ListItem>
-          <ListItem button>
-            <ListItemIcon className={classes.listItemIcon}>
-              <AccountCircleIcon />
-            </ListItemIcon>
-            <ListItemText
-              primary="Profile"
-              primaryTypographyProps={{
-                variant: "body2",
-                className: classes.listItemText,
-              }}
-            />
-          </ListItem>
-          <Divider />
-          <ListItem button onClick={logout}>
-            <ListItemIcon className={classes.listItemIcon}>
-              <ExitToAppIcon />
-            </ListItemIcon>
-            <ListItemText
-              primary="Logout"
-              primaryTypographyProps={{
-                variant: "body2",
-                className: classes.listItemText,
-              }}
-            />
-          </ListItem>
-        </List>
+        <UserDropDownList onClickAway={() => !open || setAnchorEl(null)} />
       </Popper>
     </React.Fragment>
   );

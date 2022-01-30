@@ -41,6 +41,7 @@ const useStyles = makeStyles((theme: Theme) =>
 
 const HomeContainer = ({
   children,
+  banner,
   backgroundMode = "grey",
 }: ContainerProps) => {
   const classes = useStyles();
@@ -49,6 +50,7 @@ const HomeContainer = ({
     <Box display="flex">
       <Box className={classes.root}>
         <NavBar />
+        {banner}
         <Box
           className={`${classes.mainContentBox} ${
             backgroundMode === "grey"

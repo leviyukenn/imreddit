@@ -11,6 +11,9 @@ const useStyles = makeStyles((theme: Theme) =>
         maxWidth: "740px",
       },
     },
+    fullWidthHeartContainer: {
+      flex: "1 1 100%",
+    },
     rightSideContainer: {
       marginLeft: "2rem",
       display: "none",
@@ -33,11 +36,16 @@ const useStyles = makeStyles((theme: Theme) =>
 );
 
 interface HomeContainerProps {
+  fullWidth?: boolean;
   rightSideContent?: JSX.Element;
   children: ReactNode;
 }
 
-const ContentLayout = ({ rightSideContent, children }: HomeContainerProps) => {
+const ContentLayout = ({
+  fullWidth,
+  rightSideContent,
+  children,
+}: HomeContainerProps) => {
   const classes = useStyles();
 
   const backToTop = useCallback(() => {
@@ -47,7 +55,13 @@ const ContentLayout = ({ rightSideContent, children }: HomeContainerProps) => {
   return (
     <>
       <Box display="flex" justifyContent="center">
-        <Box className={classes.heartContainer}>{children}</Box>
+        <Box
+          className={
+            fullWidth ? classes.fullWidthHeartContainer : classes.heartContainer
+          }
+        >
+          {children}
+        </Box>
         <Box className={classes.rightSideContainer}>
           {rightSideContent}
           <Fab

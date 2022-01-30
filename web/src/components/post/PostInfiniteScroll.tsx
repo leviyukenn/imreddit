@@ -1,11 +1,10 @@
-import { useCallback, useMemo } from "react";
 import InfiniteScroll from "react-infinite-scroll-component";
-import {
-  RegularPostDetailFragment,
-  useCommunityPostsQuery,
-  usePostsQuery,
-} from "../../generated/graphql";
+import { RegularPostDetailFragment } from "../../generated/graphql";
+import { useCommunityPosts } from "../../graphql/hooks/useCommunityPosts";
+import { useHomePosts } from "../../graphql/hooks/useHomePosts";
+import { useUserPosts } from "../../graphql/hooks/useUserPosts";
 import { LoadingPostCard, PostCard } from "./PostCard";
+import UserPostCard from "./userPost/UserPostCard";
 
 interface PostInfiniteScrollProps {
   posts: RegularPostDetailFragment[];
@@ -33,28 +32,25 @@ const PostInfiniteScroll = ({
 };
 
 export const HomePostsInfiniteScroll = () => {
-  const { data: postsResponse, fetchMore } = usePostsQuery({
-    skip: typeof window === "undefined",
-    variables: { limit: 10 },
-  });
-  const posts: RegularPostDetailFragment[] = useMemo(
-    () => (postsResponse ? postsResponse.paginatedPosts.posts : []),
-    [postsResponse]
-  );
-
-  const hasMore = useMemo(
-    () => (postsResponse ? postsResponse.paginatedPosts.hasMore : false),
-    [postsResponse]
-  );
-  const next = useCallback(() => {
-    fetchMore({
-      variables: {
-        limit: 10,
-        cursor: posts[posts.length - 1].createdAt,
-      },
-    });
-  }, [posts]);
+  const { posts, hasMore, next } = useHomePosts();
   return <PostInfiniteScroll posts={posts} hasMore={hasMore} next={next} />;
+};
+
+export const UserPostsInfiniteScroll = ({ userName }: { userName: string }) => {
+  const { posts, hasMore, next } = useUserPosts(userName);
+
+  return (
+    <InfiniteScroll
+      dataLength={posts.length}
+      next={next}
+      hasMore={hasMore}
+      loader={<LoadingPostCard />}
+    >
+      {posts.map((post) => {
+        return <UserPostCard post={post} key={post.id} />;
+      })}
+    </InfiniteScroll>
+  );
 };
 
 export const CommunityPostsInfiniteScroll = ({
@@ -62,28 +58,6 @@ export const CommunityPostsInfiniteScroll = ({
 }: {
   communityName: string;
 }) => {
-  const { data: postsResponse, fetchMore } = useCommunityPostsQuery({
-    skip: typeof window === "undefined",
-    variables: { limit: 10, communityName: communityName },
-  });
-
-  const posts: RegularPostDetailFragment[] = useMemo(
-    () => (postsResponse ? postsResponse.communityPosts.posts : []),
-    [postsResponse]
-  );
-
-  const hasMore = useMemo(
-    () => (postsResponse ? postsResponse.communityPosts.hasMore : false),
-    [postsResponse]
-  );
-  const next = useCallback(() => {
-    fetchMore({
-      variables: {
-        limit: 10,
-        cursor: posts[posts.length - 1].createdAt,
-        communityName: communityName,
-      },
-    });
-  }, [posts]);
+  const { posts, hasMore, next, loading } = useCommunityPosts(communityName);
   return <PostInfiniteScroll posts={posts} hasMore={hasMore} next={next} />;
 };

@@ -1,6 +1,8 @@
 export const createCommunityHomeLink = (communityName: string) =>
   `/r/${communityName}`;
 
+export const createUserProfileLink = (userName: string) => `/user/${userName}`;
+
 export const createPostDetailPageLink = (
   communityName: string,
   postId: string

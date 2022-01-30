@@ -1,0 +1,8 @@
+query UserPosts($userName: String!, $limit: Int, $cursor: String) {
+  userPosts(userName: $userName, limit: $limit, cursor: $cursor) {
+    hasMore
+    posts {
+      ...RegularPostDetail
+    }
+  }
+}

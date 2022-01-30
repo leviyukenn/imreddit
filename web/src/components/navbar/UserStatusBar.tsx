@@ -3,7 +3,7 @@ import React from "react";
 import { useMeQuery } from "../../generated/graphql";
 import { useUserModalState } from "../../redux/hooks/useUserModalState";
 import LoginRegisterModal from "../user/LoginRegisterModal";
-import UserDropDown from "./UserDropDown";
+import UserDropDown from "./userDropDown/UserDropDown";
 
 interface UserStatusBarProps {}
 const useStyles = makeStyles((theme: Theme) =>

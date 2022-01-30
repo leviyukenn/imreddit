@@ -22,8 +22,8 @@ import { format } from "timeago.js";
 import { RegularPostDetailFragment } from "../../generated/graphql";
 import {
   createCommunityHomeLink,
-  createPostDetailModalLink,
   createPostDetailPageLink,
+  createPostDetailModalLink,
 } from "../../utils/links";
 import ImagePostSwiper from "./ImgaePostSwiper";
 import UpvoteBox from "./upvote/UpvoteBox";
@@ -126,7 +126,7 @@ export const PostCard = ({ post, ...props }: PostCardProps) => {
       <NextLink
         href={createPostDetailModalLink(router.asPath, post.id)}
         as={createPostDetailPageLink(post.community.name, post.id)}
-        shallow
+        shallow={true}
         scroll={false}
       >
         <Card className={classes.card} {...props}>

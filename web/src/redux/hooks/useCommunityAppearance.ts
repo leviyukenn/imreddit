@@ -16,7 +16,6 @@ import {
 } from "../actions/communityAppearance";
 import { RootState } from "../reducers/combinedReducer";
 import { AlertSeverity } from "../types/types";
-import { useAlertDialog } from "./useAlertDialog";
 import { useSnackbarAlert } from "./useSnackbarAlert";
 
 export function useCommunityAppearance() {
@@ -132,7 +131,6 @@ export function useSaveOrInitCommunityAppearance(
       return;
     }
   };
-
 
   return {
     initiateCommunityAppearance,
