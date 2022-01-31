@@ -37,6 +37,8 @@ const useStyles = makeStyles((theme: Theme) =>
     card: {
       paddingLeft: theme.spacing(5),
       // marginBottom: theme.spacing(2),
+      borderRadius: 0,
+
       backgroundColor: "#F7F9FA",
       border: "1px solid #CCCCCC",
       cursor: "pointer",

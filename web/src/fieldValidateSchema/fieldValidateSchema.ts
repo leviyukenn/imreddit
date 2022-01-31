@@ -38,6 +38,15 @@ const communityTopicsValidation = Yup.array()
   .min(1, "Select at least one topic.")
   .required("Required");
 
+const postTitleValidation = Yup.string()
+  .max(300, "Post title must be less than 300 characters")
+  .required("Required");
+
+const postTextValidation = Yup.string().max(
+  40000,
+  "Post text must be under 40000 characters"
+);
+
 export const registerValidationSchema = Yup.object({
   username: usernameValidation,
   password: passwordValidation,
@@ -66,4 +75,8 @@ export const createCommunityValidationSchema = Yup.object({
 
 export const editCommunityDescriptionValidationSchema = Yup.object({
   description: communityDescriptionValidation,
+});
+
+export const createPostValidationSchema = Yup.object({
+  title: postTitleValidation,
 });

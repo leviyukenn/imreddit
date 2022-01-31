@@ -19,12 +19,14 @@ export function useHomePosts() {
     [postsResponse]
   );
   const next = useCallback(() => {
+    if (posts.length === 0) return;
+
     fetchMore({
       variables: {
         limit: 10,
         cursor: posts[posts.length - 1].createdAt,
       },
     });
-  }, [posts]);
+  }, [posts, fetchMore]);
   return { posts, hasMore, next, loading };
 }

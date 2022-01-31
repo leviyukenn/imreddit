@@ -42,7 +42,7 @@ const useDefaultIconStyles = makeStyles((theme: Theme) =>
       display: "inline-block",
       fill: "#0079d3",
     },
-    medium: {
+    large: {
       borderRadius: "100%",
       border: "4px solid #fff",
       height: "72px",
@@ -52,7 +52,7 @@ const useDefaultIconStyles = makeStyles((theme: Theme) =>
       display: "inline-block",
       fill: "#0079d3",
     },
-    large: {
+    medium: {
       borderRadius: "100%",
       border: "4px solid #fff",
       height: "56px",
