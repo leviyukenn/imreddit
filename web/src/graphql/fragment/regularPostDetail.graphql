@@ -13,7 +13,11 @@ fragment RegularPostDetail on Post {
     ...RegularImage
   }
   community {
+    id
     # ...RegularCommunity
     name
+  }
+  ancestor {
+    id
   }
 }

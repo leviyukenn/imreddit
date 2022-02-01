@@ -1,4 +1,4 @@
-mutation CreatePost(
+mutation CreateComment(
   $communityId: String!
   $text: String!
   $parentId: String!

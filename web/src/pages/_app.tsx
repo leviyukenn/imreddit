@@ -7,6 +7,7 @@ import { Provider } from "react-redux";
 import apolloClient from "../apollo-client/apollo-client";
 import AlertDialog from "../components/errorHandling/AlertDialog";
 import { SnackbarAlert } from "../components/errorHandling/SnackbarAlert";
+import LoginRegisterModal from "../components/user/LoginRegisterModal";
 import store from "../redux/store";
 import theme from "../theme";
 
@@ -27,6 +28,7 @@ function MyApp({ Component, pageProps }: AppProps) {
           <Component {...pageProps} />
           <SnackbarAlert />
           <AlertDialog />
+          <LoginRegisterModal />
         </ThemeProvider>
       </ApolloProvider>
     </Provider>

@@ -239,7 +239,7 @@ export type Post = {
   creator: User;
   community: Community;
   children: Array<Post>;
-  descendant: Array<Post>;
+  ancestor?: Maybe<Post>;
   images: Array<Image>;
 };
 
@@ -398,8 +398,11 @@ export type RegularPostDetailFragment = (
     & RegularImageFragment
   )>, community: (
     { __typename?: 'Community' }
-    & Pick<Community, 'name'>
-  ) }
+    & Pick<Community, 'id' | 'name'>
+  ), ancestor?: Maybe<(
+    { __typename?: 'Post' }
+    & Pick<Post, 'id'>
+  )> }
 );
 
 export type RegularRoleFragment = (
@@ -476,7 +479,7 @@ export type CreateCommunityMutation = (
   ) }
 );
 
-export type CreatePostMutationVariables = Exact<{
+export type CreateCommentMutationVariables = Exact<{
   communityId: Scalars['String'];
   text: Scalars['String'];
   parentId: Scalars['String'];
@@ -484,7 +487,7 @@ export type CreatePostMutationVariables = Exact<{
 }>;
 
 
-export type CreatePostMutation = (
+export type CreateCommentMutation = (
   { __typename?: 'Mutation' }
   & { createComment: (
     { __typename?: 'PostResponse' }
@@ -950,7 +953,11 @@ export const RegularPostDetailFragmentDoc = gql`
     ...RegularImage
   }
   community {
+    id
     name
+  }
+  ancestor {
+    id
   }
 }
     ${RegularUserFragmentDoc}
@@ -1081,8 +1088,8 @@ export function useCreateCommunityMutation(baseOptions?: Apollo.MutationHookOpti
 export type CreateCommunityMutationHookResult = ReturnType<typeof useCreateCommunityMutation>;
 export type CreateCommunityMutationResult = Apollo.MutationResult<CreateCommunityMutation>;
 export type CreateCommunityMutationOptions = Apollo.BaseMutationOptions<CreateCommunityMutation, CreateCommunityMutationVariables>;
-export const CreatePostDocument = gql`
-    mutation CreatePost($communityId: String!, $text: String!, $parentId: String!, $ancestorId: String!) {
+export const CreateCommentDocument = gql`
+    mutation CreateComment($communityId: String!, $text: String!, $parentId: String!, $ancestorId: String!) {
   createComment(
     createCommentInput: {text: $text, parentId: $parentId, ancestorId: $ancestorId, communityId: $communityId}
   ) {
@@ -1096,20 +1103,20 @@ export const CreatePostDocument = gql`
 }
     ${RegularErrorsFragmentDoc}
 ${RegularPostDetailFragmentDoc}`;
-export type CreatePostMutationFn = Apollo.MutationFunction<CreatePostMutation, CreatePostMutationVariables>;
+export type CreateCommentMutationFn = Apollo.MutationFunction<CreateCommentMutation, CreateCommentMutationVariables>;
 
 /**
- * __useCreatePostMutation__
+ * __useCreateCommentMutation__
  *
- * To run a mutation, you first call `useCreatePostMutation` within a React component and pass it any options that fit your needs.
- * When your component renders, `useCreatePostMutation` returns a tuple that includes:
+ * To run a mutation, you first call `useCreateCommentMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useCreateCommentMutation` returns a tuple that includes:
  * - A mutate function that you can call at any time to execute the mutation
  * - An object with fields that represent the current status of the mutation's execution
  *
  * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
  *
  * @example
- * const [createPostMutation, { data, loading, error }] = useCreatePostMutation({
+ * const [createCommentMutation, { data, loading, error }] = useCreateCommentMutation({
  *   variables: {
  *      communityId: // value for 'communityId'
  *      text: // value for 'text'
@@ -1118,13 +1125,13 @@ export type CreatePostMutationFn = Apollo.MutationFunction<CreatePostMutation, C
  *   },
  * });
  */
-export function useCreatePostMutation(baseOptions?: Apollo.MutationHookOptions<CreatePostMutation, CreatePostMutationVariables>) {
+export function useCreateCommentMutation(baseOptions?: Apollo.MutationHookOptions<CreateCommentMutation, CreateCommentMutationVariables>) {
         const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useMutation<CreatePostMutation, CreatePostMutationVariables>(CreatePostDocument, options);
+        return Apollo.useMutation<CreateCommentMutation, CreateCommentMutationVariables>(CreateCommentDocument, options);
       }
-export type CreatePostMutationHookResult = ReturnType<typeof useCreatePostMutation>;
-export type CreatePostMutationResult = Apollo.MutationResult<CreatePostMutation>;
-export type CreatePostMutationOptions = Apollo.BaseMutationOptions<CreatePostMutation, CreatePostMutationVariables>;
+export type CreateCommentMutationHookResult = ReturnType<typeof useCreateCommentMutation>;
+export type CreateCommentMutationResult = Apollo.MutationResult<CreateCommentMutation>;
+export type CreateCommentMutationOptions = Apollo.BaseMutationOptions<CreateCommentMutation, CreateCommentMutationVariables>;
 export const CreateImagePostDocument = gql`
     mutation CreateImagePost($communityId: String!, $title: String!, $images: [ImageInput!]!) {
   createImagePost(
@@ -2104,7 +2111,7 @@ export type PaginatedPostsFieldPolicy = {
 	posts?: FieldPolicy<any> | FieldReadFunction<any>,
 	hasMore?: FieldPolicy<any> | FieldReadFunction<any>
 };
-export type PostKeySpecifier = ('id' | 'createdAt' | 'updatedAt' | 'title' | 'text' | 'points' | 'postType' | 'creator' | 'community' | 'children' | 'descendant' | 'images' | PostKeySpecifier)[];
+export type PostKeySpecifier = ('id' | 'createdAt' | 'updatedAt' | 'title' | 'text' | 'points' | 'postType' | 'creator' | 'community' | 'children' | 'ancestor' | 'images' | PostKeySpecifier)[];
 export type PostFieldPolicy = {
 	id?: FieldPolicy<any> | FieldReadFunction<any>,
 	createdAt?: FieldPolicy<any> | FieldReadFunction<any>,
@@ -2116,7 +2123,7 @@ export type PostFieldPolicy = {
 	creator?: FieldPolicy<any> | FieldReadFunction<any>,
 	community?: FieldPolicy<any> | FieldReadFunction<any>,
 	children?: FieldPolicy<any> | FieldReadFunction<any>,
-	descendant?: FieldPolicy<any> | FieldReadFunction<any>,
+	ancestor?: FieldPolicy<any> | FieldReadFunction<any>,
 	images?: FieldPolicy<any> | FieldReadFunction<any>
 };
 export type PostResponseKeySpecifier = ('errors' | 'post' | PostResponseKeySpecifier)[];

@@ -1,20 +1,16 @@
-import { Reference } from "@apollo/client";
 import { convertFromRaw, convertToRaw, EditorState } from "draft-js";
 import draftToHtml from "draftjs-to-html";
 import { draftToMarkdown, markdownToDraft } from "markdown-draft-js";
 import React, { useCallback, useState } from "react";
 import "react-draft-wysiwyg/dist/react-draft-wysiwyg.css";
-import {
-  RegularPostDetailFragment,
-  RegularPostDetailFragmentDoc,
-  useCreatePostMutation,
-} from "../../../generated/graphql";
-import { useIsAuth } from "../../../utils/hooks/useIsAuth";
+import { RegularPostDetailFragment } from "../../../generated/graphql";
+import { useCreateComment } from "../../../graphql/hooks/useCreateComment";
 import CommentMarkdownEditor from "./CommentMarkdownEditor";
 import CommentRichEditor from "./CommentRichEditor";
 
 interface CommentEditorProps {
   replyTo: RegularPostDetailFragment;
+  setShowCommentEditor?: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 enum EditorType {
@@ -22,67 +18,27 @@ enum EditorType {
   markdown = "markdown",
 }
 
-const CommentEditor = ({ replyTo }: CommentEditorProps) => {
-  const [createPost, { error: createPostError }] = useCreatePostMutation({
-    update(cache, { data: createPostResponse }) {
-      cache.modify({
-        id: cache.identify(replyTo),
-        fields: {
-          children(existingPostRefs: Reference[]) {
-            const commentRef = cache.writeFragment({
-              fragment: RegularPostDetailFragmentDoc,
-              data: createPostResponse?.createPost,
-              fragmentName: "RegularPostDetail",
-            });
-
-            return [commentRef, ...existingPostRefs];
-          },
-        },
-      });
-    },
-  });
-  const [displayInnerError, setDisplayInnerError] = useState<boolean>(false);
-
-  const { checkIsAuth } = useIsAuth();
-
-  const [isSubmitting, setIsSubmitting] = useState(false);
-
+const CommentEditor = ({
+  replyTo,
+  setShowCommentEditor,
+}: CommentEditorProps) => {
   const [editorState, setEditorState] = useState(EditorState.createEmpty());
   const [markdownString, setMarkdownString] = useState("");
   const [editorType, setEditorType] = useState<EditorType>(EditorType.richText);
+  const { createComment, loading } = useCreateComment(replyTo);
 
   const onCreatePost = useCallback(async () => {
-    try {
-      setIsSubmitting(true);
-      if (!checkIsAuth()) return;
+    let postDetail;
 
-      let postDetail = draftToHtml(
-        convertToRaw(editorState.getCurrentContent())
-      );
-      if (editorType === EditorType.markdown) {
-        postDetail = draftToHtml(markdownToDraft(markdownString));
-      }
-
-      const result = await createPost({
-
-        variables: {
-          communityId: replyTo.community.id,
-          text: postDetail,
-          parentId: replyTo.id,
-        },
-      });
-
-      if (createPostError || result.errors) {
-        setDisplayInnerError(true);
-        return;
-      }
-    } catch (err) {
-      alert(err);
-    } finally {
-      setEditorState(EditorState.createEmpty());
-      setIsSubmitting(false);
+    if (editorType === EditorType.richText) {
+      postDetail = draftToHtml(convertToRaw(editorState.getCurrentContent()));
+    } else {
+      postDetail = draftToHtml(markdownToDraft(markdownString));
     }
-  }, [editorState, replyTo, editorType, markdownString]);
+
+    const success = await createComment(postDetail);
+    if (success && setShowCommentEditor) setShowCommentEditor(false);
+  }, [editorState, replyTo, editorType, markdownString, setShowCommentEditor]);
 
   const switchToMarkdownEditor = useCallback(() => {
     const markdownContent = draftToMarkdown(
@@ -109,7 +65,7 @@ const CommentEditor = ({ replyTo }: CommentEditorProps) => {
             setEditorState,
             switchEditor: switchToMarkdownEditor,
             onCreatePost,
-            isSubmitting,
+            isSubmitting: loading,
           }}
         />
       ) : editorType === EditorType.markdown ? (
@@ -119,7 +75,7 @@ const CommentEditor = ({ replyTo }: CommentEditorProps) => {
             setMarkdownString,
             switchEditor: switchToRichTextEditor,
             onCreatePost,
-            isSubmitting,
+            isSubmitting: loading,
           }}
         />
       ) : null}

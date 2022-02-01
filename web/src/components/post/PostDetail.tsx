@@ -1,9 +1,17 @@
-import { Box, createStyles, makeStyles, Theme } from "@material-ui/core";
+import {
+  Box,
+  createStyles,
+  makeStyles,
+  Theme,
+  Typography,
+} from "@material-ui/core";
 import React from "react";
 import { PostDetailQuery } from "../../generated/graphql";
+import { useIsAuth } from "../../utils/hooks/useIsAuth";
+import LoginRegisterButtonGroup from "../navbar/LoginRegisterButtonGroup";
 import { CommentCard } from "./CommentCard";
 import CommentEditor from "./post-editor/CommentEditor";
-import { PostDetailCard, LoadingPostDetailCard } from "./PostDetailCard";
+import { LoadingPostDetailCard, PostDetailCard } from "./PostDetailCard";
 
 interface PostDetailProps {
   post: PostDetailQuery["postDetail"];
@@ -20,11 +28,23 @@ const useStyles = makeStyles((theme: Theme) =>
       maxWidth: "650px",
       margin: "0px auto 48px",
     },
+    loginRegisterContainer: {
+      display: "flex",
+      justifyContent: "space-between",
+      alignItems: "center",
+      borderRadius: 4,
+      border: "1px solid #edeff1",
+      padding: "12px 8px",
+    },
+    loginRegisterText: {
+      color: "#7c7c7c",
+    },
   })
 );
 
 const PostDetail = ({ post }: PostDetailProps) => {
   const classes = useStyles();
+  const { me } = useIsAuth();
   if (!post) {
     return <LoadingPostDetailCard />;
   }
@@ -34,7 +54,21 @@ const PostDetail = ({ post }: PostDetailProps) => {
       <PostDetailCard post={post} />
       <Box className={classes.comments}>
         <Box className={classes.commentForm}>
-          <CommentEditor replyTo={post} />
+          {me ? (
+            <CommentEditor replyTo={post} />
+          ) : (
+            <Box className={classes.loginRegisterContainer}>
+              <Typography
+                variant="subtitle1"
+                className={classes.loginRegisterText}
+              >
+                Log in or sign up to leave a comment
+              </Typography>
+              <Box>
+                <LoginRegisterButtonGroup />
+              </Box>
+            </Box>
+          )}
         </Box>
 
         {post.children.map((child) => (

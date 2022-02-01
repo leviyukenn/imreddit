@@ -150,7 +150,12 @@ export const CommentCard = ({ postId, ...props }: PostDetailProps) => {
                 Reply
               </Button>
             </Box>
-            {showCommentEditor ? <CommentEditor replyTo={post} /> : null}
+            {showCommentEditor ? (
+              <CommentEditor
+                replyTo={post}
+                setShowCommentEditor={setShowCommentEditor}
+              />
+            ) : null}
             {post.children.map((child) => (
               <CommentCard key={child.id} postId={child.id} />
             ))}
