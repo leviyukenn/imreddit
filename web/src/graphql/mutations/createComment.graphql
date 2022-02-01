@@ -1,0 +1,22 @@
+mutation CreatePost(
+  $communityId: String!
+  $text: String!
+  $parentId: String!
+  $ancestorId: String!
+) {
+  createComment(
+    createCommentInput: {
+      text: $text
+      parentId: $parentId
+      ancestorId: $ancestorId
+      communityId: $communityId
+    }
+  ) {
+    errors {
+      ...RegularErrors
+    }
+    post {
+      ...RegularPostDetail
+    }
+  }
+}

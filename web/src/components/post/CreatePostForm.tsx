@@ -1,4 +1,3 @@
-import { Reference } from "@apollo/client";
 import {
   Button,
   createStyles,
@@ -7,19 +6,12 @@ import {
   makeStyles,
   Theme,
 } from "@material-ui/core";
-import MuiAlert from "@material-ui/lab/Alert";
 import { EditorState } from "draft-js";
 import { Field, Form, Formik, FormikHelpers } from "formik";
-import { useRouter } from "next/router";
 import React, { useCallback, useState } from "react";
 import * as Yup from "yup";
-import {
-  CreatePostMutationVariables,
-  RegularPostDetailFragmentDoc,
-  useCreatePostMutation,
-} from "../../generated/graphql";
-import { createPostDetailPageLink } from "../../utils/links";
-import { useIsAuth } from "../../utils/hooks/useIsAuth";
+import { useCreateImagePost } from "../../graphql/hooks/useCreateImagePost";
+import { useCreateTextPost } from "../../graphql/hooks/useCreateTextPost";
 import { TextInputField } from "../InputField";
 import { PostType, UploadedImage } from "../types/types";
 import ImagePostEditor from "./post-editor/ImagePostEditor";
@@ -35,6 +27,7 @@ const useStyles = makeStyles((theme: Theme) =>
       display: "flex",
       justifyContent: "center",
       width: "100%",
+      marginTop: 20,
     },
     formContainer: {
       width: "calc(100% - 16px)",
@@ -51,38 +44,14 @@ interface CreatePostFormProps {
 }
 
 const CreatePost = ({ postType, communityId }: CreatePostFormProps) => {
-  const [createPost, { error: createPostError }] = useCreatePostMutation({
-    update(cache, { data: createPostResponse }) {
-      cache.modify({
-        fields: {
-          posts(
-            existingPostRefs: {
-              posts: { [key: string]: Reference };
-              hasMore: boolean;
-            } = { posts: {}, hasMore: false }
-          ) {
-            const merged = { ...existingPostRefs.posts };
-
-            if (createPostResponse?.createPost) {
-              const newPostRef = cache.writeFragment({
-                data: createPostResponse.createPost,
-                fragment: RegularPostDetailFragmentDoc,
-                fragmentName: "RegularPostDetail",
-              });
-
-              merged[createPostResponse.createPost.id] = newPostRef!;
-            }
-            return { posts: merged, hasMore: existingPostRefs.hasMore };
-          },
-        },
-      });
-    },
-  });
-
-  const [displayInnerError, setDisplayInnerError] = useState<boolean>(false);
-
-  const router = useRouter();
-  const { checkIsAuth } = useIsAuth();
+  const {
+    createTextPost,
+    loading: createTextPostLoading,
+  } = useCreateTextPost();
+  const {
+    createImagePost,
+    loading: createImagePostLoading,
+  } = useCreateImagePost();
 
   const [getPostDetailCallback, setGetPostDetailCallback] = useState<
     () => string
@@ -92,47 +61,27 @@ const CreatePost = ({ postType, communityId }: CreatePostFormProps) => {
 
   const onCreatePost = useCallback(
     async ({ title }: FormData, actions: FormikHelpers<FormData>) => {
-      if (!checkIsAuth()) return;
-      let inputVariable: CreatePostMutationVariables;
-
+      let success: boolean;
       if (postType === PostType.TEXT_POST) {
         const postDetail = getPostDetailCallback();
-        inputVariable = {
-          communityId,
+
+        success = await createTextPost({
           title,
           text: postDetail,
-        };
+          communityId,
+        });
       } else {
-        inputVariable = { communityId, title, images: uploadedImages };
+        success = await createImagePost({
+          communityId,
+          title,
+          images: uploadedImages,
+        });
       }
-
-      const result = await createPost({
-        variables: inputVariable,
-      });
-
-      if (createPostError || result.errors) {
-        setDisplayInnerError(true);
-        return;
-      }
-      if (result.data?.createPost) {
-        router.push(
-          createPostDetailPageLink(
-            result.data.createPost.community.name,
-            result.data.createPost.id
-          )
-        );
+      if (success) {
+        actions.resetForm();
       }
     },
-    [
-      createPost,
-      setDisplayInnerError,
-      router,
-      checkIsAuth,
-      getPostDetailCallback,
-      postType,
-      uploadedImages,
-      communityId,
-    ]
+    [getPostDetailCallback, postType, uploadedImages, communityId]
   );
 
   const classes = useStyles();
@@ -154,14 +103,6 @@ const CreatePost = ({ postType, communityId }: CreatePostFormProps) => {
             className={classes.formContainer}
             spacing={3}
           >
-            <Grid item className={classes.formItem}>
-              {displayInnerError ? (
-                <MuiAlert elevation={6} variant="filled" severity="error">
-                  Inner error.Please try it again later.
-                </MuiAlert>
-              ) : null}
-            </Grid>
-
             <Grid item className={classes.formItem}>
               <Field
                 component={TextInputField}

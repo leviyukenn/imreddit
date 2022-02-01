@@ -1,0 +1,20 @@
+mutation CreateTextPost(
+  $communityId: String!
+  $text: String!
+  $title: String!
+) {
+  createTextPost(
+    createTextPostInput: {
+      title: $title
+      text: $text
+      communityId: $communityId
+    }
+  ) {
+    errors {
+      ...RegularErrors
+    }
+    post {
+      ...RegularPostDetail
+    }
+  }
+}

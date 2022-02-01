@@ -53,17 +53,28 @@ export type CompleteResponse = {
   isComplete?: Maybe<Scalars['Boolean']>;
 };
 
+export type CreateCommentInput = {
+  text: Scalars['String'];
+  parentId: Scalars['String'];
+  ancestorId: Scalars['String'];
+  communityId: Scalars['String'];
+};
+
 export type CreateCommunityInput = {
   name: Scalars['String'];
   description: Scalars['String'];
   topicIds: Array<Scalars['String']>;
 };
 
-export type CreatePostInput = {
-  title?: Maybe<Scalars['String']>;
-  text?: Maybe<Scalars['String']>;
-  parentId?: Maybe<Scalars['String']>;
-  images?: Maybe<Array<ImageInput>>;
+export type CreateImagePostInput = {
+  title: Scalars['String'];
+  images: Array<ImageInput>;
+  communityId: Scalars['String'];
+};
+
+export type CreateTextPostInput = {
+  title: Scalars['String'];
+  text: Scalars['String'];
   communityId: Scalars['String'];
 };
 
@@ -106,7 +117,9 @@ export type Mutation = {
   login: UserResponse;
   logout: Scalars['Boolean'];
   googleAuthentication: UserResponse;
-  createPost: Post;
+  createTextPost: PostResponse;
+  createImagePost: PostResponse;
+  createComment: PostResponse;
   deletePost: Scalars['Boolean'];
   uploadImage: UploadResponse;
   createCommunity: CommunityResponse;
@@ -145,8 +158,18 @@ export type MutationGoogleAuthenticationArgs = {
 };
 
 
-export type MutationCreatePostArgs = {
-  createPostInput: CreatePostInput;
+export type MutationCreateTextPostArgs = {
+  createTextPostInput: CreateTextPostInput;
+};
+
+
+export type MutationCreateImagePostArgs = {
+  createImagePostInput: CreateImagePostInput;
+};
+
+
+export type MutationCreateCommentArgs = {
+  createCommentInput: CreateCommentInput;
 };
 
 
@@ -212,10 +235,18 @@ export type Post = {
   title?: Maybe<Scalars['String']>;
   text?: Maybe<Scalars['String']>;
   points: Scalars['Int'];
+  postType: Scalars['Int'];
   creator: User;
   community: Community;
   children: Array<Post>;
+  descendant: Array<Post>;
   images: Array<Image>;
+};
+
+export type PostResponse = {
+  __typename?: 'PostResponse';
+  errors?: Maybe<Array<FieldError>>;
+  post?: Maybe<Post>;
 };
 
 export type Query = {
@@ -358,7 +389,7 @@ export type RegularImageFragment = (
 
 export type RegularPostDetailFragment = (
   { __typename?: 'Post' }
-  & Pick<Post, 'id' | 'createdAt' | 'updatedAt' | 'title' | 'text' | 'points'>
+  & Pick<Post, 'id' | 'createdAt' | 'updatedAt' | 'title' | 'text' | 'points' | 'postType'>
   & { creator: (
     { __typename?: 'User' }
     & RegularUserFragment
@@ -374,6 +405,18 @@ export type RegularPostDetailFragment = (
 export type RegularRoleFragment = (
   { __typename?: 'Role' }
   & Pick<Role, 'userId' | 'communityId' | 'joinedAt' | 'isMember' | 'isModerator'>
+);
+
+export type RegularTextPostFragment = (
+  { __typename?: 'Post' }
+  & Pick<Post, 'id' | 'createdAt' | 'updatedAt' | 'title' | 'text' | 'points'>
+  & { creator: (
+    { __typename?: 'User' }
+    & RegularUserFragment
+  ), community: (
+    { __typename?: 'Community' }
+    & Pick<Community, 'name'>
+  ) }
 );
 
 export type RegularUserFragment = (
@@ -435,22 +478,65 @@ export type CreateCommunityMutation = (
 
 export type CreatePostMutationVariables = Exact<{
   communityId: Scalars['String'];
-  text?: Maybe<Scalars['String']>;
-  title?: Maybe<Scalars['String']>;
-  parentId?: Maybe<Scalars['String']>;
-  images?: Maybe<Array<ImageInput> | ImageInput>;
+  text: Scalars['String'];
+  parentId: Scalars['String'];
+  ancestorId: Scalars['String'];
 }>;
 
 
 export type CreatePostMutation = (
   { __typename?: 'Mutation' }
-  & { createPost: (
-    { __typename?: 'Post' }
-    & Pick<Post, 'id'>
-    & { community: (
-      { __typename?: 'Community' }
-      & Pick<Community, 'name'>
-    ) }
+  & { createComment: (
+    { __typename?: 'PostResponse' }
+    & { errors?: Maybe<Array<(
+      { __typename?: 'FieldError' }
+      & RegularErrorsFragment
+    )>>, post?: Maybe<(
+      { __typename?: 'Post' }
+      & RegularPostDetailFragment
+    )> }
+  ) }
+);
+
+export type CreateImagePostMutationVariables = Exact<{
+  communityId: Scalars['String'];
+  title: Scalars['String'];
+  images: Array<ImageInput> | ImageInput;
+}>;
+
+
+export type CreateImagePostMutation = (
+  { __typename?: 'Mutation' }
+  & { createImagePost: (
+    { __typename?: 'PostResponse' }
+    & { errors?: Maybe<Array<(
+      { __typename?: 'FieldError' }
+      & RegularErrorsFragment
+    )>>, post?: Maybe<(
+      { __typename?: 'Post' }
+      & RegularPostDetailFragment
+    )> }
+  ) }
+);
+
+export type CreateTextPostMutationVariables = Exact<{
+  communityId: Scalars['String'];
+  text: Scalars['String'];
+  title: Scalars['String'];
+}>;
+
+
+export type CreateTextPostMutation = (
+  { __typename?: 'Mutation' }
+  & { createTextPost: (
+    { __typename?: 'PostResponse' }
+    & { errors?: Maybe<Array<(
+      { __typename?: 'FieldError' }
+      & RegularErrorsFragment
+    )>>, post?: Maybe<(
+      { __typename?: 'Post' }
+      & RegularPostDetailFragment
+    )> }
   ) }
 );
 
@@ -856,6 +942,7 @@ export const RegularPostDetailFragmentDoc = gql`
   title
   text
   points
+  postType
   creator {
     ...RegularUser
   }
@@ -877,6 +964,22 @@ export const RegularRoleFragmentDoc = gql`
   isModerator
 }
     `;
+export const RegularTextPostFragmentDoc = gql`
+    fragment RegularTextPost on Post {
+  id
+  createdAt
+  updatedAt
+  title
+  text
+  points
+  creator {
+    ...RegularUser
+  }
+  community {
+    name
+  }
+}
+    ${RegularUserFragmentDoc}`;
 export const RegularErrorsFragmentDoc = gql`
     fragment RegularErrors on FieldError {
   field
@@ -979,17 +1082,20 @@ export type CreateCommunityMutationHookResult = ReturnType<typeof useCreateCommu
 export type CreateCommunityMutationResult = Apollo.MutationResult<CreateCommunityMutation>;
 export type CreateCommunityMutationOptions = Apollo.BaseMutationOptions<CreateCommunityMutation, CreateCommunityMutationVariables>;
 export const CreatePostDocument = gql`
-    mutation CreatePost($communityId: String!, $text: String, $title: String, $parentId: String, $images: [ImageInput!]) {
-  createPost(
-    createPostInput: {title: $title, text: $text, parentId: $parentId, images: $images, communityId: $communityId}
+    mutation CreatePost($communityId: String!, $text: String!, $parentId: String!, $ancestorId: String!) {
+  createComment(
+    createCommentInput: {text: $text, parentId: $parentId, ancestorId: $ancestorId, communityId: $communityId}
   ) {
-    id
-    community {
-      name
+    errors {
+      ...RegularErrors
+    }
+    post {
+      ...RegularPostDetail
     }
   }
 }
-    `;
+    ${RegularErrorsFragmentDoc}
+${RegularPostDetailFragmentDoc}`;
 export type CreatePostMutationFn = Apollo.MutationFunction<CreatePostMutation, CreatePostMutationVariables>;
 
 /**
@@ -1007,9 +1113,8 @@ export type CreatePostMutationFn = Apollo.MutationFunction<CreatePostMutation, C
  *   variables: {
  *      communityId: // value for 'communityId'
  *      text: // value for 'text'
- *      title: // value for 'title'
  *      parentId: // value for 'parentId'
- *      images: // value for 'images'
+ *      ancestorId: // value for 'ancestorId'
  *   },
  * });
  */
@@ -1020,6 +1125,92 @@ export function useCreatePostMutation(baseOptions?: Apollo.MutationHookOptions<C
 export type CreatePostMutationHookResult = ReturnType<typeof useCreatePostMutation>;
 export type CreatePostMutationResult = Apollo.MutationResult<CreatePostMutation>;
 export type CreatePostMutationOptions = Apollo.BaseMutationOptions<CreatePostMutation, CreatePostMutationVariables>;
+export const CreateImagePostDocument = gql`
+    mutation CreateImagePost($communityId: String!, $title: String!, $images: [ImageInput!]!) {
+  createImagePost(
+    createImagePostInput: {title: $title, images: $images, communityId: $communityId}
+  ) {
+    errors {
+      ...RegularErrors
+    }
+    post {
+      ...RegularPostDetail
+    }
+  }
+}
+    ${RegularErrorsFragmentDoc}
+${RegularPostDetailFragmentDoc}`;
+export type CreateImagePostMutationFn = Apollo.MutationFunction<CreateImagePostMutation, CreateImagePostMutationVariables>;
+
+/**
+ * __useCreateImagePostMutation__
+ *
+ * To run a mutation, you first call `useCreateImagePostMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useCreateImagePostMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [createImagePostMutation, { data, loading, error }] = useCreateImagePostMutation({
+ *   variables: {
+ *      communityId: // value for 'communityId'
+ *      title: // value for 'title'
+ *      images: // value for 'images'
+ *   },
+ * });
+ */
+export function useCreateImagePostMutation(baseOptions?: Apollo.MutationHookOptions<CreateImagePostMutation, CreateImagePostMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<CreateImagePostMutation, CreateImagePostMutationVariables>(CreateImagePostDocument, options);
+      }
+export type CreateImagePostMutationHookResult = ReturnType<typeof useCreateImagePostMutation>;
+export type CreateImagePostMutationResult = Apollo.MutationResult<CreateImagePostMutation>;
+export type CreateImagePostMutationOptions = Apollo.BaseMutationOptions<CreateImagePostMutation, CreateImagePostMutationVariables>;
+export const CreateTextPostDocument = gql`
+    mutation CreateTextPost($communityId: String!, $text: String!, $title: String!) {
+  createTextPost(
+    createTextPostInput: {title: $title, text: $text, communityId: $communityId}
+  ) {
+    errors {
+      ...RegularErrors
+    }
+    post {
+      ...RegularPostDetail
+    }
+  }
+}
+    ${RegularErrorsFragmentDoc}
+${RegularPostDetailFragmentDoc}`;
+export type CreateTextPostMutationFn = Apollo.MutationFunction<CreateTextPostMutation, CreateTextPostMutationVariables>;
+
+/**
+ * __useCreateTextPostMutation__
+ *
+ * To run a mutation, you first call `useCreateTextPostMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useCreateTextPostMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [createTextPostMutation, { data, loading, error }] = useCreateTextPostMutation({
+ *   variables: {
+ *      communityId: // value for 'communityId'
+ *      text: // value for 'text'
+ *      title: // value for 'title'
+ *   },
+ * });
+ */
+export function useCreateTextPostMutation(baseOptions?: Apollo.MutationHookOptions<CreateTextPostMutation, CreateTextPostMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<CreateTextPostMutation, CreateTextPostMutationVariables>(CreateTextPostDocument, options);
+      }
+export type CreateTextPostMutationHookResult = ReturnType<typeof useCreateTextPostMutation>;
+export type CreateTextPostMutationResult = Apollo.MutationResult<CreateTextPostMutation>;
+export type CreateTextPostMutationOptions = Apollo.BaseMutationOptions<CreateTextPostMutation, CreateTextPostMutationVariables>;
 export const EditCommunityDescriptionDocument = gql`
     mutation EditCommunityDescription($communityId: String!, $description: String!) {
   editCommunityDescription(communityId: $communityId, description: $description) {
@@ -1887,7 +2078,7 @@ export type ImageFieldPolicy = {
 	caption?: FieldPolicy<any> | FieldReadFunction<any>,
 	link?: FieldPolicy<any> | FieldReadFunction<any>
 };
-export type MutationKeySpecifier = ('changePassword' | 'forgotPassword' | 'register' | 'login' | 'logout' | 'googleAuthentication' | 'createPost' | 'deletePost' | 'uploadImage' | 'createCommunity' | 'editCommunityDescription' | 'setCommunityAppearance' | 'joinCommunity' | 'leaveCommunity' | 'vote' | 'createTopic' | MutationKeySpecifier)[];
+export type MutationKeySpecifier = ('changePassword' | 'forgotPassword' | 'register' | 'login' | 'logout' | 'googleAuthentication' | 'createTextPost' | 'createImagePost' | 'createComment' | 'deletePost' | 'uploadImage' | 'createCommunity' | 'editCommunityDescription' | 'setCommunityAppearance' | 'joinCommunity' | 'leaveCommunity' | 'vote' | 'createTopic' | MutationKeySpecifier)[];
 export type MutationFieldPolicy = {
 	changePassword?: FieldPolicy<any> | FieldReadFunction<any>,
 	forgotPassword?: FieldPolicy<any> | FieldReadFunction<any>,
@@ -1895,7 +2086,9 @@ export type MutationFieldPolicy = {
 	login?: FieldPolicy<any> | FieldReadFunction<any>,
 	logout?: FieldPolicy<any> | FieldReadFunction<any>,
 	googleAuthentication?: FieldPolicy<any> | FieldReadFunction<any>,
-	createPost?: FieldPolicy<any> | FieldReadFunction<any>,
+	createTextPost?: FieldPolicy<any> | FieldReadFunction<any>,
+	createImagePost?: FieldPolicy<any> | FieldReadFunction<any>,
+	createComment?: FieldPolicy<any> | FieldReadFunction<any>,
 	deletePost?: FieldPolicy<any> | FieldReadFunction<any>,
 	uploadImage?: FieldPolicy<any> | FieldReadFunction<any>,
 	createCommunity?: FieldPolicy<any> | FieldReadFunction<any>,
@@ -1911,7 +2104,7 @@ export type PaginatedPostsFieldPolicy = {
 	posts?: FieldPolicy<any> | FieldReadFunction<any>,
 	hasMore?: FieldPolicy<any> | FieldReadFunction<any>
 };
-export type PostKeySpecifier = ('id' | 'createdAt' | 'updatedAt' | 'title' | 'text' | 'points' | 'creator' | 'community' | 'children' | 'images' | PostKeySpecifier)[];
+export type PostKeySpecifier = ('id' | 'createdAt' | 'updatedAt' | 'title' | 'text' | 'points' | 'postType' | 'creator' | 'community' | 'children' | 'descendant' | 'images' | PostKeySpecifier)[];
 export type PostFieldPolicy = {
 	id?: FieldPolicy<any> | FieldReadFunction<any>,
 	createdAt?: FieldPolicy<any> | FieldReadFunction<any>,
@@ -1919,10 +2112,17 @@ export type PostFieldPolicy = {
 	title?: FieldPolicy<any> | FieldReadFunction<any>,
 	text?: FieldPolicy<any> | FieldReadFunction<any>,
 	points?: FieldPolicy<any> | FieldReadFunction<any>,
+	postType?: FieldPolicy<any> | FieldReadFunction<any>,
 	creator?: FieldPolicy<any> | FieldReadFunction<any>,
 	community?: FieldPolicy<any> | FieldReadFunction<any>,
 	children?: FieldPolicy<any> | FieldReadFunction<any>,
+	descendant?: FieldPolicy<any> | FieldReadFunction<any>,
 	images?: FieldPolicy<any> | FieldReadFunction<any>
+};
+export type PostResponseKeySpecifier = ('errors' | 'post' | PostResponseKeySpecifier)[];
+export type PostResponseFieldPolicy = {
+	errors?: FieldPolicy<any> | FieldReadFunction<any>,
+	post?: FieldPolicy<any> | FieldReadFunction<any>
 };
 export type QueryKeySpecifier = ('me' | 'userPosts' | 'communityPosts' | 'paginatedPosts' | 'allPosts' | 'postDetail' | 'communities' | 'community' | 'userRoles' | 'userRole' | 'topics' | QueryKeySpecifier)[];
 export type QueryFieldPolicy = {
@@ -2010,6 +2210,10 @@ export type TypedTypePolicies = TypePolicies & {
 	Post?: Omit<TypePolicy, "fields" | "keyFields"> & {
 		keyFields?: false | PostKeySpecifier | (() => undefined | PostKeySpecifier),
 		fields?: PostFieldPolicy,
+	},
+	PostResponse?: Omit<TypePolicy, "fields" | "keyFields"> & {
+		keyFields?: false | PostResponseKeySpecifier | (() => undefined | PostResponseKeySpecifier),
+		fields?: PostResponseFieldPolicy,
 	},
 	Query?: Omit<TypePolicy, "fields" | "keyFields"> & {
 		keyFields?: false | QueryKeySpecifier | (() => undefined | QueryKeySpecifier),

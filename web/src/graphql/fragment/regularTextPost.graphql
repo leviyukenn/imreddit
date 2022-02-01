@@ -1,16 +1,12 @@
-fragment RegularPostDetail on Post {
+fragment RegularTextPost on Post {
   id
   createdAt
   updatedAt
   title
   text
   points
-  postType
   creator {
     ...RegularUser
-  }
-  images {
-    ...RegularImage
   }
   community {
     # ...RegularCommunity

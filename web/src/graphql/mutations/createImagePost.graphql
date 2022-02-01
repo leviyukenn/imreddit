@@ -1,0 +1,20 @@
+mutation CreateImagePost(
+  $communityId: String!
+  $title: String!
+  $images: [ImageInput!]!
+) {
+  createImagePost(
+    createImagePostInput: {
+      title: $title
+      images: $images
+      communityId: $communityId
+    }
+  ) {
+    errors {
+      ...RegularErrors
+    }
+    post {
+      ...RegularPostDetail
+    }
+  }
+}

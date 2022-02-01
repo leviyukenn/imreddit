@@ -13,7 +13,6 @@ import SearchIcon from "@material-ui/icons/Search";
 import { Autocomplete } from "@material-ui/lab";
 import NextLink from "next/link";
 import React, { useEffect, useMemo } from "react";
-import { SERVER_URL } from "../../const/const";
 import { useCommunitiesQuery } from "../../generated/graphql";
 import {
   CommunitySelectionOption,
@@ -21,6 +20,7 @@ import {
   CommunitySelectionOptionIconType,
 } from "../../utils/factory/communitySelectionOption";
 import { createCommunityPageLink } from "../../utils/links";
+import CommunityIcon from "../community/CommunityIcon";
 
 interface SelectCommunityProps {
   setCommunityId: React.Dispatch<React.SetStateAction<string>>;
@@ -150,12 +150,7 @@ export default function SelectCommunity({
       return <span className={classes.circle}></span>;
     }
     if (typeof pendingValue.icon === "string") {
-      return (
-        <img
-          src={SERVER_URL + pendingValue.icon}
-          className={classes.iconImage}
-        />
-      );
+      return <CommunityIcon icon={pendingValue.icon} size="small" />;
     }
     return pendingValue.icon;
   }, [pendingValue]);
@@ -185,7 +180,7 @@ export default function SelectCommunity({
       renderOption={(option) => (
         <React.Fragment>
           {typeof option.icon === "string" ? (
-            <img src={SERVER_URL + option.icon} className={classes.iconImage} />
+            <CommunityIcon icon={option.icon} size="small" />
           ) : (
             iconMap.get(option.icon)
           )}

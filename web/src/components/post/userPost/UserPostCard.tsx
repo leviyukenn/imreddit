@@ -69,6 +69,7 @@ const useStyles = makeStyles((theme: Theme) =>
     },
     cardContent: {
       display: "flex",
+      // alignItems: "center",
       padding: "8px 8px 0",
       "&:last-child": {
         paddingBottom: 0,
