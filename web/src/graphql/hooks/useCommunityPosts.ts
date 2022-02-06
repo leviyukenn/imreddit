@@ -1,4 +1,4 @@
-import { useCallback, useMemo } from "react";
+import { useMemo } from "react";
 import {
   RegularPostDetailFragment,
   useCommunityPostsQuery,
@@ -19,15 +19,17 @@ export function useCommunityPosts(communityName: string) {
     () => (postsResponse ? postsResponse.communityPosts.hasMore : false),
     [postsResponse]
   );
-  const next = useCallback(() => {
-    fetchMore({
-      variables: {
-        limit: 10,
-        cursor: posts[posts.length - 1].createdAt,
-        communityName: communityName,
-      },
-    });
-  }, [posts]);
+  const next = async () => {
+    try {
+      await fetchMore({
+        variables: {
+          limit: 10,
+          cursor: posts[posts.length - 1]?.createdAt,
+          communityName: communityName,
+        },
+      });
+    } catch (e) {}
+  };
 
   return { posts, hasMore, next, loading };
 }

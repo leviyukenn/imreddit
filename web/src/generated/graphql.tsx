@@ -78,6 +78,12 @@ export type CreateTextPostInput = {
   communityId: Scalars['String'];
 };
 
+export type DeletePostResponse = {
+  __typename?: 'DeletePostResponse';
+  errors?: Maybe<Array<FieldError>>;
+  postId?: Maybe<Scalars['String']>;
+};
+
 export type FieldError = {
   __typename?: 'FieldError';
   field: Scalars['String'];
@@ -120,7 +126,7 @@ export type Mutation = {
   createTextPost: PostResponse;
   createImagePost: PostResponse;
   createComment: PostResponse;
-  deletePost: Scalars['Boolean'];
+  deleteMyPost: DeletePostResponse;
   uploadImage: UploadResponse;
   createCommunity: CommunityResponse;
   editCommunityDescription: CommunityResponse;
@@ -173,8 +179,8 @@ export type MutationCreateCommentArgs = {
 };
 
 
-export type MutationDeletePostArgs = {
-  id: Scalars['String'];
+export type MutationDeleteMyPostArgs = {
+  postId: Scalars['String'];
 };
 
 
@@ -236,10 +242,13 @@ export type Post = {
   text?: Maybe<Scalars['String']>;
   points: Scalars['Int'];
   postType: Scalars['Int'];
+  totalComments: Scalars['Int'];
+  layer: Scalars['Int'];
   creator: User;
   community: Community;
   children: Array<Post>;
   ancestor?: Maybe<Post>;
+  descendant: Array<Post>;
   images: Array<Image>;
 };
 
@@ -252,6 +261,8 @@ export type PostResponse = {
 export type Query = {
   __typename?: 'Query';
   me?: Maybe<User>;
+  userComments: Array<Post>;
+  userCommentedPosts: PaginatedPosts;
   userPosts: PaginatedPosts;
   communityPosts: PaginatedPosts;
   paginatedPosts: PaginatedPosts;
@@ -262,6 +273,19 @@ export type Query = {
   userRoles: Array<Maybe<Role>>;
   userRole?: Maybe<Role>;
   topics: Array<Topic>;
+};
+
+
+export type QueryUserCommentsArgs = {
+  ancestorId: Scalars['String'];
+  userName: Scalars['String'];
+};
+
+
+export type QueryUserCommentedPostsArgs = {
+  userName: Scalars['String'];
+  cursor?: Maybe<Scalars['String']>;
+  limit?: Maybe<Scalars['Int']>;
 };
 
 
@@ -389,7 +413,7 @@ export type RegularImageFragment = (
 
 export type RegularPostDetailFragment = (
   { __typename?: 'Post' }
-  & Pick<Post, 'id' | 'createdAt' | 'updatedAt' | 'title' | 'text' | 'points' | 'postType'>
+  & Pick<Post, 'id' | 'createdAt' | 'updatedAt' | 'title' | 'text' | 'points' | 'postType' | 'totalComments' | 'layer'>
   & { creator: (
     { __typename?: 'User' }
     & RegularUserFragment
@@ -540,6 +564,23 @@ export type CreateTextPostMutation = (
       { __typename?: 'Post' }
       & RegularPostDetailFragment
     )> }
+  ) }
+);
+
+export type DeleteMyPostMutationVariables = Exact<{
+  postId: Scalars['String'];
+}>;
+
+
+export type DeleteMyPostMutation = (
+  { __typename?: 'Mutation' }
+  & { deleteMyPost: (
+    { __typename?: 'DeletePostResponse' }
+    & Pick<DeletePostResponse, 'postId'>
+    & { errors?: Maybe<Array<(
+      { __typename?: 'FieldError' }
+      & RegularErrorsFragment
+    )>> }
   ) }
 );
 
@@ -858,6 +899,39 @@ export type TopicsQuery = (
   )> }
 );
 
+export type UserCommentedPostsQueryVariables = Exact<{
+  userName: Scalars['String'];
+  limit?: Maybe<Scalars['Int']>;
+  cursor?: Maybe<Scalars['String']>;
+}>;
+
+
+export type UserCommentedPostsQuery = (
+  { __typename?: 'Query' }
+  & { userCommentedPosts: (
+    { __typename?: 'PaginatedPosts' }
+    & Pick<PaginatedPosts, 'hasMore'>
+    & { posts: Array<(
+      { __typename?: 'Post' }
+      & RegularPostDetailFragment
+    )> }
+  ) }
+);
+
+export type UserCommentsQueryVariables = Exact<{
+  userName: Scalars['String'];
+  ancestorId: Scalars['String'];
+}>;
+
+
+export type UserCommentsQuery = (
+  { __typename?: 'Query' }
+  & { userComments: Array<(
+    { __typename?: 'Post' }
+    & RegularPostDetailFragment
+  )> }
+);
+
 export type UserPostsQueryVariables = Exact<{
   userName: Scalars['String'];
   limit?: Maybe<Scalars['Int']>;
@@ -946,6 +1020,8 @@ export const RegularPostDetailFragmentDoc = gql`
   text
   points
   postType
+  totalComments
+  layer
   creator {
     ...RegularUser
   }
@@ -1218,6 +1294,42 @@ export function useCreateTextPostMutation(baseOptions?: Apollo.MutationHookOptio
 export type CreateTextPostMutationHookResult = ReturnType<typeof useCreateTextPostMutation>;
 export type CreateTextPostMutationResult = Apollo.MutationResult<CreateTextPostMutation>;
 export type CreateTextPostMutationOptions = Apollo.BaseMutationOptions<CreateTextPostMutation, CreateTextPostMutationVariables>;
+export const DeleteMyPostDocument = gql`
+    mutation DeleteMyPost($postId: String!) {
+  deleteMyPost(postId: $postId) {
+    postId
+    errors {
+      ...RegularErrors
+    }
+  }
+}
+    ${RegularErrorsFragmentDoc}`;
+export type DeleteMyPostMutationFn = Apollo.MutationFunction<DeleteMyPostMutation, DeleteMyPostMutationVariables>;
+
+/**
+ * __useDeleteMyPostMutation__
+ *
+ * To run a mutation, you first call `useDeleteMyPostMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useDeleteMyPostMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [deleteMyPostMutation, { data, loading, error }] = useDeleteMyPostMutation({
+ *   variables: {
+ *      postId: // value for 'postId'
+ *   },
+ * });
+ */
+export function useDeleteMyPostMutation(baseOptions?: Apollo.MutationHookOptions<DeleteMyPostMutation, DeleteMyPostMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<DeleteMyPostMutation, DeleteMyPostMutationVariables>(DeleteMyPostDocument, options);
+      }
+export type DeleteMyPostMutationHookResult = ReturnType<typeof useDeleteMyPostMutation>;
+export type DeleteMyPostMutationResult = Apollo.MutationResult<DeleteMyPostMutation>;
+export type DeleteMyPostMutationOptions = Apollo.BaseMutationOptions<DeleteMyPostMutation, DeleteMyPostMutationVariables>;
 export const EditCommunityDescriptionDocument = gql`
     mutation EditCommunityDescription($communityId: String!, $description: String!) {
   editCommunityDescription(communityId: $communityId, description: $description) {
@@ -1936,6 +2048,82 @@ export function useTopicsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<Top
 export type TopicsQueryHookResult = ReturnType<typeof useTopicsQuery>;
 export type TopicsLazyQueryHookResult = ReturnType<typeof useTopicsLazyQuery>;
 export type TopicsQueryResult = Apollo.QueryResult<TopicsQuery, TopicsQueryVariables>;
+export const UserCommentedPostsDocument = gql`
+    query UserCommentedPosts($userName: String!, $limit: Int, $cursor: String) {
+  userCommentedPosts(userName: $userName, limit: $limit, cursor: $cursor) {
+    hasMore
+    posts {
+      ...RegularPostDetail
+    }
+  }
+}
+    ${RegularPostDetailFragmentDoc}`;
+
+/**
+ * __useUserCommentedPostsQuery__
+ *
+ * To run a query within a React component, call `useUserCommentedPostsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useUserCommentedPostsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useUserCommentedPostsQuery({
+ *   variables: {
+ *      userName: // value for 'userName'
+ *      limit: // value for 'limit'
+ *      cursor: // value for 'cursor'
+ *   },
+ * });
+ */
+export function useUserCommentedPostsQuery(baseOptions: Apollo.QueryHookOptions<UserCommentedPostsQuery, UserCommentedPostsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<UserCommentedPostsQuery, UserCommentedPostsQueryVariables>(UserCommentedPostsDocument, options);
+      }
+export function useUserCommentedPostsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<UserCommentedPostsQuery, UserCommentedPostsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<UserCommentedPostsQuery, UserCommentedPostsQueryVariables>(UserCommentedPostsDocument, options);
+        }
+export type UserCommentedPostsQueryHookResult = ReturnType<typeof useUserCommentedPostsQuery>;
+export type UserCommentedPostsLazyQueryHookResult = ReturnType<typeof useUserCommentedPostsLazyQuery>;
+export type UserCommentedPostsQueryResult = Apollo.QueryResult<UserCommentedPostsQuery, UserCommentedPostsQueryVariables>;
+export const UserCommentsDocument = gql`
+    query UserComments($userName: String!, $ancestorId: String!) {
+  userComments(userName: $userName, ancestorId: $ancestorId) {
+    ...RegularPostDetail
+  }
+}
+    ${RegularPostDetailFragmentDoc}`;
+
+/**
+ * __useUserCommentsQuery__
+ *
+ * To run a query within a React component, call `useUserCommentsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useUserCommentsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useUserCommentsQuery({
+ *   variables: {
+ *      userName: // value for 'userName'
+ *      ancestorId: // value for 'ancestorId'
+ *   },
+ * });
+ */
+export function useUserCommentsQuery(baseOptions: Apollo.QueryHookOptions<UserCommentsQuery, UserCommentsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<UserCommentsQuery, UserCommentsQueryVariables>(UserCommentsDocument, options);
+      }
+export function useUserCommentsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<UserCommentsQuery, UserCommentsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<UserCommentsQuery, UserCommentsQueryVariables>(UserCommentsDocument, options);
+        }
+export type UserCommentsQueryHookResult = ReturnType<typeof useUserCommentsQuery>;
+export type UserCommentsLazyQueryHookResult = ReturnType<typeof useUserCommentsLazyQuery>;
+export type UserCommentsQueryResult = Apollo.QueryResult<UserCommentsQuery, UserCommentsQueryVariables>;
 export const UserPostsDocument = gql`
     query UserPosts($userName: String!, $limit: Int, $cursor: String) {
   userPosts(userName: $userName, limit: $limit, cursor: $cursor) {
@@ -2072,6 +2260,11 @@ export type CompleteResponseFieldPolicy = {
 	errors?: FieldPolicy<any> | FieldReadFunction<any>,
 	isComplete?: FieldPolicy<any> | FieldReadFunction<any>
 };
+export type DeletePostResponseKeySpecifier = ('errors' | 'postId' | DeletePostResponseKeySpecifier)[];
+export type DeletePostResponseFieldPolicy = {
+	errors?: FieldPolicy<any> | FieldReadFunction<any>,
+	postId?: FieldPolicy<any> | FieldReadFunction<any>
+};
 export type FieldErrorKeySpecifier = ('field' | 'errorCode' | 'message' | FieldErrorKeySpecifier)[];
 export type FieldErrorFieldPolicy = {
 	field?: FieldPolicy<any> | FieldReadFunction<any>,
@@ -2085,7 +2278,7 @@ export type ImageFieldPolicy = {
 	caption?: FieldPolicy<any> | FieldReadFunction<any>,
 	link?: FieldPolicy<any> | FieldReadFunction<any>
 };
-export type MutationKeySpecifier = ('changePassword' | 'forgotPassword' | 'register' | 'login' | 'logout' | 'googleAuthentication' | 'createTextPost' | 'createImagePost' | 'createComment' | 'deletePost' | 'uploadImage' | 'createCommunity' | 'editCommunityDescription' | 'setCommunityAppearance' | 'joinCommunity' | 'leaveCommunity' | 'vote' | 'createTopic' | MutationKeySpecifier)[];
+export type MutationKeySpecifier = ('changePassword' | 'forgotPassword' | 'register' | 'login' | 'logout' | 'googleAuthentication' | 'createTextPost' | 'createImagePost' | 'createComment' | 'deleteMyPost' | 'uploadImage' | 'createCommunity' | 'editCommunityDescription' | 'setCommunityAppearance' | 'joinCommunity' | 'leaveCommunity' | 'vote' | 'createTopic' | MutationKeySpecifier)[];
 export type MutationFieldPolicy = {
 	changePassword?: FieldPolicy<any> | FieldReadFunction<any>,
 	forgotPassword?: FieldPolicy<any> | FieldReadFunction<any>,
@@ -2096,7 +2289,7 @@ export type MutationFieldPolicy = {
 	createTextPost?: FieldPolicy<any> | FieldReadFunction<any>,
 	createImagePost?: FieldPolicy<any> | FieldReadFunction<any>,
 	createComment?: FieldPolicy<any> | FieldReadFunction<any>,
-	deletePost?: FieldPolicy<any> | FieldReadFunction<any>,
+	deleteMyPost?: FieldPolicy<any> | FieldReadFunction<any>,
 	uploadImage?: FieldPolicy<any> | FieldReadFunction<any>,
 	createCommunity?: FieldPolicy<any> | FieldReadFunction<any>,
 	editCommunityDescription?: FieldPolicy<any> | FieldReadFunction<any>,
@@ -2111,7 +2304,7 @@ export type PaginatedPostsFieldPolicy = {
 	posts?: FieldPolicy<any> | FieldReadFunction<any>,
 	hasMore?: FieldPolicy<any> | FieldReadFunction<any>
 };
-export type PostKeySpecifier = ('id' | 'createdAt' | 'updatedAt' | 'title' | 'text' | 'points' | 'postType' | 'creator' | 'community' | 'children' | 'ancestor' | 'images' | PostKeySpecifier)[];
+export type PostKeySpecifier = ('id' | 'createdAt' | 'updatedAt' | 'title' | 'text' | 'points' | 'postType' | 'totalComments' | 'layer' | 'creator' | 'community' | 'children' | 'ancestor' | 'descendant' | 'images' | PostKeySpecifier)[];
 export type PostFieldPolicy = {
 	id?: FieldPolicy<any> | FieldReadFunction<any>,
 	createdAt?: FieldPolicy<any> | FieldReadFunction<any>,
@@ -2120,10 +2313,13 @@ export type PostFieldPolicy = {
 	text?: FieldPolicy<any> | FieldReadFunction<any>,
 	points?: FieldPolicy<any> | FieldReadFunction<any>,
 	postType?: FieldPolicy<any> | FieldReadFunction<any>,
+	totalComments?: FieldPolicy<any> | FieldReadFunction<any>,
+	layer?: FieldPolicy<any> | FieldReadFunction<any>,
 	creator?: FieldPolicy<any> | FieldReadFunction<any>,
 	community?: FieldPolicy<any> | FieldReadFunction<any>,
 	children?: FieldPolicy<any> | FieldReadFunction<any>,
 	ancestor?: FieldPolicy<any> | FieldReadFunction<any>,
+	descendant?: FieldPolicy<any> | FieldReadFunction<any>,
 	images?: FieldPolicy<any> | FieldReadFunction<any>
 };
 export type PostResponseKeySpecifier = ('errors' | 'post' | PostResponseKeySpecifier)[];
@@ -2131,9 +2327,11 @@ export type PostResponseFieldPolicy = {
 	errors?: FieldPolicy<any> | FieldReadFunction<any>,
 	post?: FieldPolicy<any> | FieldReadFunction<any>
 };
-export type QueryKeySpecifier = ('me' | 'userPosts' | 'communityPosts' | 'paginatedPosts' | 'allPosts' | 'postDetail' | 'communities' | 'community' | 'userRoles' | 'userRole' | 'topics' | QueryKeySpecifier)[];
+export type QueryKeySpecifier = ('me' | 'userComments' | 'userCommentedPosts' | 'userPosts' | 'communityPosts' | 'paginatedPosts' | 'allPosts' | 'postDetail' | 'communities' | 'community' | 'userRoles' | 'userRole' | 'topics' | QueryKeySpecifier)[];
 export type QueryFieldPolicy = {
 	me?: FieldPolicy<any> | FieldReadFunction<any>,
+	userComments?: FieldPolicy<any> | FieldReadFunction<any>,
+	userCommentedPosts?: FieldPolicy<any> | FieldReadFunction<any>,
 	userPosts?: FieldPolicy<any> | FieldReadFunction<any>,
 	communityPosts?: FieldPolicy<any> | FieldReadFunction<any>,
 	paginatedPosts?: FieldPolicy<any> | FieldReadFunction<any>,
@@ -2197,6 +2395,10 @@ export type TypedTypePolicies = TypePolicies & {
 	CompleteResponse?: Omit<TypePolicy, "fields" | "keyFields"> & {
 		keyFields?: false | CompleteResponseKeySpecifier | (() => undefined | CompleteResponseKeySpecifier),
 		fields?: CompleteResponseFieldPolicy,
+	},
+	DeletePostResponse?: Omit<TypePolicy, "fields" | "keyFields"> & {
+		keyFields?: false | DeletePostResponseKeySpecifier | (() => undefined | DeletePostResponseKeySpecifier),
+		fields?: DeletePostResponseFieldPolicy,
 	},
 	FieldError?: Omit<TypePolicy, "fields" | "keyFields"> & {
 		keyFields?: false | FieldErrorKeySpecifier | (() => undefined | FieldErrorKeySpecifier),

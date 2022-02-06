@@ -13,6 +13,12 @@ export const createPostDetailModalLink = (
   postId: string
 ) => `${currentPath}?modalPostId=${postId}`;
 
+export const createPostDetailModalLinkWithCommentId = (
+  currentPath: string,
+  postId: string,
+  commentId: string
+) => `${currentPath}?modalPostId=${postId}&commentId=${commentId}`;
+
 export const loginPageLink = "/login";
 export const registerPageLink = "/register";
 export const forgotPasswordPageLink = "/forgot-password";

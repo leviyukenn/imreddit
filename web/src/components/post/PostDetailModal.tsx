@@ -59,11 +59,11 @@ const PostDetailModal = ({}: PostDetailModalProps) => {
   const classes = useStyles();
 
   const handleClose = useCallback(() => {
-    if (router.query.postInfo?.length === 1) {
+    if (router.pathname.includes("postInfo")) {
       router.push(
-        createCommunityHomeLink(router.query.postInfo[0]),
+        createCommunityHomeLink((router.query.postInfo as string[])[0]),
         undefined,
-        { shallow: true }
+        { shallow: true, scroll: false }
       );
       return;
     }

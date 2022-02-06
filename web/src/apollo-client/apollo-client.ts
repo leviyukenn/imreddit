@@ -15,6 +15,7 @@ const cache = new InMemoryCache({
         communityPosts: communityPostsFieldPolicy,
         paginatedPosts: postsFieldPolicy,
         userPosts: userPostsFieldPolicy,
+        userCommentedPosts: userPostsFieldPolicy,
       },
     },
   },

@@ -2,9 +2,11 @@ import InfiniteScroll from "react-infinite-scroll-component";
 import { RegularPostDetailFragment } from "../../generated/graphql";
 import { useCommunityPosts } from "../../graphql/hooks/useCommunityPosts";
 import { useHomePosts } from "../../graphql/hooks/useHomePosts";
+import { useUserCommentedPosts } from "../../graphql/hooks/useUserCommentedPosts";
 import { useUserPosts } from "../../graphql/hooks/useUserPosts";
 import { LoadingPostCard, PostCard } from "./PostCard";
-import UserPostCard from "./userPost/UserPostCard";
+import UserCommentedPostCard from "./userPost/UserCommentedPostCard";
+import UserPostCard, { LoadingUserPostCard } from "./userPost/UserPostCard";
 
 interface PostInfiniteScrollProps {
   posts: RegularPostDetailFragment[];
@@ -32,8 +34,14 @@ const PostInfiniteScroll = ({
 };
 
 export const HomePostsInfiniteScroll = () => {
-  const { posts, hasMore, next } = useHomePosts();
-  return <PostInfiniteScroll posts={posts} hasMore={hasMore} next={next} />;
+  const { posts, hasMore, next, loading } = useHomePosts();
+  return (
+    <PostInfiniteScroll
+      posts={posts}
+      hasMore={hasMore && !loading}
+      next={next}
+    />
+  );
 };
 
 export const UserPostsInfiniteScroll = ({ userName }: { userName: string }) => {
@@ -44,10 +52,37 @@ export const UserPostsInfiniteScroll = ({ userName }: { userName: string }) => {
       dataLength={posts.length}
       next={next}
       hasMore={hasMore}
-      loader={<LoadingPostCard />}
+      loader={<LoadingUserPostCard />}
     >
       {posts.map((post) => {
         return <UserPostCard post={post} key={post.id} />;
+      })}
+    </InfiniteScroll>
+  );
+};
+
+export const UserCommentedPostsInfiniteScroll = ({
+  userName,
+}: {
+  userName: string;
+}) => {
+  const { posts, hasMore, next } = useUserCommentedPosts(userName);
+
+  return (
+    <InfiniteScroll
+      dataLength={posts.length}
+      next={next}
+      hasMore={hasMore}
+      loader={<LoadingUserPostCard />}
+    >
+      {posts.map((post) => {
+        return (
+          <UserCommentedPostCard
+            userName={userName}
+            post={post}
+            key={post.id}
+          />
+        );
       })}
     </InfiniteScroll>
   );
@@ -59,5 +94,11 @@ export const CommunityPostsInfiniteScroll = ({
   communityName: string;
 }) => {
   const { posts, hasMore, next, loading } = useCommunityPosts(communityName);
-  return <PostInfiniteScroll posts={posts} hasMore={hasMore} next={next} />;
+  return (
+    <PostInfiniteScroll
+      posts={posts}
+      hasMore={hasMore && !loading}
+      next={next}
+    />
+  );
 };

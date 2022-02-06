@@ -1,4 +1,4 @@
-import { useCallback, useMemo } from "react";
+import { useMemo } from "react";
 import {
   RegularPostDetailFragment,
   usePostsQuery,
@@ -18,15 +18,15 @@ export function useHomePosts() {
     () => (postsResponse ? postsResponse.paginatedPosts.hasMore : false),
     [postsResponse]
   );
-  const next = useCallback(() => {
-    if (posts.length === 0) return;
-
-    fetchMore({
-      variables: {
-        limit: 10,
-        cursor: posts[posts.length - 1].createdAt,
-      },
-    });
-  }, [posts, fetchMore]);
+  const next = async () => {
+    try {
+      await fetchMore({
+        variables: {
+          limit: 10,
+          cursor: posts[posts.length - 1]?.createdAt,
+        },
+      });
+    } catch (e) {}
+  };
   return { posts, hasMore, next, loading };
 }

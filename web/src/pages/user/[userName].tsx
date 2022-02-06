@@ -1,21 +1,38 @@
-import { useRouter } from "next/router";
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import ContentLayout from "../../components/ContentLayout";
 import HomeContainer from "../../components/HomeContainer";
-import { UserPostsInfiniteScroll } from "../../components/post/PostInfiniteScroll";
+import UserCommentsContent from "../../components/userProfile/UserCommentsContent";
+import UserPostsContent from "../../components/userProfile/UserPostsContents";
 import UserProfileNavigation from "../../components/userProfile/UserProfileNavigation";
 
 interface UserProfileProps {}
+export enum UserProfileTabType {
+  POSTS,
+  COMMENTS,
+  UPVOTED,
+  DOWNVOTED,
+}
 
 const UserProfile = ({}: UserProfileProps) => {
-  const router = useRouter();
-  const [route, setRoute] = useState(0);
+  const [route, setRoute] = useState<UserProfileTabType>(
+    UserProfileTabType.POSTS
+  );
+
+  const content = useMemo(() => {
+    switch (route) {
+      case UserProfileTabType.POSTS:
+        return <UserPostsContent />;
+
+      case UserProfileTabType.COMMENTS:
+        return <UserCommentsContent />;
+      default:
+        return null;
+    }
+  }, [route]);
 
   return (
     <HomeContainer banner={<UserProfileNavigation {...{ route, setRoute }} />}>
-      <ContentLayout fullWidth={true}>
-        <UserPostsInfiniteScroll userName={router.query.userName as string} />
-      </ContentLayout>
+      <ContentLayout fullWidth={true}>{content}</ContentLayout>
     </HomeContainer>
   );
 };

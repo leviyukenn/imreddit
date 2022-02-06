@@ -12,7 +12,14 @@ import { blue, red } from "@material-ui/core/colors";
 import ChatBubbleOutlineIcon from "@material-ui/icons/ChatBubbleOutline";
 import ControlPointIcon from "@material-ui/icons/ControlPoint";
 import { Skeleton } from "@material-ui/lab";
-import React, { useCallback, useMemo, useState } from "react";
+import { useRouter } from "next/router";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { format } from "timeago.js";
 import { usePostDetailQuery } from "../../generated/graphql";
 import CommentEditor from "./post-editor/CommentEditor";
@@ -51,9 +58,12 @@ const useStyles = makeStyles((theme: Theme) =>
     },
     commentBox: {
       marginLeft: "6px",
+      flex: 1,
     },
 
     header: {
+      display: "flex",
+      alignItems: "center",
       margin: "12px 0",
     },
     content: {
@@ -73,6 +83,8 @@ export const CommentCard = ({ postId, ...props }: PostDetailProps) => {
   const [showThread, setShowThread] = useState(true);
   const [showCommentEditor, setShowCommentEditor] = useState(false);
   const classes = useStyles();
+  const router = useRouter();
+  const commentRef = useRef<HTMLDivElement>(null);
 
   const {
     data: postDetailResponse,
@@ -98,6 +110,26 @@ export const CommentCard = ({ postId, ...props }: PostDetailProps) => {
   const toggleShowCommentEditor = useCallback(() => {
     setShowCommentEditor((prevState) => !prevState);
   }, [setShowThread]);
+
+  const backgroundColor = useMemo(
+    () =>
+      router.query.commentId === postId
+        ? { backgroundColor: "rgb(0 121 211 / 5%)" }
+        : undefined,
+    [postId, router]
+  );
+
+  useEffect(() => {
+    if (!(post?.id && router.query.commentId && commentRef.current)) return;
+
+    if (post.id === router.query.commentId) {
+      console.log("scroll");
+      commentRef.current.scrollIntoView({
+        behavior: "smooth",
+        block: "center",
+      });
+    }
+  }, [post, router.query.commentId, commentRef]);
 
   if (!post) return <LoadingCommentCard />;
 
@@ -125,8 +157,8 @@ export const CommentCard = ({ postId, ...props }: PostDetailProps) => {
           </Box>
         ) : null}
       </Box>
-      <Box className={classes.commentBox}>
-        <Box display="flex" alignItems="center" className={classes.header}>
+      <div className={classes.commentBox}>
+        <div className={classes.header} ref={commentRef}>
           <Typography variant="caption">
             {`${post.creator.username} `}
           </Typography>
@@ -135,20 +167,22 @@ export const CommentCard = ({ postId, ...props }: PostDetailProps) => {
             variant="caption"
             style={{ color: "#7C7C7C" }}
           >{`${timeago}`}</Typography>
-        </Box>
+        </div>
 
         {showThread ? (
           <Box className={classes.content}>
-            <Box dangerouslySetInnerHTML={{ __html: post.text || "" }}></Box>
-            <Box display="flex">
-              <UpvoteBox post={post} isVerticalLayout={false} />
-              <Button
-                size="small"
-                startIcon={<ChatBubbleOutlineIcon />}
-                onClick={toggleShowCommentEditor}
-              >
-                Reply
-              </Button>
+            <Box style={backgroundColor}>
+              <Box dangerouslySetInnerHTML={{ __html: post.text || "" }}></Box>
+              <Box display="flex">
+                <UpvoteBox post={post} isVerticalLayout={false} />
+                <Button
+                  size="small"
+                  startIcon={<ChatBubbleOutlineIcon />}
+                  onClick={toggleShowCommentEditor}
+                >
+                  Reply
+                </Button>
+              </Box>
             </Box>
             {showCommentEditor ? (
               <CommentEditor
@@ -161,7 +195,7 @@ export const CommentCard = ({ postId, ...props }: PostDetailProps) => {
             ))}
           </Box>
         ) : null}
-      </Box>
+      </div>
     </Box>
   );
 };

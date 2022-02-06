@@ -1,0 +1,5 @@
+query UserComments($userName: String!, $ancestorId: String!) {
+  userComments(userName: $userName, ancestorId: $ancestorId) {
+    ...RegularPostDetail
+  }
+}

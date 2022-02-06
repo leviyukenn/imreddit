@@ -6,6 +6,8 @@ fragment RegularPostDetail on Post {
   text
   points
   postType
+  totalComments
+  layer
   creator {
     ...RegularUser
   }

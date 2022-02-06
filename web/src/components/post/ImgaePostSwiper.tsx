@@ -9,6 +9,7 @@ import {
 } from "@material-ui/core";
 import ArrowBackIosOutlinedIcon from "@material-ui/icons/ArrowBackIosOutlined";
 import ArrowForwardIosOutlinedIcon from "@material-ui/icons/ArrowForwardIosOutlined";
+import NextLink from "next/link";
 import React, { useCallback, useState } from "react";
 import { SERVER_URL } from "../../const/const";
 import { RegularImageFragment } from "../../generated/graphql";
@@ -116,7 +117,14 @@ const ImgaePostSwiper = ({ images }: ImgaePostSwiperProps) => {
             style={{ left: index !== current ? "-100%" : "0" }}
             key={img.id}
           >
-            <img src={SERVER_URL + img.path} className={classes.slideImage} />
+            <NextLink href={SERVER_URL + img.path} passHref>
+              <Link target="_blank">
+                <img
+                  src={SERVER_URL + img.path}
+                  className={classes.slideImage}
+                />
+              </Link>
+            </NextLink>
           </Box>
         ))}
       </Box>

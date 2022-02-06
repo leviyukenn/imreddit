@@ -33,6 +33,15 @@ export function useCreateComment(replyTo: RegularPostDetailFragment) {
           },
         },
       });
+      cache.modify({
+        id: cache.identify(replyTo.ancestor || replyTo),
+        fields: {
+          totalComments(existing: number) {
+            if (!createCommentResponse?.createComment.post) return existing;
+            return existing + 1;
+          },
+        },
+      });
     },
   });
 

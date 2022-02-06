@@ -10,19 +10,21 @@ import {
   Typography,
 } from "@material-ui/core";
 import { red } from "@material-ui/core/colors";
-import ChatBubbleOutlineIcon from "@material-ui/icons/ChatBubbleOutline";
 import ViewHeadlineIcon from "@material-ui/icons/ViewHeadline";
+import { Skeleton } from "@material-ui/lab";
 import NextLink from "next/link";
-import { useRouter } from "next/router";
 import React, { useMemo } from "react";
 import { format } from "timeago.js";
-import { SERVER_URL } from "../../../const/const";
+import { FRONTEND_URL, SERVER_URL } from "../../../const/const";
 import { RegularPostDetailFragment } from "../../../generated/graphql";
 import {
   createCommunityHomeLink,
   createPostDetailModalLink,
   createPostDetailPageLink,
 } from "../../../utils/links";
+import CommentNumberButton from "../postToolBar/CommentNumberButton";
+import CopyLinkButton from "../postToolBar/CopyLinkButton";
+import RemovePostButton from "../postToolBar/RemovePostButton";
 import UpvoteBox from "../upvote/UpvoteBox";
 
 interface UserPostCardProps extends CardProps {
@@ -39,6 +41,7 @@ const useStyles = makeStyles((theme: Theme) =>
       // marginBottom: theme.spacing(2),
       borderRadius: 0,
 
+      boxShadow: "none",
       backgroundColor: "#F7F9FA",
       border: "1px solid #CCCCCC",
       cursor: "pointer",
@@ -104,20 +107,6 @@ const useStyles = makeStyles((theme: Theme) =>
     toolBar: {
       display: "flex",
     },
-    commentButton: {
-      display: "flex",
-      alignItems: "center",
-      lineHeight: 16,
-      padding: 8,
-      fontSize: "0.75rem",
-      fontWeight: 700,
-      cursor: "pointer",
-      color: "#9b9b9b",
-      borderRadius: 4,
-      "&:hover": {
-        backgroundColor: theme.palette.action.hover,
-      },
-    },
   })
 );
 
@@ -142,11 +131,9 @@ const UserPostCard = ({ post, ...props }: UserPostCardProps) => {
         <Typography variant="caption">{`Posted by ${post.creator.username} ${timeago}`}</Typography>
       </Box>
     ),
-    []
+    [post, timeago]
   );
 
-  const isTextPost = useMemo(() => post.images.length === 0, [post]);
-  const router = useRouter();
   const postDetailModalLink = createPostDetailModalLink(
     createPostDetailPageLink(post.community.name, post.id),
     post.id
@@ -167,15 +154,6 @@ const UserPostCard = ({ post, ...props }: UserPostCardProps) => {
         scroll={false}
       >
         <Card className={classes.card} {...props}>
-          {/* <CardHeader
-            avatar={
-              <Avatar aria-label="recipe" className={classes.avatar}>
-                R
-              </Avatar>
-            }
-            subheader={subHeader}
-            className={classes.header}
-          /> */}
           <CardContent className={classes.cardContent}>
             {post.images[0]?.path ? (
               <Box
@@ -195,16 +173,51 @@ const UserPostCard = ({ post, ...props }: UserPostCardProps) => {
               </Typography>
               {postInfo}
               <Box className={classes.toolBar}>
-                <NextLink href={postDetailModalLink} passHref>
-                  <Link className={classes.commentButton}>
-                    <ChatBubbleOutlineIcon />
-                  </Link>
-                </NextLink>
+                <CommentNumberButton
+                  link={postDetailModalLink}
+                  totalComments={post.totalComments}
+                />
+                <CopyLinkButton link={FRONTEND_URL + postDetailLink} />
+                <RemovePostButton postId={post.id} />
               </Box>
             </Box>
           </CardContent>
         </Card>
       </NextLink>
+    </Box>
+  );
+};
+
+export const LoadingUserPostCard = () => {
+  const classes = useStyles();
+
+  return (
+    <Box className={classes.root}>
+      <Box className={classes.upvoteBox}>
+        <Box display="flex" justifyContent="center" alignItems="center">
+          <Skeleton variant="rect" />
+        </Box>
+      </Box>
+      <Card className={classes.card}>
+        <CardContent className={classes.cardContent}>
+          <Box className={classes.textPostIcon}>
+            <Skeleton />
+          </Box>
+          <Box className={classes.postInfoContainer}>
+            <Typography variant="subtitle1" className={classes.postTitle}>
+              <Skeleton width={40} />
+            </Typography>
+            <Skeleton width={60} />
+            <Box className={classes.toolBar}>
+              <Box>
+                <Typography variant="caption">
+                  <Skeleton width={70} />
+                </Typography>
+              </Box>
+            </Box>
+          </Box>
+        </CardContent>
+      </Card>
     </Box>
   );
 };

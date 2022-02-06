@@ -37,6 +37,10 @@ const CommentEditor = ({
     }
 
     const success = await createComment(postDetail);
+    if (success) {
+      setEditorState(EditorState.createEmpty());
+      setMarkdownString("");
+    }
     if (success && setShowCommentEditor) setShowCommentEditor(false);
   }, [editorState, replyTo, editorType, markdownString, setShowCommentEditor]);
 
