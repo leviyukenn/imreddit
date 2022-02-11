@@ -1,16 +1,11 @@
-import { useRouter } from "next/router";
 import React from "react";
 import { UserCommentedPostsInfiniteScroll } from "../post/PostInfiniteScroll";
 
-interface UserCommentsProps {}
+interface UserCommentsProps {
+  userName: string;
+}
 
-const UserCommentsContent = ({}: UserCommentsProps) => {
-  const router = useRouter();
-  const userName =
-    typeof router.query.userName === "string" ? router.query.userName : "";
-
-  return userName ? (
-    <UserCommentedPostsInfiniteScroll userName={userName} />
-  ) : null;
+const UserCommentsContent = ({ userName }: UserCommentsProps) => {
+  return <UserCommentedPostsInfiniteScroll userName={userName} />;
 };
 export default UserCommentsContent;

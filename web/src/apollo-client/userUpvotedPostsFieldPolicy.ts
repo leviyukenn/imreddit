@@ -1,37 +1,34 @@
 import { FieldPolicy, Reference } from "@apollo/client";
+import { PostsIncoming, PostsReadResult } from "./postsFieldPolicy";
 
-type HomePostsExisting = {
+type UserPostsExisting = {
   posts: { [key: string]: Reference };
   hasMore: boolean;
 };
 
-export type PostsIncoming = { posts: Reference[]; hasMore: boolean };
-export type PostsReadResult = PostsIncoming;
-
-export const postsFieldPolicy: FieldPolicy<
-  HomePostsExisting,
+export const userUpvotedPostsFieldPolicy: FieldPolicy<
+  UserPostsExisting,
   PostsIncoming,
   PostsReadResult
 > = {
-  keyArgs: false,
+  keyArgs: ["userName", "upvoteType"],
   merge(existing, incoming, { args, readField }) {
-    const merged = existing ? { ...existing.posts } : {};
+    const mergedPosts = existing ? { ...existing.posts } : {};
+
     incoming.posts.forEach((item) => {
       const id = readField("id", item) as string;
-      merged[id] = item;
+      mergedPosts[id] = item;
     });
-    return { posts: merged, hasMore: incoming.hasMore };
+    return { posts: mergedPosts, hasMore: incoming.hasMore };
   },
 
   // Return all items stored so far, to avoid ambiguities
   // about the order of the items.
   read(existing, { args, readField }) {
     if (!existing) {
-      return existing;
-      // return { posts: [], hasMore: false };
+      return undefined;
     }
     const posts = Object.values(existing.posts);
-
     //sort cached posts by create time
     const postsSortedByCreatedTime = posts.sort((a, b) => {
       return (

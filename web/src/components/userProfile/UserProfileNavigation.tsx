@@ -1,29 +1,32 @@
 import { Tab, Tabs } from "@material-ui/core";
+import { useRouter } from "next/router";
 import React from "react";
+import { UserProfileTabType } from "../../pages/user/[userName]/[sectionName]";
 
 interface UserProfileNavigationProps {
-  route: number;
-  setRoute: React.Dispatch<React.SetStateAction<number>>;
+  userName: string;
+  sectionName: string;
 }
 
 const UserProfileNavigation = ({
-  route,
-  setRoute,
+  userName,
+  sectionName,
 }: UserProfileNavigationProps) => {
-  const handleChange = (event: React.ChangeEvent<{}>, newValue: number) => {
-    setRoute(newValue);
+  const router = useRouter();
+  const handleChange = (event: React.ChangeEvent<{}>, newValue: string) => {
+    router.push(`/user/${userName}/${newValue}`);
   };
   return (
     <Tabs
       indicatorColor="primary"
       textColor="primary"
-      value={route}
+      value={sectionName}
       onChange={handleChange}
     >
-      <Tab label="Posts" />
-      <Tab label="Comments" />
-      <Tab label="Upvoted" />
-      <Tab label="Downvoted" />
+      <Tab label="Posts" value={UserProfileTabType.POSTS} />
+      <Tab label="Comments" value={UserProfileTabType.COMMENTS} />
+      <Tab label="Upvoted" value={UserProfileTabType.UPVOTED} />
+      <Tab label="Downvoted" value={UserProfileTabType.DOWNVOTED} />
     </Tabs>
   );
 };

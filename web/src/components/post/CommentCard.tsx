@@ -123,13 +123,12 @@ export const CommentCard = ({ postId, ...props }: PostDetailProps) => {
     if (!(post?.id && router.query.commentId && commentRef.current)) return;
 
     if (post.id === router.query.commentId) {
-      console.log("scroll");
       commentRef.current.scrollIntoView({
+        block: "start",
         behavior: "smooth",
-        block: "center",
       });
     }
-  }, [post, router.query.commentId, commentRef]);
+  }, [post?.id, router.query.commentId, commentRef.current]);
 
   if (!post) return <LoadingCommentCard />;
 

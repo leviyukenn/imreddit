@@ -1,0 +1,18 @@
+query UserUpvotedPosts(
+  $userName: String!
+  $upvoteType: Int!
+  $limit: Int
+  $cursor: String
+) {
+  userUpvotedPosts(
+    userName: $userName
+    upvoteType: $upvoteType
+    limit: $limit
+    cursor: $cursor
+  ) {
+    hasMore
+    posts {
+      ...RegularPostDetail
+    }
+  }
+}

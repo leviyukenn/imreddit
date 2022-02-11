@@ -1,40 +1,16 @@
-import {
-  Box,
-  createStyles,
-  makeStyles,
-  Theme,
-  Typography,
-} from "@material-ui/core";
 import ShareIcon from "@material-ui/icons/Share";
 import React, { useCallback } from "react";
 import { useSnackbarAlert } from "../../../redux/hooks/useSnackbarAlert";
 import { AlertSeverity } from "../../../redux/types/types";
 import { copyTextToClipboard } from "../../../utils/utils";
+import ToolBarButton from "./ToolBarButton";
 
 interface CopyLinkButtonProps {
   link: string;
+  withIcon?: boolean;
 }
-const useStyles = makeStyles((theme: Theme) =>
-  createStyles({
-    button: {
-      display: "flex",
-      alignItems: "center",
-      lineHeight: 16,
-      padding: 8,
-      fontSize: "0.75rem",
-      fontWeight: 700,
-      cursor: "pointer",
-      color: "#9b9b9b",
-      borderRadius: 4,
-      "&:hover": {
-        backgroundColor: theme.palette.action.hover,
-      },
-    },
-  })
-);
 
-const CopyLinkButton = ({ link }: CopyLinkButtonProps) => {
-  const classes = useStyles();
+const CopyLinkButton = ({ link, withIcon = true }: CopyLinkButtonProps) => {
   const { onOpenSnackbarAlert } = useSnackbarAlert();
 
   const handleClick = useCallback(
@@ -57,10 +33,12 @@ const CopyLinkButton = ({ link }: CopyLinkButtonProps) => {
     [link, copyTextToClipboard]
   );
   return (
-    <Box className={classes.button} onClick={handleClick}>
-      <ShareIcon />
-      <Typography variant="caption">Share</Typography>
-    </Box>
+    <ToolBarButton
+      startIcon={withIcon ? <ShareIcon /> : null}
+      onClick={handleClick}
+    >
+      Share
+    </ToolBarButton>
   );
 };
 export default CopyLinkButton;

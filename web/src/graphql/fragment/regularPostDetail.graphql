@@ -18,6 +18,7 @@ fragment RegularPostDetail on Post {
     id
     # ...RegularCommunity
     name
+    icon
   }
   ancestor {
     id

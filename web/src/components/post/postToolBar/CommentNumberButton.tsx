@@ -12,6 +12,7 @@ import React from "react";
 interface CommentNumberButtonProps {
   link: string;
   totalComments: number;
+  asPath?: string;
 }
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -34,11 +35,12 @@ const useStyles = makeStyles((theme: Theme) =>
 
 const CommentNumberButton = ({
   link,
+  asPath,
   totalComments,
 }: CommentNumberButtonProps) => {
   const classes = useStyles();
   return (
-    <NextLink href={link} passHref>
+    <NextLink href={link} as={asPath} passHref>
       <Link className={classes.commentButton} underline="none">
         <ChatBubbleOutlineIcon />
         <Typography variant="caption">{totalComments}</Typography>

@@ -12,11 +12,14 @@ import NextLink from "next/link";
 import { useRouter } from "next/router";
 import React, { useMemo } from "react";
 import { format } from "timeago.js";
+import { FRONTEND_URL } from "../../../const/const";
 import { RegularPostDetailFragment } from "../../../generated/graphql";
 import {
   createPostDetailModalLinkWithCommentId,
   createUserProfileLink,
 } from "../../../utils/links";
+import CopyLinkButton from "../postToolBar/CopyLinkButton";
+import RemovePostButton from "../postToolBar/RemovePostButton";
 
 interface UserCommentCardProps extends CardProps {
   comment: RegularPostDetailFragment;
@@ -113,6 +116,13 @@ const UserCommentCard = ({ comment, ...props }: UserCommentCardProps) => {
               <span>{timeago}</span>
             </Box>
             <Box dangerouslySetInnerHTML={{ __html: comment.text || "" }}></Box>
+            <Box display="flex">
+              <CopyLinkButton
+                link={FRONTEND_URL + postDetailModalLinkWithCommentId}
+                withIcon={false}
+              />
+              <RemovePostButton postId={comment.id} withIcon={false} />
+            </Box>
           </Box>
         </CardContent>
       </Card>

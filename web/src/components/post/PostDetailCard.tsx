@@ -20,7 +20,7 @@ import { useRouter } from "next/router";
 import React, { useMemo } from "react";
 import { format } from "timeago.js";
 import { RegularPostDetailFragment } from "../../generated/graphql";
-import ImagePostSwiper from "./ImgaePostSwiper";
+import ImagePostSwiper from "./postCard/ImgaePostSwiper";
 import UpvoteBox from "./upvote/UpvoteBox";
 
 interface PostDetailProps extends CardProps {

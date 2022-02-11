@@ -4,7 +4,7 @@ import { GRAPHQL_SERVER_URL } from "../const/const";
 import { communityPostsFieldPolicy } from "./communityPostsFieldPolicy";
 import { postsFieldPolicy } from "./postsFieldPolicy";
 import { userPostsFieldPolicy } from "./userPostsFieldPolicy";
-
+import { userUpvotedPostsFieldPolicy } from "./userUpvotedPostsFieldPolicy";
 const cache = new InMemoryCache({
   typePolicies: {
     Role: {
@@ -16,6 +16,7 @@ const cache = new InMemoryCache({
         paginatedPosts: postsFieldPolicy,
         userPosts: userPostsFieldPolicy,
         userCommentedPosts: userPostsFieldPolicy,
+        userUpvotedPosts: userUpvotedPostsFieldPolicy,
       },
     },
   },

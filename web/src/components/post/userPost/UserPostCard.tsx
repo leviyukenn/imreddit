@@ -13,6 +13,7 @@ import { red } from "@material-ui/core/colors";
 import ViewHeadlineIcon from "@material-ui/icons/ViewHeadline";
 import { Skeleton } from "@material-ui/lab";
 import NextLink from "next/link";
+import { useRouter } from "next/router";
 import React, { useMemo } from "react";
 import { format } from "timeago.js";
 import { FRONTEND_URL, SERVER_URL } from "../../../const/const";
@@ -134,10 +135,12 @@ const UserPostCard = ({ post, ...props }: UserPostCardProps) => {
     [post, timeago]
   );
 
-  const postDetailModalLink = createPostDetailModalLink(
-    createPostDetailPageLink(post.community.name, post.id),
-    post.id
-  );
+  // const postDetailModalLink = createPostDetailModalLink(
+  //   createPostDetailPageLink(post.community.name, post.id),
+  //   post.id
+  // );
+  const router = useRouter();
+  const postDetailModalLink = createPostDetailModalLink(router.asPath, post.id);
   const postDetailLink = createPostDetailPageLink(post.community.name, post.id);
 
   return (
@@ -149,7 +152,7 @@ const UserPostCard = ({ post, ...props }: UserPostCardProps) => {
       </Box>
       <NextLink
         href={postDetailModalLink}
-        as={postDetailLink}
+        // as={postDetailLink}
         shallow
         scroll={false}
       >

@@ -13,20 +13,24 @@ import {
   Typography,
 } from "@material-ui/core";
 import { red } from "@material-ui/core/colors";
-import MoreVertIcon from "@material-ui/icons/MoreVert";
 import { Skeleton } from "@material-ui/lab";
 import NextLink from "next/link";
 import { useRouter } from "next/router";
 import React, { useMemo } from "react";
 import { format } from "timeago.js";
-import { RegularPostDetailFragment } from "../../generated/graphql";
+import { FRONTEND_URL } from "../../../const/const";
+import { RegularPostDetailFragment } from "../../../generated/graphql";
 import {
   createCommunityHomeLink,
-  createPostDetailPageLink,
   createPostDetailModalLink,
-} from "../../utils/links";
-import ImagePostSwiper from "./ImgaePostSwiper";
-import UpvoteBox from "./upvote/UpvoteBox";
+  createPostDetailPageLink,
+} from "../../../utils/links";
+import CommunityIcon from "../../community/CommunityIcon";
+import CommentNumberButton from "../postToolBar/CommentNumberButton";
+import CopyLinkButton from "../postToolBar/CopyLinkButton";
+import UpvoteBox from "../upvote/UpvoteBox";
+import ImagePostContent from "./ImagePostContent";
+import TextPostContent from "./TextPostContent";
 
 interface PostCardProps extends CardProps {
   post: RegularPostDetailFragment;
@@ -55,6 +59,11 @@ const useStyles = makeStyles((theme: Theme) =>
     header: {
       backgroundColor: theme.palette.background.paper,
     },
+    communityIcon: {
+      display: "flex",
+      alignItems: "center",
+      marginRight: 8,
+    },
     communityLink: {
       lineHeight: "20px",
       fontSize: "12px",
@@ -65,25 +74,12 @@ const useStyles = makeStyles((theme: Theme) =>
         textDecorationColor: theme.palette.text.primary,
       },
     },
-    textPostContent: {
+    cardContent: {
       paddingTop: 0,
       backgroundColor: theme.palette.background.paper,
-      maxHeight: "300px",
-      overflow: "hidden",
-      "&::after": {
-        content: '""',
-        background: " linear-gradient(rgba(255, 255, 255, 0.001),white)",
-        position: "absolute",
-        bottom: "1px",
-        height: "60px",
-        width: "calc(100% - 58px)",
+      "&:last-child": {
+        paddingBottom: 0,
       },
-    },
-    imagePostContent: {
-      paddingTop: 0,
-      backgroundColor: theme.palette.background.paper,
-      maxHeight: "600px",
-      overflow: "hidden",
     },
     avatar: {
       backgroundColor: red[500],
@@ -115,8 +111,14 @@ export const PostCard = ({ post, ...props }: PostCardProps) => {
     []
   );
 
-  const isTextPost = useMemo(() => post.images.length === 0, [post]);
+  const isTextPost = useMemo(() => post.postType === 0, [post]);
   const router = useRouter();
+
+  const postDetailModalLink = createPostDetailModalLink(router.asPath, post.id);
+  const postDetailPageLink = createPostDetailPageLink(
+    post.community.name,
+    post.id
+  );
 
   return (
     <Box className={classes.root}>
@@ -131,32 +133,28 @@ export const PostCard = ({ post, ...props }: PostCardProps) => {
       >
         <Card className={classes.card} {...props}>
           <CardHeader
-            avatar={
-              <Avatar aria-label="recipe" className={classes.avatar}>
-                R
-              </Avatar>
-            }
-            action={
-              <IconButton aria-label="settings">
-                <MoreVertIcon />
-              </IconButton>
-            }
+            avatar={<CommunityIcon icon={post.community.icon} size="small" />}
             subheader={subHeader}
-            className={classes.header}
+            // className={classes.header}
+            classes={{ root: classes.header, avatar: classes.communityIcon }}
           />
-          <CardContent
-            className={
-              isTextPost ? classes.textPostContent : classes.imagePostContent
-            }
-          >
-            <Typography variant="h6" gutterBottom>
-              {post.title}
-            </Typography>
+          <CardContent className={classes.cardContent}>
             {isTextPost ? (
-              <Box dangerouslySetInnerHTML={{ __html: post.text || "" }}></Box>
+              <TextPostContent
+                title={post.title || ""}
+                text={post.text || ""}
+              />
             ) : (
-              <ImagePostSwiper images={post.images} />
+              <ImagePostContent images={post.images} title={post.title || ""} />
             )}
+            <Box display="flex">
+              <CommentNumberButton
+                link={postDetailModalLink}
+                asPath={postDetailPageLink}
+                totalComments={post.totalComments}
+              />
+              <CopyLinkButton link={FRONTEND_URL + postDetailPageLink} />
+            </Box>
           </CardContent>
         </Card>
       </NextLink>
@@ -183,7 +181,7 @@ export const LoadingPostCard = () => {
         subheader={<Skeleton />}
         className={classes.header}
       />
-      <CardContent className={classes.textPostContent}>
+      <CardContent className={classes.cardContent}>
         <Typography variant="h6" gutterBottom>
           <Skeleton />
         </Typography>

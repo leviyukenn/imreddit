@@ -262,6 +262,7 @@ export type Query = {
   __typename?: 'Query';
   me?: Maybe<User>;
   userComments: Array<Post>;
+  userUpvotedPosts: PaginatedPosts;
   userCommentedPosts: PaginatedPosts;
   userPosts: PaginatedPosts;
   communityPosts: PaginatedPosts;
@@ -278,6 +279,14 @@ export type Query = {
 
 export type QueryUserCommentsArgs = {
   ancestorId: Scalars['String'];
+  userName: Scalars['String'];
+};
+
+
+export type QueryUserUpvotedPostsArgs = {
+  cursor?: Maybe<Scalars['String']>;
+  limit?: Maybe<Scalars['Int']>;
+  upvoteType: Scalars['Int'];
   userName: Scalars['String'];
 };
 
@@ -422,7 +431,7 @@ export type RegularPostDetailFragment = (
     & RegularImageFragment
   )>, community: (
     { __typename?: 'Community' }
-    & Pick<Community, 'id' | 'name'>
+    & Pick<Community, 'id' | 'name' | 'icon'>
   ), ancestor?: Maybe<(
     { __typename?: 'Post' }
     & Pick<Post, 'id'>
@@ -978,6 +987,26 @@ export type UserRolesQuery = (
   )>> }
 );
 
+export type UserUpvotedPostsQueryVariables = Exact<{
+  userName: Scalars['String'];
+  upvoteType: Scalars['Int'];
+  limit?: Maybe<Scalars['Int']>;
+  cursor?: Maybe<Scalars['String']>;
+}>;
+
+
+export type UserUpvotedPostsQuery = (
+  { __typename?: 'Query' }
+  & { userUpvotedPosts: (
+    { __typename?: 'PaginatedPosts' }
+    & Pick<PaginatedPosts, 'hasMore'>
+    & { posts: Array<(
+      { __typename?: 'Post' }
+      & RegularPostDetailFragment
+    )> }
+  ) }
+);
+
 export const RegularCommunityFragmentDoc = gql`
     fragment RegularCommunity on Community {
   id
@@ -1031,6 +1060,7 @@ export const RegularPostDetailFragmentDoc = gql`
   community {
     id
     name
+    icon
   }
   ancestor {
     id
@@ -2235,6 +2265,52 @@ export function useUserRolesLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<
 export type UserRolesQueryHookResult = ReturnType<typeof useUserRolesQuery>;
 export type UserRolesLazyQueryHookResult = ReturnType<typeof useUserRolesLazyQuery>;
 export type UserRolesQueryResult = Apollo.QueryResult<UserRolesQuery, UserRolesQueryVariables>;
+export const UserUpvotedPostsDocument = gql`
+    query UserUpvotedPosts($userName: String!, $upvoteType: Int!, $limit: Int, $cursor: String) {
+  userUpvotedPosts(
+    userName: $userName
+    upvoteType: $upvoteType
+    limit: $limit
+    cursor: $cursor
+  ) {
+    hasMore
+    posts {
+      ...RegularPostDetail
+    }
+  }
+}
+    ${RegularPostDetailFragmentDoc}`;
+
+/**
+ * __useUserUpvotedPostsQuery__
+ *
+ * To run a query within a React component, call `useUserUpvotedPostsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useUserUpvotedPostsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useUserUpvotedPostsQuery({
+ *   variables: {
+ *      userName: // value for 'userName'
+ *      upvoteType: // value for 'upvoteType'
+ *      limit: // value for 'limit'
+ *      cursor: // value for 'cursor'
+ *   },
+ * });
+ */
+export function useUserUpvotedPostsQuery(baseOptions: Apollo.QueryHookOptions<UserUpvotedPostsQuery, UserUpvotedPostsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<UserUpvotedPostsQuery, UserUpvotedPostsQueryVariables>(UserUpvotedPostsDocument, options);
+      }
+export function useUserUpvotedPostsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<UserUpvotedPostsQuery, UserUpvotedPostsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<UserUpvotedPostsQuery, UserUpvotedPostsQueryVariables>(UserUpvotedPostsDocument, options);
+        }
+export type UserUpvotedPostsQueryHookResult = ReturnType<typeof useUserUpvotedPostsQuery>;
+export type UserUpvotedPostsLazyQueryHookResult = ReturnType<typeof useUserUpvotedPostsLazyQuery>;
+export type UserUpvotedPostsQueryResult = Apollo.QueryResult<UserUpvotedPostsQuery, UserUpvotedPostsQueryVariables>;
 export type CommunityKeySpecifier = ('id' | 'createdAt' | 'updatedAt' | 'name' | 'description' | 'background' | 'backgroundColor' | 'bannerColor' | 'icon' | 'banner' | 'topics' | 'totalMemberships' | CommunityKeySpecifier)[];
 export type CommunityFieldPolicy = {
 	id?: FieldPolicy<any> | FieldReadFunction<any>,
@@ -2327,10 +2403,11 @@ export type PostResponseFieldPolicy = {
 	errors?: FieldPolicy<any> | FieldReadFunction<any>,
 	post?: FieldPolicy<any> | FieldReadFunction<any>
 };
-export type QueryKeySpecifier = ('me' | 'userComments' | 'userCommentedPosts' | 'userPosts' | 'communityPosts' | 'paginatedPosts' | 'allPosts' | 'postDetail' | 'communities' | 'community' | 'userRoles' | 'userRole' | 'topics' | QueryKeySpecifier)[];
+export type QueryKeySpecifier = ('me' | 'userComments' | 'userUpvotedPosts' | 'userCommentedPosts' | 'userPosts' | 'communityPosts' | 'paginatedPosts' | 'allPosts' | 'postDetail' | 'communities' | 'community' | 'userRoles' | 'userRole' | 'topics' | QueryKeySpecifier)[];
 export type QueryFieldPolicy = {
 	me?: FieldPolicy<any> | FieldReadFunction<any>,
 	userComments?: FieldPolicy<any> | FieldReadFunction<any>,
+	userUpvotedPosts?: FieldPolicy<any> | FieldReadFunction<any>,
 	userCommentedPosts?: FieldPolicy<any> | FieldReadFunction<any>,
 	userPosts?: FieldPolicy<any> | FieldReadFunction<any>,
 	communityPosts?: FieldPolicy<any> | FieldReadFunction<any>,

@@ -11,8 +11,8 @@ import ArrowBackIosOutlinedIcon from "@material-ui/icons/ArrowBackIosOutlined";
 import ArrowForwardIosOutlinedIcon from "@material-ui/icons/ArrowForwardIosOutlined";
 import NextLink from "next/link";
 import React, { useCallback, useState } from "react";
-import { SERVER_URL } from "../../const/const";
-import { RegularImageFragment } from "../../generated/graphql";
+import { SERVER_URL } from "../../../const/const";
+import { RegularImageFragment } from "../../../generated/graphql";
 
 interface ImgaePostSwiperProps {
   images: RegularImageFragment[];
@@ -63,7 +63,7 @@ const useStyles = makeStyles((theme: Theme) =>
       alignItems: "center",
     },
     slideImage: {
-      maxHeight: "100%",
+      maxHeight: "512px",
       maxWidth: "100%",
     },
   })
@@ -128,7 +128,7 @@ const ImgaePostSwiper = ({ images }: ImgaePostSwiperProps) => {
           </Box>
         ))}
       </Box>
-      {images[current].caption || images[current].link ? (
+      {images[current]?.caption || images[current]?.link ? (
         <Box
           display="flex"
           justifyContent="space-between"

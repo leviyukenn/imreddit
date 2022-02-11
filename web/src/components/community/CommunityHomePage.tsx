@@ -4,7 +4,7 @@ import { useCommunity } from "../../graphql/hooks/useCommunity";
 import { useUserCommunityRole } from "../../graphql/hooks/useUserCommunityRole";
 import { useSaveOrInitCommunityAppearance } from "../../redux/hooks/useCommunityAppearance";
 import ContentLayout from "../ContentLayout";
-import { LoadingPostCard } from "../post/PostCard";
+import { LoadingPostCard } from "../post/postCard/PostCard";
 import CommunityAppearanceDrawer from "./CommunityAppearanceDrawer";
 import CommunityBanner from "./CommunityBanner";
 import CommunityDescription from "./CommunityDescription";

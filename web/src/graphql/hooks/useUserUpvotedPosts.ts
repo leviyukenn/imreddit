@@ -1,24 +1,25 @@
 import { useMemo } from "react";
 import {
   RegularPostDetailFragment,
-  useUserCommentedPostsQuery,
+  useUserUpvotedPostsQuery,
 } from "../../generated/graphql";
 
-export function useUserCommentedPosts(userName: string) {
-  const response = useUserCommentedPostsQuery({
+//upvoteType: 1 for upvote, 0 for downvote
+export function useUserUpvotedPosts(userName: string, upvoteType: 0 | 1) {
+  const response = useUserUpvotedPostsQuery({
     skip: typeof window === "undefined",
-    variables: { limit: 10, userName },
+    variables: { limit: 10, userName, upvoteType },
   });
 
   const posts: RegularPostDetailFragment[] = useMemo(
-    () => response.data?.userCommentedPosts.posts || [],
+    () => response.data?.userUpvotedPosts.posts || [],
     [response]
   );
 
   const hasMore = useMemo(
     () =>
-      response.data?.userCommentedPosts
-        ? response.data.userCommentedPosts.hasMore
+      response.data?.userUpvotedPosts
+        ? response.data.userUpvotedPosts.hasMore
         : false,
     [response]
   );

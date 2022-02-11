@@ -58,9 +58,11 @@ const CreatePost = ({ postType, communityId }: CreatePostFormProps) => {
   >(() => () => "");
   const [editorState, setEditorState] = useState(EditorState.createEmpty());
   const [uploadedImages, setUploadedImages] = useState<UploadedImage[]>([]);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const onCreatePost = useCallback(
     async ({ title }: FormData, actions: FormikHelpers<FormData>) => {
+      setIsSubmitting(true);
       let success: boolean;
       if (postType === PostType.TEXT_POST) {
         const postDetail = getPostDetailCallback();
@@ -80,6 +82,7 @@ const CreatePost = ({ postType, communityId }: CreatePostFormProps) => {
       if (success) {
         actions.resetForm();
       }
+      setIsSubmitting(false);
     },
     [getPostDetailCallback, postType, uploadedImages, communityId]
   );
@@ -93,7 +96,7 @@ const CreatePost = ({ postType, communityId }: CreatePostFormProps) => {
       })}
       onSubmit={onCreatePost}
     >
-      {({ submitForm, isSubmitting }) => (
+      {({ submitForm }) => (
         <Form className={classes.form}>
           <Grid
             container
