@@ -18,6 +18,7 @@ import React, { useMemo } from "react";
 import { format } from "timeago.js";
 import { FRONTEND_URL, SERVER_URL } from "../../../const/const";
 import { RegularPostDetailFragment } from "../../../generated/graphql";
+import { useIsAuth } from "../../../utils/hooks/useIsAuth";
 import {
   createCommunityHomeLink,
   createPostDetailModalLink,
@@ -113,6 +114,7 @@ const useStyles = makeStyles((theme: Theme) =>
 
 const UserPostCard = ({ post, ...props }: UserPostCardProps) => {
   const classes = useStyles();
+  const { me } = useIsAuth();
 
   const timeago = useMemo(() => format(parseInt(post.createdAt)), [post]);
   const postInfo = useMemo(
@@ -135,13 +137,10 @@ const UserPostCard = ({ post, ...props }: UserPostCardProps) => {
     [post, timeago]
   );
 
-  // const postDetailModalLink = createPostDetailModalLink(
-  //   createPostDetailPageLink(post.community.name, post.id),
-  //   post.id
-  // );
   const router = useRouter();
   const postDetailModalLink = createPostDetailModalLink(router.asPath, post.id);
   const postDetailLink = createPostDetailPageLink(post.community.name, post.id);
+  const isCreator = me?.id && me.id === post.creator.id;
 
   return (
     <Box className={classes.root}>
@@ -181,7 +180,7 @@ const UserPostCard = ({ post, ...props }: UserPostCardProps) => {
                   totalComments={post.totalComments}
                 />
                 <CopyLinkButton link={FRONTEND_URL + postDetailLink} />
-                <RemovePostButton postId={post.id} />
+                {isCreator ? <RemovePostButton postId={post.id} /> : null}
               </Box>
             </Box>
           </CardContent>

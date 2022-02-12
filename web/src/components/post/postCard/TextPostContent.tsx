@@ -5,6 +5,7 @@ import {
   Theme,
   Typography,
 } from "@material-ui/core";
+import DOMPurify from "dompurify";
 import React, { useEffect, useRef, useState } from "react";
 
 interface TextPostContentProps {
@@ -50,7 +51,9 @@ const TextPostContent = ({ text, title }: TextPostContentProps) => {
         }`}
         ref={contentRef}
       >
-        <Box dangerouslySetInnerHTML={{ __html: text }}></Box>
+        <Box
+          dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(text) }}
+        ></Box>
       </div>
     </Box>
   );

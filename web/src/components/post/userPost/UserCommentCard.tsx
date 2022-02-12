@@ -8,6 +8,7 @@ import {
   makeStyles,
   Theme,
 } from "@material-ui/core";
+import DOMPurify from "dompurify";
 import NextLink from "next/link";
 import { useRouter } from "next/router";
 import React, { useMemo } from "react";
@@ -104,7 +105,7 @@ const UserCommentCard = ({ comment, ...props }: UserCommentCardProps) => {
           <Box>
             <Box display="flex" alignItems="center" className={classes.title}>
               <NextLink
-                href={createUserProfileLink(comment.creator.username)}
+                href={createUserProfileLink(comment.creator.username,"posts")}
                 passHref
               >
                 <Link className={classes.userLink}>
@@ -115,7 +116,11 @@ const UserCommentCard = ({ comment, ...props }: UserCommentCardProps) => {
               <span> · </span>
               <span>{timeago}</span>
             </Box>
-            <Box dangerouslySetInnerHTML={{ __html: comment.text || "" }}></Box>
+            <Box
+              dangerouslySetInnerHTML={{
+                __html: DOMPurify.sanitize(comment.text || ""),
+              }}
+            ></Box>
             <Box display="flex">
               <CopyLinkButton
                 link={FRONTEND_URL + postDetailModalLinkWithCommentId}

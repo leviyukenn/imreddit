@@ -1,6 +1,6 @@
 import { Divider, List, ListItem, ListItemText } from "@material-ui/core";
 import React from "react";
-import { useCommunityAppearance } from "../../redux/hooks/useCommunityAppearance";
+import { useCommunityAppearance } from "../../../redux/hooks/useCommunityAppearance";
 import CommmunityImageEditor from "./CommmunityImageEditor";
 import CommunityColorPicker from "./CommunityColorPicker";
 

@@ -12,6 +12,7 @@ import { blue, red } from "@material-ui/core/colors";
 import ChatBubbleOutlineIcon from "@material-ui/icons/ChatBubbleOutline";
 import ControlPointIcon from "@material-ui/icons/ControlPoint";
 import { Skeleton } from "@material-ui/lab";
+import DOMPurify from "dompurify";
 import { useRouter } from "next/router";
 import React, {
   useCallback,
@@ -171,7 +172,11 @@ export const CommentCard = ({ postId, ...props }: PostDetailProps) => {
         {showThread ? (
           <Box className={classes.content}>
             <Box style={backgroundColor}>
-              <Box dangerouslySetInnerHTML={{ __html: post.text || "" }}></Box>
+              <Box
+                dangerouslySetInnerHTML={{
+                  __html: DOMPurify.sanitize(post.text || ""),
+                }}
+              ></Box>
               <Box display="flex">
                 <UpvoteBox post={post} isVerticalLayout={false} />
                 <Button

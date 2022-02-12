@@ -6,7 +6,7 @@ import {
   Theme,
 } from "@material-ui/core";
 import DeleteIcon from "@material-ui/icons/Delete";
-import { SERVER_URL } from "../../const/const";
+import { SERVER_URL } from "../../../const/const";
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({

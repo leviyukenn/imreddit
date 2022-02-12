@@ -1,7 +1,6 @@
 import { Box, createStyles, Fab, makeStyles, Theme } from "@material-ui/core";
 import NavigationIcon from "@material-ui/icons/Navigation";
 import { ReactNode, useCallback } from "react";
-import PostDetailModal from "./post/PostDetailModal";
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -39,16 +38,18 @@ interface HomeContainerProps {
   fullWidth?: boolean;
   rightSideContent?: JSX.Element;
   children: ReactNode;
+  backToTop?: () => void;
 }
 
 const ContentLayout = ({
   fullWidth,
   rightSideContent,
   children,
+  backToTop,
 }: HomeContainerProps) => {
   const classes = useStyles();
 
-  const backToTop = useCallback(() => {
+  const defaultBackToTop = useCallback(() => {
     window.scrollTo({ top: 0, behavior: "smooth" });
   }, []);
 
@@ -67,7 +68,7 @@ const ContentLayout = ({
           <Fab
             variant="extended"
             color="primary"
-            onClick={backToTop}
+            onClick={backToTop || defaultBackToTop}
             size="small"
             className={classes.backToTopButton}
           >
@@ -76,7 +77,6 @@ const ContentLayout = ({
           </Fab>
         </Box>
       </Box>
-      <PostDetailModal />
     </>
   );
 };

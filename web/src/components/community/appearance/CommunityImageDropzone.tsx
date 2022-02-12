@@ -8,7 +8,7 @@ import {
 import CloudUploadIcon from "@material-ui/icons/CloudUpload";
 import React, { useMemo } from "react";
 import { useDropzone } from "react-dropzone";
-import { useUploadImage } from "../hooks/useUploadImage";
+import { useUploadImage } from "../../hooks/useUploadImage";
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({

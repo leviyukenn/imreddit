@@ -11,9 +11,9 @@ import {
 } from "@material-ui/core";
 import CloseIcon from "@material-ui/icons/Close";
 import { useCallback } from "react";
-import { CommunityQuery } from "../../generated/graphql";
-import { useAlertDialog } from "../../redux/hooks/useAlertDialog";
-import { useSaveOrInitCommunityAppearance } from "../../redux/hooks/useCommunityAppearance";
+import { CommunityQuery } from "../../../generated/graphql";
+import { useAlertDialog } from "../../../redux/hooks/useAlertDialog";
+import { useSaveOrInitCommunityAppearance } from "../../../redux/hooks/useCommunityAppearance";
 import CommunityAppearanceEditor from "./CommunityAppearanceEditor";
 
 interface CommunityAppearanceDrawerProps {

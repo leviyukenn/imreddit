@@ -1,9 +1,6 @@
 export const createCommunityHomeLink = (communityName: string) =>
   `/r/${communityName}`;
 
-export const createUserProfileLink = (userName: string) =>
-  `/user/${userName}/posts`;
-
 export const createPostDetailPageLink = (
   communityName: string,
   postId: string
@@ -20,6 +17,10 @@ export const createPostDetailModalLinkWithCommentId = (
   commentId: string
 ) => `${currentPath}?modalPostId=${postId}&commentId=${commentId}`;
 
+export const createUserProfileLink = (userName: string, sectionName: string) =>
+  `/user/${userName}/${sectionName}`;
+
+export const createPostLink = "/create-post";
 export const loginPageLink = "/login";
 export const registerPageLink = "/register";
 export const forgotPasswordPageLink = "/forgot-password";

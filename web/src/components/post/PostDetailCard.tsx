@@ -13,13 +13,14 @@ import {
   Typography,
 } from "@material-ui/core";
 import { red } from "@material-ui/core/colors";
-import MoreVertIcon from "@material-ui/icons/MoreVert";
 import { Skeleton } from "@material-ui/lab";
+import DOMPurify from "dompurify";
 import NextLink from "next/link";
-import { useRouter } from "next/router";
 import React, { useMemo } from "react";
 import { format } from "timeago.js";
 import { RegularPostDetailFragment } from "../../generated/graphql";
+import { createCommunityHomeLink } from "../../utils/links";
+import CommunityIcon from "../community/CommunityIcon";
 import ImagePostSwiper from "./postCard/ImgaePostSwiper";
 import UpvoteBox from "./upvote/UpvoteBox";
 
@@ -39,6 +40,14 @@ const useStyles = makeStyles((theme: Theme) =>
       position: "absolute",
       top: 0,
       left: 0,
+    },
+    // header: {
+    //   backgroundColor: theme.palette.background.paper,
+    // },
+    communityIcon: {
+      display: "flex",
+      alignItems: "center",
+      marginRight: 8,
     },
     communityLink: {
       lineHeight: "20px",
@@ -66,7 +75,6 @@ export const PostDetailCard = ({ post, ...props }: PostDetailProps) => {
   const timeago = useMemo(() => format(parseInt(post.createdAt)), [post]);
 
   const isTextPost = useMemo(() => post.images.length === 0, [post]);
-  const router = useRouter();
 
   return (
     <Card className={classes.root} {...props}>
@@ -75,19 +83,11 @@ export const PostDetailCard = ({ post, ...props }: PostDetailProps) => {
       </Box>
 
       <CardHeader
-        avatar={
-          <Avatar aria-label="recipe" className={classes.avatar}>
-            R
-          </Avatar>
-        }
-        action={
-          <IconButton aria-label="settings">
-            <MoreVertIcon />
-          </IconButton>
-        }
+        avatar={<CommunityIcon icon={post.community.icon} size="small" />}
+        classes={{ avatar: classes.communityIcon }}
         subheader={
           <Box display="flex" alignItems="center">
-            <NextLink href={`/r/${post.community.name}`}>
+            <NextLink href={createCommunityHomeLink(post.community.name)}>
               <Link
                 className={classes.communityLink}
                 onMouseDown={(
@@ -107,7 +107,11 @@ export const PostDetailCard = ({ post, ...props }: PostDetailProps) => {
           {post.title}
         </Typography>
         {isTextPost ? (
-          <Box dangerouslySetInnerHTML={{ __html: post.text || "" }}></Box>
+          <Box
+            dangerouslySetInnerHTML={{
+              __html: DOMPurify.sanitize(post.text || ""),
+            }}
+          ></Box>
         ) : (
           <ImagePostSwiper images={post.images} />
         )}

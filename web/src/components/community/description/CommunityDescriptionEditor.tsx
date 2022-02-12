@@ -14,11 +14,11 @@ import {
 import { Field, Form, Formik } from "formik";
 import { TextField, TextFieldProps } from "formik-material-ui";
 import React, { useCallback, useState } from "react";
-import { FrontendError } from "../../const/errors";
-import { editCommunityDescriptionValidationSchema } from "../../fieldValidateSchema/fieldValidateSchema";
-import { useEditCommunityDescriptionMutation } from "../../generated/graphql";
-import { useSnackbarAlert } from "../../redux/hooks/useSnackbarAlert";
-import { AlertSeverity } from "../../redux/types/types";
+import { FrontendError } from "../../../const/errors";
+import { editCommunityDescriptionValidationSchema } from "../../../fieldValidateSchema/fieldValidateSchema";
+import { useEditCommunityDescriptionMutation } from "../../../generated/graphql";
+import { useSnackbarAlert } from "../../../redux/hooks/useSnackbarAlert";
+import { AlertSeverity } from "../../../redux/types/types";
 
 interface CommunityDescriptionEditorProps {
   communityId: string;

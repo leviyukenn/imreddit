@@ -13,7 +13,8 @@ import {
 import CakeIcon from "@material-ui/icons/Cake";
 import { useRouter } from "next/router";
 import React, { useCallback } from "react";
-import { RegularCommunityFragment } from "../../generated/graphql";
+import { RegularCommunityFragment } from "../../../generated/graphql";
+import { createPostLink } from "../../../utils/links";
 
 interface CommunityDescriptionProps {
   community: RegularCommunityFragment;
@@ -58,7 +59,7 @@ const CommunityDescription = ({ community }: CommunityDescriptionProps) => {
   const router = useRouter();
 
   const goToCreatePost = useCallback(() => {
-    router.push("/create-post");
+    router.push(createPostLink);
   }, [router]);
 
   return (

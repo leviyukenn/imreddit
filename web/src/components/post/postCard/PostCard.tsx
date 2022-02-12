@@ -84,6 +84,10 @@ const useStyles = makeStyles((theme: Theme) =>
     avatar: {
       backgroundColor: red[500],
     },
+    toolbar: {
+      display: "flex",
+      backgroundColor: theme.palette.background.paper,
+    },
   })
 );
 
@@ -147,15 +151,15 @@ export const PostCard = ({ post, ...props }: PostCardProps) => {
             ) : (
               <ImagePostContent images={post.images} title={post.title || ""} />
             )}
-            <Box display="flex">
-              <CommentNumberButton
-                link={postDetailModalLink}
-                asPath={postDetailPageLink}
-                totalComments={post.totalComments}
-              />
-              <CopyLinkButton link={FRONTEND_URL + postDetailPageLink} />
-            </Box>
           </CardContent>
+          <Box className={classes.toolbar}>
+            <CommentNumberButton
+              link={postDetailModalLink}
+              asPath={postDetailPageLink}
+              totalComments={post.totalComments}
+            />
+            <CopyLinkButton link={FRONTEND_URL + postDetailPageLink} />
+          </Box>
         </Card>
       </NextLink>
     </Box>
@@ -169,7 +173,7 @@ export const LoadingPostCard = () => {
     <Card className={classes.card}>
       <CardHeader
         avatar={
-          <Avatar aria-label="recipe" className={classes.avatar}>
+          <Avatar className={classes.avatar}>
             <Skeleton />
           </Avatar>
         }

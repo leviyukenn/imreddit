@@ -3,10 +3,12 @@ import { useMemo } from "react";
 import ContentLayout from "../../../components/ContentLayout";
 import HomeContainer from "../../../components/HomeContainer";
 import UserCommentsContent from "../../../components/userProfile/UserCommentsContent";
-import UserDownvotedPostsContent from "../../../components/userProfile/UserDownvotedPostsContent";
 import UserPostsContent from "../../../components/userProfile/UserPostsContents";
 import UserProfileNavigation from "../../../components/userProfile/UserProfileNavigation";
-import UserUpvotedPostsContent from "../../../components/userProfile/UserUpvotedPostsContent";
+import UserUpvotedPostsContent, {
+  UpvoteType,
+} from "../../../components/userProfile/UserUpvotedPostsContent";
+import { useIsAuth } from "../../../utils/hooks/useIsAuth";
 
 interface UserProfileProps {}
 export enum UserProfileTabType {
@@ -18,12 +20,14 @@ export enum UserProfileTabType {
 
 const UserProfile = ({}: UserProfileProps) => {
   const router = useRouter();
+  const { me } = useIsAuth();
   const userName =
     typeof router.query.userName === "string" ? router.query.userName : "";
   const sectionName =
     typeof router.query.sectionName === "string"
       ? router.query.sectionName
       : "";
+  const isMe = me?.username && me.username === userName;
 
   const content = useMemo(() => {
     switch (sectionName) {
@@ -33,9 +37,21 @@ const UserProfile = ({}: UserProfileProps) => {
       case UserProfileTabType.COMMENTS:
         return <UserCommentsContent userName={userName} />;
       case UserProfileTabType.UPVOTED:
-        return <UserUpvotedPostsContent userName={userName} />;
+        if (!isMe) return null;
+        return (
+          <UserUpvotedPostsContent
+            userName={userName}
+            upvoteType={UpvoteType.UPVOTE}
+          />
+        );
       case UserProfileTabType.DOWNVOTED:
-        return <UserDownvotedPostsContent userName={userName} />;
+        if (!isMe) return null;
+        return (
+          <UserUpvotedPostsContent
+            userName={userName}
+            upvoteType={UpvoteType.DOWNVOTE}
+          />
+        );
       default:
         return null;
     }
@@ -49,7 +65,9 @@ const UserProfile = ({}: UserProfileProps) => {
         ) : undefined
       }
     >
-      <ContentLayout fullWidth={true}>{content}</ContentLayout>
+      <ContentLayout fullWidth={true} rightSideContent={<UserProfile />}>
+        {content}
+      </ContentLayout>
     </HomeContainer>
   );
 };

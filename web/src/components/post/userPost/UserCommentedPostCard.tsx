@@ -18,7 +18,6 @@ import { RegularPostDetailFragment } from "../../../generated/graphql";
 import {
   createCommunityHomeLink,
   createPostDetailModalLink,
-  createPostDetailPageLink,
   createUserProfileLink,
 } from "../../../utils/links";
 import UserComments from "./UserComments";
@@ -134,7 +133,7 @@ const UserCommentedPostCard = ({
   const title = useMemo(
     () => (
       <Box display="flex" alignItems="center" className={classes.title}>
-        <NextLink href={createUserProfileLink(userName)} passHref>
+        <NextLink href={createUserProfileLink(userName, "posts")} passHref>
           <Link className={classes.userLink}>{userName}</Link>
         </NextLink>
         <span style={{ color: "rgb(120, 124, 126)" }}>
@@ -153,7 +152,7 @@ const UserCommentedPostCard = ({
     // createPostDetailPageLink(post.community.name, post.id),
     post.id
   );
-//   const postDetailLink = createPostDetailPageLink(post.community.name, post.id);
+  //   const postDetailLink = createPostDetailPageLink(post.community.name, post.id);
 
   return (
     <Box className={classes.root}>

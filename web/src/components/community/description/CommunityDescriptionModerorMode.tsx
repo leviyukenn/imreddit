@@ -14,12 +14,12 @@ import {
 import CakeIcon from "@material-ui/icons/Cake";
 import EditIcon from "@material-ui/icons/Edit";
 import React, { useState } from "react";
-import { RegularCommunityFragment } from "../../generated/graphql";
+import { RegularCommunityFragment } from "../../../generated/graphql";
 import CommunityDescriptionEditor from "./CommunityDescriptionEditor";
 
 interface CommunityDescriptionProps {
   community: RegularCommunityFragment;
-  setOpenDrawer: React.Dispatch<React.SetStateAction<boolean>>;
+  openDrawer: () => void;
 }
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -72,7 +72,7 @@ const useStyles = makeStyles((theme: Theme) =>
 
 const CommunityDescriptionModeratorMode = ({
   community,
-  setOpenDrawer,
+  openDrawer,
 }: CommunityDescriptionProps) => {
   const classes = useStyles();
   const [showDescriptionEditor, setShowDescriptionEditor] = useState<boolean>(
@@ -93,7 +93,7 @@ const CommunityDescriptionModeratorMode = ({
               <IconButton
                 size="small"
                 className={classes.appearanceButton}
-                onClick={() => setOpenDrawer(true)}
+                onClick={openDrawer}
               >
                 <EditIcon fontSize="small" />
                 Appearance

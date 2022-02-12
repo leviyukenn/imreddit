@@ -6,8 +6,8 @@ import {
   Theme,
 } from "@material-ui/core";
 import React from "react";
-import CommunityImageDropzone from "./CommunityImageDropzone";
 import CommunityImagePreview from "./CommunityImagePreview";
+import CommunityImageDropzone from "./CommunityImageDropzone";
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({

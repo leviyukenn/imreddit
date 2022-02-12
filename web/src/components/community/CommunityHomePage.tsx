@@ -5,11 +5,11 @@ import { useUserCommunityRole } from "../../graphql/hooks/useUserCommunityRole";
 import { useSaveOrInitCommunityAppearance } from "../../redux/hooks/useCommunityAppearance";
 import ContentLayout from "../ContentLayout";
 import { LoadingPostCard } from "../post/postCard/PostCard";
-import CommunityAppearanceDrawer from "./CommunityAppearanceDrawer";
+import CommunityAppearanceDrawer from "./appearance/CommunityAppearanceDrawer";
 import CommunityBanner from "./CommunityBanner";
-import CommunityDescription from "./CommunityDescription";
-import CommunityDescriptionModeratorMode from "./CommunityDescriptionModerorMode";
 import CommunityHomeContainer from "./CommunityHomeContainer";
+import CommunityDescription from "./description/CommunityDescription";
+import CommunityDescriptionModeratorMode from "./description/CommunityDescriptionModerorMode";
 
 interface CommunityProps {
   communityName: string;
@@ -42,7 +42,7 @@ const CommunityHomePage = ({
       return (
         <CommunityDescriptionModeratorMode
           community={community}
-          setOpenDrawer={setOpenDrawer}
+          openDrawer={() => setOpenDrawer(true)}
         />
       );
     }

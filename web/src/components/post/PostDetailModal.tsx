@@ -9,12 +9,20 @@ import {
 } from "@material-ui/core";
 import CloseIcon from "@material-ui/icons/Close";
 import { useRouter } from "next/router";
-import React, { useCallback, useMemo } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { SERVER_URL } from "../../const/const";
 import { useCommunity } from "../../graphql/hooks/useCommunity";
 import { usePostDetail } from "../../graphql/hooks/usePostDetail";
 import { usePostInfoRoute } from "../../utils/hooks/usePostInfoRoute";
 import { createCommunityHomeLink } from "../../utils/links";
+import CommunityDescription from "../community/description/CommunityDescription";
+import ContentLayout from "../ContentLayout";
 import PostDetail from "./PostDetail";
 
 interface PostDetailModalProps {}
@@ -24,6 +32,8 @@ const useStyles = makeStyles((theme: Theme) =>
     root: {
       position: "absolute",
       top: "32px",
+      maxWidth: "1280px",
+      width: "calc(100% - 160px)",
     },
     title: {
       height: theme.spacing(6),
@@ -41,10 +51,10 @@ const useStyles = makeStyles((theme: Theme) =>
       padding: "0 32px",
     },
     content: {
-      display: "flex",
-      justifyContent: "center",
-      padding: 0,
-      backgroundColor: theme.palette.background.default,
+      // display: "flex",
+      // justifyContent: "center",
+      // padding: 0,
+      // backgroundColor: theme.palette.background.default,
     },
     heart: {
       maxWidth: "740px",
@@ -57,6 +67,8 @@ const useStyles = makeStyles((theme: Theme) =>
 const PostDetailModal = ({}: PostDetailModalProps) => {
   const router = useRouter();
   const classes = useStyles();
+  const scrollerRef = useRef<HTMLDivElement>(null);
+  const [isScrollerRefAcquired, setIsScrollerRefAcquired] = useState(false);
 
   const handleClose = useCallback(() => {
     if (router.pathname.includes("postInfo")) {
@@ -89,13 +101,21 @@ const PostDetailModal = ({}: PostDetailModalProps) => {
         background: backgroundColor,
       };
   }, [community]);
+  const open = !!router.query.modalPostId;
+
+  useEffect(() => {
+    if (post && community && open) {
+      setIsScrollerRefAcquired(true);
+      return;
+    }
+    setIsScrollerRefAcquired(false);
+  }, [post, community, open]);
 
   return (
     <Dialog
-      open={!!router.query.modalPostId}
+      open={open}
       onClose={handleClose}
       scroll={"paper"}
-      maxWidth={"lg"}
       fullWidth
       classes={{ paper: classes.root }}
     >
@@ -119,15 +139,29 @@ const PostDetailModal = ({}: PostDetailModalProps) => {
           </Box>
         </Box>
       </Box>
-      <DialogContent
-        dividers
-        className={classes.content}
-        style={backgroundStyle}
-      >
-        <Box className={classes.heart}>
-          <PostDetail post={post}></PostDetail>
-        </Box>
-      </DialogContent>
+      {post && community ? (
+        <DialogContent
+          dividers
+          className={classes.content}
+          style={backgroundStyle}
+          ref={scrollerRef}
+        >
+          <ContentLayout
+            rightSideContent={<CommunityDescription community={community} />}
+            backToTop={
+              scrollerRef.current
+                ? () =>
+                    scrollerRef.current?.scrollTo({
+                      top: 0,
+                      behavior: "smooth",
+                    })
+                : undefined
+            }
+          >
+            <PostDetail post={post}></PostDetail>
+          </ContentLayout>
+        </DialogContent>
+      ) : null}
     </Dialog>
   );
 };

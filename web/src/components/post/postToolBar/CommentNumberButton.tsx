@@ -30,6 +30,9 @@ const useStyles = makeStyles((theme: Theme) =>
         backgroundColor: theme.palette.action.hover,
       },
     },
+    totalComments: {
+      marginLeft: 4,
+    },
   })
 );
 
@@ -43,7 +46,9 @@ const CommentNumberButton = ({
     <NextLink href={link} as={asPath} passHref>
       <Link className={classes.commentButton} underline="none">
         <ChatBubbleOutlineIcon />
-        <Typography variant="caption">{totalComments}</Typography>
+        <Typography variant="caption" className={classes.totalComments}>
+          {totalComments}
+        </Typography>
       </Link>
     </NextLink>
   );
