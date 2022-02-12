@@ -13,8 +13,10 @@ import {
 } from "@material-ui/core";
 import CakeIcon from "@material-ui/icons/Cake";
 import EditIcon from "@material-ui/icons/Edit";
-import React, { useState } from "react";
+import { useRouter } from "next/router";
+import React, { useCallback, useState } from "react";
 import { RegularCommunityFragment } from "../../../generated/graphql";
+import { createPostLink } from "../../../utils/links";
 import CommunityDescriptionEditor from "./CommunityDescriptionEditor";
 
 interface CommunityDescriptionProps {
@@ -78,6 +80,10 @@ const CommunityDescriptionModeratorMode = ({
   const [showDescriptionEditor, setShowDescriptionEditor] = useState<boolean>(
     false
   );
+  const router = useRouter();
+  const goToCreatePost = useCallback(() => {
+    router.push(createPostLink);
+  }, [router]);
 
   return (
     <Card className={classes.root}>
@@ -153,6 +159,7 @@ const CommunityDescriptionModeratorMode = ({
           variant="contained"
           color="primary"
           className={classes.createPostButton}
+          onClick={goToCreatePost}
         >
           Create Post
         </Button>

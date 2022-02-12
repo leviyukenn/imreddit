@@ -47,10 +47,11 @@ const UserDropDownList = ({ onClickAway }: UserDropDownListProps) => {
         <UserDropDownListItem
           icon={<AccountCircleIcon />}
           text="Profile"
-          onClick={() =>
+          onClick={() => {
             me?.username &&
-            router.push(createUserProfileLink(me?.username, "posts"))
-          }
+              router.push(createUserProfileLink(me?.username, "posts"));
+            onClickAway();
+          }}
         />
         <Divider />
         <UserDropDownListItem

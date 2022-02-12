@@ -2,12 +2,14 @@ import { useRouter } from "next/router";
 import { useMemo } from "react";
 import ContentLayout from "../../../components/ContentLayout";
 import HomeContainer from "../../../components/HomeContainer";
+import UserProfile from "../../../components/userProfile/profile/UserProfile";
 import UserCommentsContent from "../../../components/userProfile/UserCommentsContent";
 import UserPostsContent from "../../../components/userProfile/UserPostsContents";
 import UserProfileNavigation from "../../../components/userProfile/UserProfileNavigation";
 import UserUpvotedPostsContent, {
   UpvoteType,
 } from "../../../components/userProfile/UserUpvotedPostsContent";
+import { useFindUser } from "../../../graphql/hooks/useFindUser";
 import { useIsAuth } from "../../../utils/hooks/useIsAuth";
 
 interface UserProfileProps {}
@@ -18,7 +20,7 @@ export enum UserProfileTabType {
   DOWNVOTED = "downvoted",
 }
 
-const UserProfile = ({}: UserProfileProps) => {
+const UserProfilePage = ({}: UserProfileProps) => {
   const router = useRouter();
   const { me } = useIsAuth();
   const userName =
@@ -28,6 +30,7 @@ const UserProfile = ({}: UserProfileProps) => {
       ? router.query.sectionName
       : "";
   const isMe = me?.username && me.username === userName;
+  const user = useFindUser(userName);
 
   const content = useMemo(() => {
     switch (sectionName) {
@@ -65,10 +68,13 @@ const UserProfile = ({}: UserProfileProps) => {
         ) : undefined
       }
     >
-      <ContentLayout fullWidth={true} rightSideContent={<UserProfile />}>
+      <ContentLayout
+        fullWidth={true}
+        rightSideContent={user ? <UserProfile user={user} /> : undefined}
+      >
         {content}
       </ContentLayout>
     </HomeContainer>
   );
 };
-export default UserProfile;
+export default UserProfilePage;

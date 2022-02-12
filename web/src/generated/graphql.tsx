@@ -123,6 +123,7 @@ export type Mutation = {
   login: UserResponse;
   logout: Scalars['Boolean'];
   googleAuthentication: UserResponse;
+  changeUserAvatar: User;
   createTextPost: PostResponse;
   createImagePost: PostResponse;
   createComment: PostResponse;
@@ -161,6 +162,11 @@ export type MutationLoginArgs = {
 
 export type MutationGoogleAuthenticationArgs = {
   idToken: Scalars['String'];
+};
+
+
+export type MutationChangeUserAvatarArgs = {
+  avatarSeed: Scalars['String'];
 };
 
 
@@ -260,6 +266,7 @@ export type PostResponse = {
 
 export type Query = {
   __typename?: 'Query';
+  user?: Maybe<User>;
   me?: Maybe<User>;
   userComments: Array<Post>;
   userUpvotedPosts: PaginatedPosts;
@@ -274,6 +281,11 @@ export type Query = {
   userRoles: Array<Maybe<Role>>;
   userRole?: Maybe<Role>;
   topics: Array<Topic>;
+};
+
+
+export type QueryUserArgs = {
+  userName: Scalars['String'];
 };
 
 
@@ -388,6 +400,8 @@ export type User = {
   username: Scalars['String'];
   role: Scalars['String'];
   email: Scalars['String'];
+  about: Scalars['String'];
+  avatar: Scalars['String'];
 };
 
 export type UserResponse = {
@@ -457,7 +471,7 @@ export type RegularTextPostFragment = (
 
 export type RegularUserFragment = (
   { __typename?: 'User' }
-  & Pick<User, 'id' | 'username' | 'email'>
+  & Pick<User, 'id' | 'username' | 'email' | 'avatar' | 'createdAt'>
 );
 
 export type RegularUserResponseFragment = (
@@ -908,6 +922,19 @@ export type TopicsQuery = (
   )> }
 );
 
+export type FindUserQueryVariables = Exact<{
+  userName: Scalars['String'];
+}>;
+
+
+export type FindUserQuery = (
+  { __typename?: 'Query' }
+  & { user?: Maybe<(
+    { __typename?: 'User' }
+    & RegularUserFragment
+  )> }
+);
+
 export type UserCommentedPostsQueryVariables = Exact<{
   userName: Scalars['String'];
   limit?: Maybe<Scalars['Int']>;
@@ -1030,6 +1057,8 @@ export const RegularUserFragmentDoc = gql`
   id
   username
   email
+  avatar
+  createdAt
 }
     `;
 export const RegularImageFragmentDoc = gql`
@@ -2078,6 +2107,41 @@ export function useTopicsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<Top
 export type TopicsQueryHookResult = ReturnType<typeof useTopicsQuery>;
 export type TopicsLazyQueryHookResult = ReturnType<typeof useTopicsLazyQuery>;
 export type TopicsQueryResult = Apollo.QueryResult<TopicsQuery, TopicsQueryVariables>;
+export const FindUserDocument = gql`
+    query FindUser($userName: String!) {
+  user(userName: $userName) {
+    ...RegularUser
+  }
+}
+    ${RegularUserFragmentDoc}`;
+
+/**
+ * __useFindUserQuery__
+ *
+ * To run a query within a React component, call `useFindUserQuery` and pass it any options that fit your needs.
+ * When your component renders, `useFindUserQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useFindUserQuery({
+ *   variables: {
+ *      userName: // value for 'userName'
+ *   },
+ * });
+ */
+export function useFindUserQuery(baseOptions: Apollo.QueryHookOptions<FindUserQuery, FindUserQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<FindUserQuery, FindUserQueryVariables>(FindUserDocument, options);
+      }
+export function useFindUserLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<FindUserQuery, FindUserQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<FindUserQuery, FindUserQueryVariables>(FindUserDocument, options);
+        }
+export type FindUserQueryHookResult = ReturnType<typeof useFindUserQuery>;
+export type FindUserLazyQueryHookResult = ReturnType<typeof useFindUserLazyQuery>;
+export type FindUserQueryResult = Apollo.QueryResult<FindUserQuery, FindUserQueryVariables>;
 export const UserCommentedPostsDocument = gql`
     query UserCommentedPosts($userName: String!, $limit: Int, $cursor: String) {
   userCommentedPosts(userName: $userName, limit: $limit, cursor: $cursor) {
@@ -2354,7 +2418,7 @@ export type ImageFieldPolicy = {
 	caption?: FieldPolicy<any> | FieldReadFunction<any>,
 	link?: FieldPolicy<any> | FieldReadFunction<any>
 };
-export type MutationKeySpecifier = ('changePassword' | 'forgotPassword' | 'register' | 'login' | 'logout' | 'googleAuthentication' | 'createTextPost' | 'createImagePost' | 'createComment' | 'deleteMyPost' | 'uploadImage' | 'createCommunity' | 'editCommunityDescription' | 'setCommunityAppearance' | 'joinCommunity' | 'leaveCommunity' | 'vote' | 'createTopic' | MutationKeySpecifier)[];
+export type MutationKeySpecifier = ('changePassword' | 'forgotPassword' | 'register' | 'login' | 'logout' | 'googleAuthentication' | 'changeUserAvatar' | 'createTextPost' | 'createImagePost' | 'createComment' | 'deleteMyPost' | 'uploadImage' | 'createCommunity' | 'editCommunityDescription' | 'setCommunityAppearance' | 'joinCommunity' | 'leaveCommunity' | 'vote' | 'createTopic' | MutationKeySpecifier)[];
 export type MutationFieldPolicy = {
 	changePassword?: FieldPolicy<any> | FieldReadFunction<any>,
 	forgotPassword?: FieldPolicy<any> | FieldReadFunction<any>,
@@ -2362,6 +2426,7 @@ export type MutationFieldPolicy = {
 	login?: FieldPolicy<any> | FieldReadFunction<any>,
 	logout?: FieldPolicy<any> | FieldReadFunction<any>,
 	googleAuthentication?: FieldPolicy<any> | FieldReadFunction<any>,
+	changeUserAvatar?: FieldPolicy<any> | FieldReadFunction<any>,
 	createTextPost?: FieldPolicy<any> | FieldReadFunction<any>,
 	createImagePost?: FieldPolicy<any> | FieldReadFunction<any>,
 	createComment?: FieldPolicy<any> | FieldReadFunction<any>,
@@ -2403,8 +2468,9 @@ export type PostResponseFieldPolicy = {
 	errors?: FieldPolicy<any> | FieldReadFunction<any>,
 	post?: FieldPolicy<any> | FieldReadFunction<any>
 };
-export type QueryKeySpecifier = ('me' | 'userComments' | 'userUpvotedPosts' | 'userCommentedPosts' | 'userPosts' | 'communityPosts' | 'paginatedPosts' | 'allPosts' | 'postDetail' | 'communities' | 'community' | 'userRoles' | 'userRole' | 'topics' | QueryKeySpecifier)[];
+export type QueryKeySpecifier = ('user' | 'me' | 'userComments' | 'userUpvotedPosts' | 'userCommentedPosts' | 'userPosts' | 'communityPosts' | 'paginatedPosts' | 'allPosts' | 'postDetail' | 'communities' | 'community' | 'userRoles' | 'userRole' | 'topics' | QueryKeySpecifier)[];
 export type QueryFieldPolicy = {
+	user?: FieldPolicy<any> | FieldReadFunction<any>,
 	me?: FieldPolicy<any> | FieldReadFunction<any>,
 	userComments?: FieldPolicy<any> | FieldReadFunction<any>,
 	userUpvotedPosts?: FieldPolicy<any> | FieldReadFunction<any>,
@@ -2446,14 +2512,16 @@ export type UploadResponseFieldPolicy = {
 	errors?: FieldPolicy<any> | FieldReadFunction<any>,
 	path?: FieldPolicy<any> | FieldReadFunction<any>
 };
-export type UserKeySpecifier = ('id' | 'createdAt' | 'updatedAt' | 'username' | 'role' | 'email' | UserKeySpecifier)[];
+export type UserKeySpecifier = ('id' | 'createdAt' | 'updatedAt' | 'username' | 'role' | 'email' | 'about' | 'avatar' | UserKeySpecifier)[];
 export type UserFieldPolicy = {
 	id?: FieldPolicy<any> | FieldReadFunction<any>,
 	createdAt?: FieldPolicy<any> | FieldReadFunction<any>,
 	updatedAt?: FieldPolicy<any> | FieldReadFunction<any>,
 	username?: FieldPolicy<any> | FieldReadFunction<any>,
 	role?: FieldPolicy<any> | FieldReadFunction<any>,
-	email?: FieldPolicy<any> | FieldReadFunction<any>
+	email?: FieldPolicy<any> | FieldReadFunction<any>,
+	about?: FieldPolicy<any> | FieldReadFunction<any>,
+	avatar?: FieldPolicy<any> | FieldReadFunction<any>
 };
 export type UserResponseKeySpecifier = ('errors' | 'user' | UserResponseKeySpecifier)[];
 export type UserResponseFieldPolicy = {

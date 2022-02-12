@@ -63,19 +63,21 @@ const ContentLayout = ({
         >
           {children}
         </Box>
-        <Box className={classes.rightSideContainer}>
-          {rightSideContent}
-          <Fab
-            variant="extended"
-            color="primary"
-            onClick={backToTop || defaultBackToTop}
-            size="small"
-            className={classes.backToTopButton}
-          >
-            <NavigationIcon className={classes.backToTopButtonIcon} />
-            Back to Top
-          </Fab>
-        </Box>
+        {rightSideContent ? (
+          <Box className={classes.rightSideContainer}>
+            {rightSideContent}
+            <Fab
+              variant="extended"
+              color="primary"
+              onClick={backToTop || defaultBackToTop}
+              size="small"
+              className={classes.backToTopButton}
+            >
+              <NavigationIcon className={classes.backToTopButtonIcon} />
+              Back to Top
+            </Fab>
+          </Box>
+        ) : null}
       </Box>
     </>
   );
