@@ -9,7 +9,7 @@ import CommunityAppearanceDrawer from "./appearance/CommunityAppearanceDrawer";
 import CommunityBanner from "./CommunityBanner";
 import CommunityHomeContainer from "./CommunityHomeContainer";
 import CommunityDescription from "./description/CommunityDescription";
-import CommunityDescriptionModeratorMode from "./description/CommunityDescriptionModerorMode";
+import CommunityDescriptionModeratorMode from "./description/CommunityDescriptionModeratorMode";
 
 interface CommunityProps {
   communityName: string;

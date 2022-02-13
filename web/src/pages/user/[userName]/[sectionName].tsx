@@ -2,6 +2,7 @@ import { useRouter } from "next/router";
 import { useMemo } from "react";
 import ContentLayout from "../../../components/ContentLayout";
 import HomeContainer from "../../../components/HomeContainer";
+import MyProfile from "../../../components/userProfile/profile/MyProfile";
 import UserProfile from "../../../components/userProfile/profile/UserProfile";
 import UserCommentsContent from "../../../components/userProfile/UserCommentsContent";
 import UserPostsContent from "../../../components/userProfile/UserPostsContents";
@@ -31,6 +32,10 @@ const UserProfilePage = ({}: UserProfileProps) => {
       : "";
   const isMe = me?.username && me.username === userName;
   const user = useFindUser(userName);
+  const profile = useMemo(() => {
+    if (isMe) return <MyProfile user={me!} />;
+    return user ? <UserProfile user={user} /> : undefined;
+  }, [isMe, user]);
 
   const content = useMemo(() => {
     switch (sectionName) {
@@ -68,10 +73,7 @@ const UserProfilePage = ({}: UserProfileProps) => {
         ) : undefined
       }
     >
-      <ContentLayout
-        fullWidth={true}
-        rightSideContent={user ? <UserProfile user={user} /> : undefined}
-      >
+      <ContentLayout fullWidth={true} rightSideContent={profile}>
         {content}
       </ContentLayout>
     </HomeContainer>

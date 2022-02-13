@@ -1,17 +1,13 @@
 import {
   Box,
-  Button,
   createStyles,
   makeStyles,
   Theme,
   Typography,
 } from "@material-ui/core";
 import CakeIcon from "@material-ui/icons/Cake";
-import { useRouter } from "next/router";
-import React, { useCallback, useState } from "react";
+import React from "react";
 import { RegularUserFragment } from "../../../generated/graphql";
-import { createPostLink } from "../../../utils/links";
-import GenerateAvatarModal from "./GenerateAvatarModal";
 
 interface UserProfileProps {
   user: RegularUserFragment;
@@ -23,14 +19,13 @@ const useStyles = makeStyles((theme: Theme) =>
       backgroundColor: theme.palette.background.paper,
       border: "1px solid #bdbfc0",
       borderRadius: 4,
-      height: 600,
     },
     banner: {
       height: 94,
       backgroundColor: "#33a8ff",
     },
     content: {
-      padding: "0 1rem",
+      padding: "0 1rem 1rem",
     },
     userName: {
       textAlign: "center",
@@ -67,93 +62,66 @@ const useStyles = makeStyles((theme: Theme) =>
       color: "#2B9EED",
       marginRight: 4,
     },
-    generateAvatarButton: {
-      background: "linear-gradient(90deg,#ec0623,#ff8717)",
-      borderRadius: "9999px",
-      fontWeight: 700,
-      textTransform: "none",
+    userAbout: {
+      margin: "20px 0",
     },
-    createPostButton: {
-      borderRadius: "9999px",
-      fontWeight: 700,
-      textTransform: "none",
+    userAboutContainer: {
+      cursor: "pointer",
+      transition: "all .1s linear 0s",
+      "&:hover": {
+        border: "1px solid #0079d3",
+        borderRadius: "4px",
+        padding: "0.5em",
+      },
     },
   })
 );
 
 const UserProfile = ({ user }: UserProfileProps) => {
   const classes = useStyles();
-  const router = useRouter();
-  const [openAvatarGenerator, setOpenAvatarGenerator] = useState(false);
-  const goToCreatePost = useCallback(() => {
-    router.push(createPostLink);
-  }, [router]);
 
   return (
-    <>
-      <Box className={classes.root}>
-        <Box className={classes.banner}></Box>
-        <Box className={classes.avatarContainer}>
-          <img src={user.avatar} className={classes.avatar} />
+    <Box className={classes.root}>
+      <Box className={classes.banner}></Box>
+      <Box className={classes.avatarContainer}>
+        <img src={user.avatar} className={classes.avatar} />
+      </Box>
+      <Box className={classes.content}>
+        <Typography variant="h5" className={classes.userName}>
+          {user.username}
+        </Typography>
+        <Typography variant="subtitle1" className={classes.subUserName}>
+          {"u/" + user.username}
+        </Typography>
+        <Box className={classes.userAbout}>
+          <Box className={classes.userAboutContainer}>
+            <Typography variant="body2" component="p">
+              {user.about}
+            </Typography>
+          </Box>
         </Box>
-        <Box className={classes.content}>
-          <Typography variant="h5" className={classes.userName}>
-            {user.username}
-          </Typography>
-          <Typography variant="subtitle1" className={classes.subUserName}>
-            {"u/" + user.username}
-          </Typography>
-          <Button
-            fullWidth
-            disableElevation
-            variant="contained"
-            color="primary"
-            className={classes.generateAvatarButton}
-            onClick={() => setOpenAvatarGenerator(true)}
-          >
-            Generate Random Avatar
-          </Button>
-          <Typography variant="subtitle2" gutterBottom>
-            {user.about ||
-              "Write down A brief description of yourself shown on your profile."}
-          </Typography>
-          <Box display="flex" justifyContent="center" margin="8px 0">
-            <Box flex={1}>
-              <Typography variant="subtitle2">Points</Typography>
-              <Box display="flex" className={classes.createdDateContainer}>
-                <CakeIcon className={classes.cakeIcon} />
-                <Typography variant="caption" className={classes.subUserName}>
-                  {user.points}
-                </Typography>
-              </Box>
-            </Box>
-            <Box flex={1}>
-              <Typography variant="subtitle2">Cake Day</Typography>
-              <Box display="flex" className={classes.createdDateContainer}>
-                <CakeIcon className={classes.cakeIcon} />
-                <Typography variant="caption" className={classes.subUserName}>
-                  {new Date(+user.createdAt).toDateString()}
-                </Typography>
-              </Box>
+        <Box display="flex" justifyContent="center" margin="8px 0">
+          <Box flex={1}>
+            <Typography variant="subtitle2">Points</Typography>
+            <Box display="flex" className={classes.createdDateContainer}>
+              <CakeIcon className={classes.cakeIcon} />
+              <Typography variant="caption" className={classes.subUserName}>
+                {user.points}
+              </Typography>
             </Box>
           </Box>
-          <Button
-            fullWidth
-            disableElevation
-            variant="contained"
-            color="primary"
-            className={classes.createPostButton}
-            onClick={goToCreatePost}
-          >
-            New Post
-          </Button>
+          <Box flex={1}>
+            <Typography variant="subtitle2">Cake Day</Typography>
+            <Box display="flex" className={classes.createdDateContainer}>
+              <CakeIcon className={classes.cakeIcon} />
+              <Typography variant="caption" className={classes.subUserName}>
+                {new Date(+user.createdAt).toDateString()}
+              </Typography>
+            </Box>
+          </Box>
         </Box>
       </Box>
-      <GenerateAvatarModal
-        open={openAvatarGenerator}
-        closeModal={() => setOpenAvatarGenerator(false)}
-      />
-    </>
+    </Box>
   );
 };
 export default UserProfile;

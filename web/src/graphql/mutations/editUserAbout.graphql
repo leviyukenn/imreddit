@@ -1,0 +1,10 @@
+mutation EditUserAbout($about: String!) {
+  editUserAbout(about: $about) {
+    user {
+      ...RegularUser
+    }
+    errors {
+      ...RegularErrors
+    }
+  }
+}

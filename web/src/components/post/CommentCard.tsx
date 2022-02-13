@@ -8,7 +8,7 @@ import {
   Theme,
   Typography,
 } from "@material-ui/core";
-import { blue, red } from "@material-ui/core/colors";
+import { blue } from "@material-ui/core/colors";
 import ChatBubbleOutlineIcon from "@material-ui/icons/ChatBubbleOutline";
 import ControlPointIcon from "@material-ui/icons/ControlPoint";
 import { Skeleton } from "@material-ui/lab";
@@ -73,7 +73,6 @@ const useStyles = makeStyles((theme: Theme) =>
     smallAvatar: {
       width: "28px",
       height: "28px",
-      backgroundColor: red[500],
       marginTop: theme.spacing(1),
       marginBottom: theme.spacing(1),
     },
@@ -145,7 +144,7 @@ export const CommentCard = ({ postId, ...props }: PostDetailProps) => {
               onClick={toggleShowThread}
             />
           ) : null}
-          <Avatar className={classes.smallAvatar}>R</Avatar>
+          <img className={classes.smallAvatar} src={post.creator.avatar} />
         </Box>
         {showThread ? (
           <Box

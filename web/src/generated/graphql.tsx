@@ -124,6 +124,7 @@ export type Mutation = {
   logout: Scalars['Boolean'];
   googleAuthentication: UserResponse;
   changeUserAvatar: User;
+  editUserAbout: UserResponse;
   createTextPost: PostResponse;
   createImagePost: PostResponse;
   createComment: PostResponse;
@@ -167,6 +168,11 @@ export type MutationGoogleAuthenticationArgs = {
 
 export type MutationChangeUserAvatarArgs = {
   avatarSeed: Scalars['String'];
+};
+
+
+export type MutationEditUserAboutArgs = {
+  about: Scalars['String'];
 };
 
 
@@ -647,6 +653,25 @@ export type EditCommunityDescriptionMutation = (
     & { community?: Maybe<(
       { __typename?: 'Community' }
       & RegularCommunityFragment
+    )>, errors?: Maybe<Array<(
+      { __typename?: 'FieldError' }
+      & RegularErrorsFragment
+    )>> }
+  ) }
+);
+
+export type EditUserAboutMutationVariables = Exact<{
+  about: Scalars['String'];
+}>;
+
+
+export type EditUserAboutMutation = (
+  { __typename?: 'Mutation' }
+  & { editUserAbout: (
+    { __typename?: 'UserResponse' }
+    & { user?: Maybe<(
+      { __typename?: 'User' }
+      & RegularUserFragment
     )>, errors?: Maybe<Array<(
       { __typename?: 'FieldError' }
       & RegularErrorsFragment
@@ -1504,6 +1529,45 @@ export function useEditCommunityDescriptionMutation(baseOptions?: Apollo.Mutatio
 export type EditCommunityDescriptionMutationHookResult = ReturnType<typeof useEditCommunityDescriptionMutation>;
 export type EditCommunityDescriptionMutationResult = Apollo.MutationResult<EditCommunityDescriptionMutation>;
 export type EditCommunityDescriptionMutationOptions = Apollo.BaseMutationOptions<EditCommunityDescriptionMutation, EditCommunityDescriptionMutationVariables>;
+export const EditUserAboutDocument = gql`
+    mutation EditUserAbout($about: String!) {
+  editUserAbout(about: $about) {
+    user {
+      ...RegularUser
+    }
+    errors {
+      ...RegularErrors
+    }
+  }
+}
+    ${RegularUserFragmentDoc}
+${RegularErrorsFragmentDoc}`;
+export type EditUserAboutMutationFn = Apollo.MutationFunction<EditUserAboutMutation, EditUserAboutMutationVariables>;
+
+/**
+ * __useEditUserAboutMutation__
+ *
+ * To run a mutation, you first call `useEditUserAboutMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useEditUserAboutMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [editUserAboutMutation, { data, loading, error }] = useEditUserAboutMutation({
+ *   variables: {
+ *      about: // value for 'about'
+ *   },
+ * });
+ */
+export function useEditUserAboutMutation(baseOptions?: Apollo.MutationHookOptions<EditUserAboutMutation, EditUserAboutMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<EditUserAboutMutation, EditUserAboutMutationVariables>(EditUserAboutDocument, options);
+      }
+export type EditUserAboutMutationHookResult = ReturnType<typeof useEditUserAboutMutation>;
+export type EditUserAboutMutationResult = Apollo.MutationResult<EditUserAboutMutation>;
+export type EditUserAboutMutationOptions = Apollo.BaseMutationOptions<EditUserAboutMutation, EditUserAboutMutationVariables>;
 export const ForgotPasswordDocument = gql`
     mutation ForgotPassword($username: String!, $email: String!) {
   forgotPassword(forgotPasswordInput: {username: $username, email: $email}) {
@@ -2530,7 +2594,7 @@ export type ImageFieldPolicy = {
 	caption?: FieldPolicy<any> | FieldReadFunction<any>,
 	link?: FieldPolicy<any> | FieldReadFunction<any>
 };
-export type MutationKeySpecifier = ('changePassword' | 'forgotPassword' | 'register' | 'login' | 'logout' | 'googleAuthentication' | 'changeUserAvatar' | 'createTextPost' | 'createImagePost' | 'createComment' | 'deleteMyPost' | 'uploadImage' | 'createCommunity' | 'editCommunityDescription' | 'setCommunityAppearance' | 'joinCommunity' | 'leaveCommunity' | 'vote' | 'createTopic' | MutationKeySpecifier)[];
+export type MutationKeySpecifier = ('changePassword' | 'forgotPassword' | 'register' | 'login' | 'logout' | 'googleAuthentication' | 'changeUserAvatar' | 'editUserAbout' | 'createTextPost' | 'createImagePost' | 'createComment' | 'deleteMyPost' | 'uploadImage' | 'createCommunity' | 'editCommunityDescription' | 'setCommunityAppearance' | 'joinCommunity' | 'leaveCommunity' | 'vote' | 'createTopic' | MutationKeySpecifier)[];
 export type MutationFieldPolicy = {
 	changePassword?: FieldPolicy<any> | FieldReadFunction<any>,
 	forgotPassword?: FieldPolicy<any> | FieldReadFunction<any>,
@@ -2539,6 +2603,7 @@ export type MutationFieldPolicy = {
 	logout?: FieldPolicy<any> | FieldReadFunction<any>,
 	googleAuthentication?: FieldPolicy<any> | FieldReadFunction<any>,
 	changeUserAvatar?: FieldPolicy<any> | FieldReadFunction<any>,
+	editUserAbout?: FieldPolicy<any> | FieldReadFunction<any>,
 	createTextPost?: FieldPolicy<any> | FieldReadFunction<any>,
 	createImagePost?: FieldPolicy<any> | FieldReadFunction<any>,
 	createComment?: FieldPolicy<any> | FieldReadFunction<any>,

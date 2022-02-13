@@ -47,6 +47,10 @@ const postTextValidation = Yup.string().max(
   "Post text must be under 40000 characters"
 );
 
+const userAboutValidation = Yup.string()
+  .max(300, "User about must be less than 300 characters")
+  .required("Required");
+
 export const registerValidationSchema = Yup.object({
   username: usernameValidation,
   password: passwordValidation,
@@ -75,6 +79,10 @@ export const createCommunityValidationSchema = Yup.object({
 
 export const editCommunityDescriptionValidationSchema = Yup.object({
   description: communityDescriptionValidation,
+});
+
+export const editUserAboutValidationSchema = Yup.object({
+  about: userAboutValidation,
 });
 
 export const createPostValidationSchema = Yup.object({
