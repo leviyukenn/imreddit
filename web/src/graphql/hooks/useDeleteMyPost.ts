@@ -26,21 +26,20 @@ export function useDeleteMyPost() {
             delete merged[deleteMyPostResponse.deleteMyPost.postId!];
             return { posts: merged, hasMore: existingPostRefs.hasMore };
           },
-          userPosts(existingUserPostRefs: {
-            [key: string]: {
+          userPosts(
+            existingUserPostRefs: {
               posts: { [key: string]: Reference };
               hasMore: boolean;
-            };
-          }) {
-            if (!me?.username) return existingUserPostRefs;
-            const merged = { ...existingUserPostRefs[me.username].posts };
+            },
+            { storeFieldName }
+          ) {
+            if (!me?.username || !storeFieldName.includes(me.username))
+              return existingUserPostRefs;
+            const merged = { ...existingUserPostRefs.posts };
             delete merged[deleteMyPostResponse.deleteMyPost.postId!];
             return {
-              ...existingUserPostRefs,
-              [me.username]: {
-                posts: merged,
-                hasMore: existingUserPostRefs[me.username].hasMore,
-              },
+              posts: merged,
+              hasMore: existingUserPostRefs.hasMore,
             };
           },
         },
@@ -53,7 +52,10 @@ export function useDeleteMyPost() {
       if (!checkIsAuth()) return;
       const response = await deleteMyPostMutation({
         variables: { postId },
-      }).catch(() => null);
+      }).catch((err) => {
+        console.log(err);
+        return null;
+      });
       if (!response) {
         onOpenSnackbarAlert({
           message: FrontendError.ERR0002,

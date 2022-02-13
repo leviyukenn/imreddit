@@ -1,0 +1,8 @@
+
+query GetMyUpvote($postId:String!){
+    getUpvote(postId:$postId){
+        userId
+        postId
+        value
+    }
+}

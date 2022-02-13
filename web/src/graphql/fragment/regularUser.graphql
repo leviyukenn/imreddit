@@ -4,4 +4,6 @@ fragment RegularUser on User {
   email
   avatar
   createdAt
+  points
+  about
 }

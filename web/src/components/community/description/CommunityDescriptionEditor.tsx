@@ -14,11 +14,8 @@ import {
 import { Field, Form, Formik } from "formik";
 import { TextField, TextFieldProps } from "formik-material-ui";
 import React, { useCallback, useState } from "react";
-import { FrontendError } from "../../../const/errors";
 import { editCommunityDescriptionValidationSchema } from "../../../fieldValidateSchema/fieldValidateSchema";
-import { useEditCommunityDescriptionMutation } from "../../../generated/graphql";
-import { useSnackbarAlert } from "../../../redux/hooks/useSnackbarAlert";
-import { AlertSeverity } from "../../../redux/types/types";
+import { useSaveCommunityDescription } from "../../../graphql/hooks/useSaveCommunityDescription";
 
 interface CommunityDescriptionEditorProps {
   communityId: string;
@@ -67,55 +64,6 @@ const useStyles = makeStyles((theme: Theme) =>
   })
 );
 
-const useSaveDescription = () => {
-  const { onOpenSnackbarAlert } = useSnackbarAlert();
-  const [saveDescription] = useEditCommunityDescriptionMutation();
-  const onSaveDescription = useCallback(
-    async (communityId: string, description: string) => {
-      const result = await saveDescription({
-        variables: { communityId, description },
-      }).catch(() => null);
-      if (!result) {
-        onOpenSnackbarAlert({
-          message: FrontendError.ERR0002,
-          severity: AlertSeverity.ERROR,
-        });
-        return;
-      }
-
-      if (result.errors) {
-        onOpenSnackbarAlert({
-          message: result.errors[0].message,
-          severity: AlertSeverity.ERROR,
-        });
-        return;
-      }
-
-      const communityResponse = result.data?.editCommunityDescription;
-      if (communityResponse?.errors) {
-        onOpenSnackbarAlert({
-          message: communityResponse.errors[0].message,
-          severity: AlertSeverity.ERROR,
-        });
-        return;
-      }
-
-      if (communityResponse?.community) {
-        onOpenSnackbarAlert({
-          message: `Community settings updated successfully`,
-          severity: AlertSeverity.SUCCESS,
-        });
-        return;
-      }
-    },
-    []
-  );
-
-  return {
-    onSaveDescription,
-  };
-};
-
 const CommunityDescriptionEditor = ({
   communityId,
   description,
@@ -133,7 +81,7 @@ const CommunityDescriptionEditor = ({
     setShowDescriptionEditor(false);
   }, []);
 
-  const { onSaveDescription } = useSaveDescription();
+  const { onSaveDescription } = useSaveCommunityDescription();
 
   const handleSave = useCallback(
     (values: FormData) => {

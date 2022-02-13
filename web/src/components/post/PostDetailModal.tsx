@@ -8,6 +8,8 @@ import {
   Theme,
 } from "@material-ui/core";
 import CloseIcon from "@material-ui/icons/Close";
+import DescriptionIcon from "@material-ui/icons/Description";
+import ImageIcon from "@material-ui/icons/Image";
 import { useRouter } from "next/router";
 import React, {
   useCallback,
@@ -38,6 +40,9 @@ const useStyles = makeStyles((theme: Theme) =>
     title: {
       height: theme.spacing(6),
       backgroundColor: "#030303",
+    },
+    titleIcon: {
+      marginRight: 8,
     },
     closeButtonContainer: {
       width: "312px",
@@ -119,48 +124,64 @@ const PostDetailModal = ({}: PostDetailModalProps) => {
       fullWidth
       classes={{ paper: classes.root }}
     >
-      <Box className={classes.title} display="flex" justifyContent="center">
-        <Box className={classes.titleHeart} display="flex" alignItems="center">
-          <Box display="flex" justifyContent="flex-start" flexGrow="1">
-            Subscribe
-          </Box>
-          <Box
-            className={classes.closeButtonContainer}
-            display="flex"
-            justifyContent="flex-end"
-          >
-            <Button
-              color="primary"
-              startIcon={<CloseIcon />}
-              onClick={handleClose}
-            >
-              close
-            </Button>
-          </Box>
-        </Box>
-      </Box>
       {post && community ? (
-        <DialogContent
-          dividers
-          className={classes.content}
-          style={backgroundStyle}
-          ref={scrollerRef}
-        >
-          <ContentLayout
-            rightSideContent={<CommunityDescription community={community} />}
-            backToTop={
-              scrollerRef.current
-                ? () =>
-                    scrollerRef.current?.scrollTo({
-                      top: 0,
-                      behavior: "smooth",
-                    })
-                : undefined
-            }
+        <>
+          <Box className={classes.title} display="flex" justifyContent="center">
+            <Box
+              className={classes.titleHeart}
+              display="flex"
+              alignItems="center"
+            >
+              <Box
+                display="flex"
+                justifyContent="flex-start"
+                flexGrow="1"
+                alignItems="center"
+              >
+                {post.postType === 0 ? (
+                  <DescriptionIcon className={classes.titleIcon} />
+                ) : (
+                  <ImageIcon className={classes.titleIcon} />
+                )}
+                {post.title}
+              </Box>
+              <Box
+                className={classes.closeButtonContainer}
+                display="flex"
+                justifyContent="flex-end"
+              >
+                <Button
+                  color="primary"
+                  startIcon={<CloseIcon />}
+                  onClick={handleClose}
+                >
+                  close
+                </Button>
+              </Box>
+            </Box>
+          </Box>
+          <DialogContent
+            dividers
+            className={classes.content}
+            style={backgroundStyle}
+            ref={scrollerRef}
           >
-            <PostDetail post={post}></PostDetail>
-          </ContentLayout>
-        </DialogContent>
+            <ContentLayout
+              rightSideContent={<CommunityDescription community={community} />}
+              backToTop={
+                scrollerRef.current
+                  ? () =>
+                      scrollerRef.current?.scrollTo({
+                        top: 0,
+                        behavior: "smooth",
+                      })
+                  : undefined
+              }
+            >
+              <PostDetail post={post}></PostDetail>
+            </ContentLayout>
+          </DialogContent>
+        </>
       ) : null}
     </Dialog>
   );

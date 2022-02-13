@@ -280,6 +280,7 @@ export type Query = {
   community?: Maybe<Community>;
   userRoles: Array<Maybe<Role>>;
   userRole?: Maybe<Role>;
+  getUpvote?: Maybe<Upvote>;
   topics: Array<Topic>;
 };
 
@@ -355,6 +356,11 @@ export type QueryUserRoleArgs = {
   userId: Scalars['String'];
 };
 
+
+export type QueryGetUpvoteArgs = {
+  postId: Scalars['String'];
+};
+
 export type RegisterInput = {
   username: Scalars['String'];
   email: Scalars['String'];
@@ -392,6 +398,13 @@ export type UploadResponse = {
   path?: Maybe<Scalars['String']>;
 };
 
+export type Upvote = {
+  __typename?: 'Upvote';
+  userId: Scalars['String'];
+  postId: Scalars['String'];
+  value: Scalars['Int'];
+};
+
 export type User = {
   __typename?: 'User';
   id: Scalars['String'];
@@ -401,6 +414,7 @@ export type User = {
   role: Scalars['String'];
   email: Scalars['String'];
   about: Scalars['String'];
+  points: Scalars['Int'];
   avatar: Scalars['String'];
 };
 
@@ -471,7 +485,7 @@ export type RegularTextPostFragment = (
 
 export type RegularUserFragment = (
   { __typename?: 'User' }
-  & Pick<User, 'id' | 'username' | 'email' | 'avatar' | 'createdAt'>
+  & Pick<User, 'id' | 'username' | 'email' | 'avatar' | 'createdAt' | 'points' | 'about'>
 );
 
 export type RegularUserResponseFragment = (
@@ -502,6 +516,19 @@ export type ChangePasswordMutation = (
       { __typename?: 'User' }
       & RegularUserFragment
     )> }
+  ) }
+);
+
+export type ChangeUserAvatarMutationVariables = Exact<{
+  avatarSeed: Scalars['String'];
+}>;
+
+
+export type ChangeUserAvatarMutation = (
+  { __typename?: 'Mutation' }
+  & { changeUserAvatar: (
+    { __typename?: 'User' }
+    & RegularUserFragment
   ) }
 );
 
@@ -865,6 +892,19 @@ export type CommunityPostsQuery = (
   ) }
 );
 
+export type GetMyUpvoteQueryVariables = Exact<{
+  postId: Scalars['String'];
+}>;
+
+
+export type GetMyUpvoteQuery = (
+  { __typename?: 'Query' }
+  & { getUpvote?: Maybe<(
+    { __typename?: 'Upvote' }
+    & Pick<Upvote, 'userId' | 'postId' | 'value'>
+  )> }
+);
+
 export type MeQueryVariables = Exact<{ [key: string]: never; }>;
 
 
@@ -1059,6 +1099,8 @@ export const RegularUserFragmentDoc = gql`
   email
   avatar
   createdAt
+  points
+  about
 }
     `;
 export const RegularImageFragmentDoc = gql`
@@ -1180,6 +1222,39 @@ export function useChangePasswordMutation(baseOptions?: Apollo.MutationHookOptio
 export type ChangePasswordMutationHookResult = ReturnType<typeof useChangePasswordMutation>;
 export type ChangePasswordMutationResult = Apollo.MutationResult<ChangePasswordMutation>;
 export type ChangePasswordMutationOptions = Apollo.BaseMutationOptions<ChangePasswordMutation, ChangePasswordMutationVariables>;
+export const ChangeUserAvatarDocument = gql`
+    mutation ChangeUserAvatar($avatarSeed: String!) {
+  changeUserAvatar(avatarSeed: $avatarSeed) {
+    ...RegularUser
+  }
+}
+    ${RegularUserFragmentDoc}`;
+export type ChangeUserAvatarMutationFn = Apollo.MutationFunction<ChangeUserAvatarMutation, ChangeUserAvatarMutationVariables>;
+
+/**
+ * __useChangeUserAvatarMutation__
+ *
+ * To run a mutation, you first call `useChangeUserAvatarMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useChangeUserAvatarMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [changeUserAvatarMutation, { data, loading, error }] = useChangeUserAvatarMutation({
+ *   variables: {
+ *      avatarSeed: // value for 'avatarSeed'
+ *   },
+ * });
+ */
+export function useChangeUserAvatarMutation(baseOptions?: Apollo.MutationHookOptions<ChangeUserAvatarMutation, ChangeUserAvatarMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<ChangeUserAvatarMutation, ChangeUserAvatarMutationVariables>(ChangeUserAvatarDocument, options);
+      }
+export type ChangeUserAvatarMutationHookResult = ReturnType<typeof useChangeUserAvatarMutation>;
+export type ChangeUserAvatarMutationResult = Apollo.MutationResult<ChangeUserAvatarMutation>;
+export type ChangeUserAvatarMutationOptions = Apollo.BaseMutationOptions<ChangeUserAvatarMutation, ChangeUserAvatarMutationVariables>;
 export const CreateCommunityDocument = gql`
     mutation CreateCommunity($name: String!, $description: String!, $topicIds: [String!]!) {
   createCommunity(
@@ -1961,6 +2036,43 @@ export function useCommunityPostsLazyQuery(baseOptions?: Apollo.LazyQueryHookOpt
 export type CommunityPostsQueryHookResult = ReturnType<typeof useCommunityPostsQuery>;
 export type CommunityPostsLazyQueryHookResult = ReturnType<typeof useCommunityPostsLazyQuery>;
 export type CommunityPostsQueryResult = Apollo.QueryResult<CommunityPostsQuery, CommunityPostsQueryVariables>;
+export const GetMyUpvoteDocument = gql`
+    query GetMyUpvote($postId: String!) {
+  getUpvote(postId: $postId) {
+    userId
+    postId
+    value
+  }
+}
+    `;
+
+/**
+ * __useGetMyUpvoteQuery__
+ *
+ * To run a query within a React component, call `useGetMyUpvoteQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetMyUpvoteQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetMyUpvoteQuery({
+ *   variables: {
+ *      postId: // value for 'postId'
+ *   },
+ * });
+ */
+export function useGetMyUpvoteQuery(baseOptions: Apollo.QueryHookOptions<GetMyUpvoteQuery, GetMyUpvoteQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetMyUpvoteQuery, GetMyUpvoteQueryVariables>(GetMyUpvoteDocument, options);
+      }
+export function useGetMyUpvoteLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetMyUpvoteQuery, GetMyUpvoteQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetMyUpvoteQuery, GetMyUpvoteQueryVariables>(GetMyUpvoteDocument, options);
+        }
+export type GetMyUpvoteQueryHookResult = ReturnType<typeof useGetMyUpvoteQuery>;
+export type GetMyUpvoteLazyQueryHookResult = ReturnType<typeof useGetMyUpvoteLazyQuery>;
+export type GetMyUpvoteQueryResult = Apollo.QueryResult<GetMyUpvoteQuery, GetMyUpvoteQueryVariables>;
 export const MeDocument = gql`
     query Me {
   me {
@@ -2468,7 +2580,7 @@ export type PostResponseFieldPolicy = {
 	errors?: FieldPolicy<any> | FieldReadFunction<any>,
 	post?: FieldPolicy<any> | FieldReadFunction<any>
 };
-export type QueryKeySpecifier = ('user' | 'me' | 'userComments' | 'userUpvotedPosts' | 'userCommentedPosts' | 'userPosts' | 'communityPosts' | 'paginatedPosts' | 'allPosts' | 'postDetail' | 'communities' | 'community' | 'userRoles' | 'userRole' | 'topics' | QueryKeySpecifier)[];
+export type QueryKeySpecifier = ('user' | 'me' | 'userComments' | 'userUpvotedPosts' | 'userCommentedPosts' | 'userPosts' | 'communityPosts' | 'paginatedPosts' | 'allPosts' | 'postDetail' | 'communities' | 'community' | 'userRoles' | 'userRole' | 'getUpvote' | 'topics' | QueryKeySpecifier)[];
 export type QueryFieldPolicy = {
 	user?: FieldPolicy<any> | FieldReadFunction<any>,
 	me?: FieldPolicy<any> | FieldReadFunction<any>,
@@ -2484,6 +2596,7 @@ export type QueryFieldPolicy = {
 	community?: FieldPolicy<any> | FieldReadFunction<any>,
 	userRoles?: FieldPolicy<any> | FieldReadFunction<any>,
 	userRole?: FieldPolicy<any> | FieldReadFunction<any>,
+	getUpvote?: FieldPolicy<any> | FieldReadFunction<any>,
 	topics?: FieldPolicy<any> | FieldReadFunction<any>
 };
 export type RoleKeySpecifier = ('userId' | 'communityId' | 'joinedAt' | 'isMember' | 'isModerator' | RoleKeySpecifier)[];
@@ -2512,7 +2625,13 @@ export type UploadResponseFieldPolicy = {
 	errors?: FieldPolicy<any> | FieldReadFunction<any>,
 	path?: FieldPolicy<any> | FieldReadFunction<any>
 };
-export type UserKeySpecifier = ('id' | 'createdAt' | 'updatedAt' | 'username' | 'role' | 'email' | 'about' | 'avatar' | UserKeySpecifier)[];
+export type UpvoteKeySpecifier = ('userId' | 'postId' | 'value' | UpvoteKeySpecifier)[];
+export type UpvoteFieldPolicy = {
+	userId?: FieldPolicy<any> | FieldReadFunction<any>,
+	postId?: FieldPolicy<any> | FieldReadFunction<any>,
+	value?: FieldPolicy<any> | FieldReadFunction<any>
+};
+export type UserKeySpecifier = ('id' | 'createdAt' | 'updatedAt' | 'username' | 'role' | 'email' | 'about' | 'points' | 'avatar' | UserKeySpecifier)[];
 export type UserFieldPolicy = {
 	id?: FieldPolicy<any> | FieldReadFunction<any>,
 	createdAt?: FieldPolicy<any> | FieldReadFunction<any>,
@@ -2521,6 +2640,7 @@ export type UserFieldPolicy = {
 	role?: FieldPolicy<any> | FieldReadFunction<any>,
 	email?: FieldPolicy<any> | FieldReadFunction<any>,
 	about?: FieldPolicy<any> | FieldReadFunction<any>,
+	points?: FieldPolicy<any> | FieldReadFunction<any>,
 	avatar?: FieldPolicy<any> | FieldReadFunction<any>
 };
 export type UserResponseKeySpecifier = ('errors' | 'user' | UserResponseKeySpecifier)[];
@@ -2588,6 +2708,10 @@ export type TypedTypePolicies = TypePolicies & {
 	UploadResponse?: Omit<TypePolicy, "fields" | "keyFields"> & {
 		keyFields?: false | UploadResponseKeySpecifier | (() => undefined | UploadResponseKeySpecifier),
 		fields?: UploadResponseFieldPolicy,
+	},
+	Upvote?: Omit<TypePolicy, "fields" | "keyFields"> & {
+		keyFields?: false | UpvoteKeySpecifier | (() => undefined | UpvoteKeySpecifier),
+		fields?: UpvoteFieldPolicy,
 	},
 	User?: Omit<TypePolicy, "fields" | "keyFields"> & {
 		keyFields?: false | UserKeySpecifier | (() => undefined | UserKeySpecifier),

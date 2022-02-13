@@ -1,6 +1,18 @@
-import { useIsAuth } from "../../utils/hooks/useIsAuth";import { useSnackbarAlert } from "../../redux/hooks/useSnackbarAlert";import { useJoinCommunityMutation, useLeaveCommunityMutation } from "../../generated/graphql";import { Reference } from "@apollo/client";import { useCallback } from "react";import { FrontendError } from "../../const/errors";import { AlertSeverity } from "../../redux/types/types";
+import { Reference } from "@apollo/client";
+import { useCallback } from "react";
+import { FrontendError } from "../../const/errors";
+import {
+  useJoinCommunityMutation,
+  useLeaveCommunityMutation,
+} from "../../generated/graphql";
+import { useSnackbarAlert } from "../../redux/hooks/useSnackbarAlert";
+import { AlertSeverity } from "../../redux/types/types";
+import { useIsAuth } from "../../utils/hooks/useIsAuth";
 
-export function useJoinLeaveCommunity(communityId: string, communityName: string) {
+export function useJoinLeaveCommunity(
+  communityId: string,
+  communityName: string
+) {
   const { me, checkIsAuth } = useIsAuth();
 
   const { onOpenSnackbarAlert } = useSnackbarAlert();
@@ -13,6 +25,7 @@ export function useJoinLeaveCommunity(communityId: string, communityName: string
             existing: Reference[],
             { storeFieldName, toReference, readField }
           ) {
+            debugger;
             const userRole = roleResponse?.joinCommunity.role;
             if (!userRole) {
               return existing;

@@ -113,8 +113,21 @@ const UserProfile = ({ user }: UserProfileProps) => {
           >
             Generate Random Avatar
           </Button>
-          <Box display="flex" justifyContent="center">
-            <Box>
+          <Typography variant="subtitle2" gutterBottom>
+            {user.about ||
+              "Write down A brief description of yourself shown on your profile."}
+          </Typography>
+          <Box display="flex" justifyContent="center" margin="8px 0">
+            <Box flex={1}>
+              <Typography variant="subtitle2">Points</Typography>
+              <Box display="flex" className={classes.createdDateContainer}>
+                <CakeIcon className={classes.cakeIcon} />
+                <Typography variant="caption" className={classes.subUserName}>
+                  {user.points}
+                </Typography>
+              </Box>
+            </Box>
+            <Box flex={1}>
               <Typography variant="subtitle2">Cake Day</Typography>
               <Box display="flex" className={classes.createdDateContainer}>
                 <CakeIcon className={classes.cakeIcon} />

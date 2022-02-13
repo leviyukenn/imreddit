@@ -10,6 +10,9 @@ const cache = new InMemoryCache({
     Role: {
       keyFields: ["userId", "communityId"],
     },
+    Upvote: {
+      keyFields: ["userId", "postId"],
+    },
     Query: {
       fields: {
         communityPosts: communityPostsFieldPolicy,
