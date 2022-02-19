@@ -13,12 +13,12 @@ import ExitToAppIcon from "@material-ui/icons/ExitToApp";
 import { useRouter } from "next/router";
 import React from "react";
 import { useLogout } from "../../../graphql/hooks/useLogout";
-import { useIsAuth } from "../../../utils/hooks/useIsAuth";
 import { createUserProfileLink } from "../../../utils/links";
 import UserDropDownListItem from "./UserDropDownListItem";
 
 interface UserDropDownListProps {
   onClickAway: () => void;
+  userName: string;
 }
 
 const useStyles = makeStyles((theme: Theme) =>
@@ -29,11 +29,10 @@ const useStyles = makeStyles((theme: Theme) =>
   })
 );
 
-const UserDropDownList = ({ onClickAway }: UserDropDownListProps) => {
+const UserDropDownList = ({ onClickAway, userName }: UserDropDownListProps) => {
   const router = useRouter();
   const classes = useStyles();
-  const { logout, loading } = useLogout();
-  const { me } = useIsAuth();
+  const { logout } = useLogout();
   return (
     <ClickAwayListener onClickAway={onClickAway}>
       <List>
@@ -48,8 +47,7 @@ const UserDropDownList = ({ onClickAway }: UserDropDownListProps) => {
           icon={<AccountCircleIcon />}
           text="Profile"
           onClick={() => {
-            me?.username &&
-              router.push(createUserProfileLink(me?.username, "posts"));
+            router.push(createUserProfileLink(userName, "posts"));
             onClickAway();
           }}
         />

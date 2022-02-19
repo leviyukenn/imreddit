@@ -17,6 +17,12 @@ export const createPostDetailModalLinkWithCommentId = (
   commentId: string
 ) => `${currentPath}?modalPostId=${postId}&commentId=${commentId}`;
 
+export const createPostDetailPageLinkWithCommentId = (
+  communityName: string,
+  postId: string,
+  commentId: string
+) => `/r/${communityName}/${postId}?commentId=${commentId}`;
+
 export const createUserProfileLink = (userName: string, sectionName: string) =>
   `/user/${userName}/${sectionName}`;
 

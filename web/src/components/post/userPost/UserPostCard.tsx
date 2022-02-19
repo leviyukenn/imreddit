@@ -26,7 +26,7 @@ import {
 } from "../../../utils/links";
 import CommentNumberButton from "../postToolBar/CommentNumberButton";
 import CopyLinkButton from "../postToolBar/CopyLinkButton";
-import RemovePostButton from "../postToolBar/RemovePostButton";
+import RemovePostButton from "../postToolBar/DeletePostButton";
 import UpvoteBox from "../upvote/UpvoteBox";
 
 interface UserPostCardProps extends CardProps {

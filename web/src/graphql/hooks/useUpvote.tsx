@@ -3,7 +3,7 @@ import { useGetMyUpvoteQuery, useVoteMutation } from "../../generated/graphql";
 import { useSnackbarAlert } from "../../redux/hooks/useSnackbarAlert";
 import { AlertSeverity } from "../../redux/types/types";
 import { useIsAuth } from "../../utils/hooks/useIsAuth";
-import { VoteStatus } from "../types/types";
+import { VoteStatus } from "../../components/types/types";
 
 enum VoteType {
   UPVOTE = 1,
@@ -53,7 +53,6 @@ export function useVote(post: { __typename?: string; id: string }) {
 
   const onVote = useCallback(
     async (value) => {
-      if (meLoading) return false;
       if (!checkIsAuth()) return false;
       const voteResponse = await vote({
         variables: { postId: post.id, value },
@@ -65,10 +64,10 @@ export function useVote(post: { __typename?: string; id: string }) {
         return null;
       });
 
-      if (!voteResponse?.data) return false;
-      return true;
+      if (voteResponse?.data) return true;
+      return false;
     },
-    [vote, checkIsAuth, meLoading, post]
+    [vote, checkIsAuth, post]
   );
 
   const onUpvote = useCallback(() => {

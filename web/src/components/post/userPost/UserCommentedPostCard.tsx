@@ -173,7 +173,11 @@ const UserCommentedPostCard = ({
           </CardContent>
         </Card>
       </NextLink>
-      <UserComments ancestorId={post.id} userName={userName} />
+      <UserComments
+        ancestorId={post.id}
+        userName={userName}
+        communityName={post.community.name}
+      />
     </Box>
   );
 };

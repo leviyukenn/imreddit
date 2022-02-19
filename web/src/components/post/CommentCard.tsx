@@ -4,6 +4,7 @@ import {
   Button,
   CardProps,
   createStyles,
+  Link,
   makeStyles,
   Theme,
   Typography,
@@ -13,6 +14,7 @@ import ChatBubbleOutlineIcon from "@material-ui/icons/ChatBubbleOutline";
 import ControlPointIcon from "@material-ui/icons/ControlPoint";
 import { Skeleton } from "@material-ui/lab";
 import DOMPurify from "dompurify";
+import NextLink from "next/link";
 import { useRouter } from "next/router";
 import React, {
   useCallback,
@@ -21,8 +23,8 @@ import React, {
   useRef,
   useState,
 } from "react";
-import { format } from "timeago.js";
-import { usePostDetailQuery } from "../../generated/graphql";
+import { usePostDetail } from "../../graphql/hooks/usePostDetail";
+import { createUserProfileLink } from "../../utils/links";
 import CommentEditor from "./post-editor/CommentEditor";
 import UpvoteBox from "./upvote/UpvoteBox";
 
@@ -37,7 +39,6 @@ const useStyles = makeStyles((theme: Theme) =>
       paddingLeft: theme.spacing(1),
       paddingTop: theme.spacing(1),
       minHeight: "72px",
-      // marginBottom: theme.spacing(2),
     },
     threadLineBox: {
       cursor: "pointer",
@@ -51,7 +52,6 @@ const useStyles = makeStyles((theme: Theme) =>
       height: "100%",
       width: "50%",
       borderRight: "2px solid #edeff1",
-      // padding: "8px 0",
     },
     expandThreadIcon: {
       margin: "0 8px",
@@ -66,6 +66,7 @@ const useStyles = makeStyles((theme: Theme) =>
       display: "flex",
       alignItems: "center",
       margin: "12px 0",
+      lineHeight: "1rem",
     },
     content: {
       paddingTop: 0,
@@ -75,6 +76,19 @@ const useStyles = makeStyles((theme: Theme) =>
       height: "28px",
       marginTop: theme.spacing(1),
       marginBottom: theme.spacing(1),
+    },
+    usernameLink: {
+      color: "#1a1a1b",
+      fontWeight: 500,
+      textDecoration: "none",
+      "&:hover": {
+        textDecoration: "underline",
+        textDecoratiionColor: "#1a1a1b",
+      },
+    },
+    replyButton: {
+      textTransform: "none",
+      color: "#878a8c",
     },
   })
 );
@@ -86,22 +100,7 @@ export const CommentCard = ({ postId, ...props }: PostDetailProps) => {
   const router = useRouter();
   const commentRef = useRef<HTMLDivElement>(null);
 
-  const {
-    data: postDetailResponse,
-    loading: postDetailLoading,
-    error,
-  } = usePostDetailQuery({
-    skip: !postId,
-    variables: { postId },
-  });
-  const post = useMemo(() => postDetailResponse?.postDetail, [
-    postDetailResponse,
-  ]);
-
-  const timeago = useMemo(
-    () => post?.createdAt && format(parseInt(post.createdAt)),
-    [post]
-  );
+  const { post, loading, timeago } = usePostDetail(postId);
 
   const toggleShowThread = useCallback(() => {
     setShowThread((prevState) => !prevState);
@@ -130,7 +129,9 @@ export const CommentCard = ({ postId, ...props }: PostDetailProps) => {
     }
   }, [post?.id, router.query.commentId, commentRef.current]);
 
-  if (!post) return <LoadingCommentCard />;
+  if (loading) return <LoadingCommentCard />;
+  
+  if (!post) return null;
 
   return (
     <Box display="flex" className={classes.root} {...props}>
@@ -144,7 +145,14 @@ export const CommentCard = ({ postId, ...props }: PostDetailProps) => {
               onClick={toggleShowThread}
             />
           ) : null}
-          <img className={classes.smallAvatar} src={post.creator.avatar} />
+          <NextLink
+            href={createUserProfileLink(post.creator.username, "posts")}
+            passHref
+          >
+            <Link>
+              <img className={classes.smallAvatar} src={post.creator.avatar} />
+            </Link>
+          </NextLink>
         </Box>
         {showThread ? (
           <Box
@@ -158,9 +166,16 @@ export const CommentCard = ({ postId, ...props }: PostDetailProps) => {
       </Box>
       <div className={classes.commentBox}>
         <div className={classes.header} ref={commentRef}>
-          <Typography variant="caption">
-            {`${post.creator.username} `}
-          </Typography>
+          <NextLink
+            href={createUserProfileLink(post.creator.username, "posts")}
+            passHref
+          >
+            <Link>
+              <Typography variant="caption" className={classes.usernameLink}>
+                {`${post.creator.username} `}
+              </Typography>
+            </Link>
+          </NextLink>
           &nbsp;&#183;&nbsp;
           <Typography
             variant="caption"
@@ -182,6 +197,7 @@ export const CommentCard = ({ postId, ...props }: PostDetailProps) => {
                   size="small"
                   startIcon={<ChatBubbleOutlineIcon />}
                   onClick={toggleShowCommentEditor}
+                  className={classes.replyButton}
                 >
                   Reply
                 </Button>

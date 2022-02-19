@@ -9,7 +9,7 @@ import { useIsAuth } from "../../utils/hooks/useIsAuth";
 export function useDeleteMyPost() {
   const { me, checkIsAuth } = useIsAuth();
   const { onOpenSnackbarAlert } = useSnackbarAlert();
-  const [deleteMyPostMutation, { loading }] = useDeleteMyPostMutation({
+  const [deleteMyPostMutation, { loading, error }] = useDeleteMyPostMutation({
     update(cache, { data: deleteMyPostResponse }) {
       if (!deleteMyPostResponse?.deleteMyPost.postId) return;
       cache.evict({ id: deleteMyPostResponse.deleteMyPost.postId });
@@ -53,14 +53,13 @@ export function useDeleteMyPost() {
       const response = await deleteMyPostMutation({
         variables: { postId },
       }).catch((err) => {
-        console.log(err);
+        onOpenSnackbarAlert({
+          message: err.message || FrontendError.ERR0002,
+          severity: AlertSeverity.ERROR,
+        });
         return null;
       });
       if (!response) {
-        onOpenSnackbarAlert({
-          message: FrontendError.ERR0002,
-          severity: AlertSeverity.ERROR,
-        });
         return false;
       }
 

@@ -1,0 +1,10 @@
+mutation ChangePostStatus($postId: String!, $postStatus: Int!) {
+  changePostStatus(postId: $postId, postStatus: $postStatus) {
+    errors {
+      ...RegularErrors
+    }
+    post {
+      ...RegularPostDetail
+    }
+  }
+}

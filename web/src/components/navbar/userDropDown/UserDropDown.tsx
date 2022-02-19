@@ -77,7 +77,10 @@ const UserDropDown = ({}: UserDropDownProps) => {
         placement="bottom-start"
         className={classes.popper}
       >
-        <UserDropDownList onClickAway={() => !open || setAnchorEl(null)} />
+        <UserDropDownList
+          onClickAway={() => !open || setAnchorEl(null)}
+          userName={me?.username!}
+        />
       </Popper>
     </React.Fragment>
   );

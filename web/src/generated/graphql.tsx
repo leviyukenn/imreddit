@@ -128,6 +128,7 @@ export type Mutation = {
   createTextPost: PostResponse;
   createImagePost: PostResponse;
   createComment: PostResponse;
+  changePostStatus: PostResponse;
   deleteMyPost: DeletePostResponse;
   uploadImage: UploadResponse;
   createCommunity: CommunityResponse;
@@ -188,6 +189,12 @@ export type MutationCreateImagePostArgs = {
 
 export type MutationCreateCommentArgs = {
   createCommentInput: CreateCommentInput;
+};
+
+
+export type MutationChangePostStatusArgs = {
+  postStatus: Scalars['Int'];
+  postId: Scalars['String'];
 };
 
 
@@ -254,6 +261,7 @@ export type Post = {
   text?: Maybe<Scalars['String']>;
   points: Scalars['Int'];
   postType: Scalars['Int'];
+  postStatus: Scalars['Int'];
   totalComments: Scalars['Int'];
   layer: Scalars['Int'];
   creator: User;
@@ -456,7 +464,7 @@ export type RegularImageFragment = (
 
 export type RegularPostDetailFragment = (
   { __typename?: 'Post' }
-  & Pick<Post, 'id' | 'createdAt' | 'updatedAt' | 'title' | 'text' | 'points' | 'postType' | 'totalComments' | 'layer'>
+  & Pick<Post, 'id' | 'createdAt' | 'updatedAt' | 'title' | 'text' | 'points' | 'postType' | 'totalComments' | 'layer' | 'postStatus'>
   & { creator: (
     { __typename?: 'User' }
     & RegularUserFragment
@@ -521,6 +529,26 @@ export type ChangePasswordMutation = (
     )>>, user?: Maybe<(
       { __typename?: 'User' }
       & RegularUserFragment
+    )> }
+  ) }
+);
+
+export type ChangePostStatusMutationVariables = Exact<{
+  postId: Scalars['String'];
+  postStatus: Scalars['Int'];
+}>;
+
+
+export type ChangePostStatusMutation = (
+  { __typename?: 'Mutation' }
+  & { changePostStatus: (
+    { __typename?: 'PostResponse' }
+    & { errors?: Maybe<Array<(
+      { __typename?: 'FieldError' }
+      & RegularErrorsFragment
+    )>>, post?: Maybe<(
+      { __typename?: 'Post' }
+      & RegularPostDetailFragment
     )> }
   ) }
 );
@@ -1147,6 +1175,7 @@ export const RegularPostDetailFragmentDoc = gql`
   postType
   totalComments
   layer
+  postStatus
   creator {
     ...RegularUser
   }
@@ -1247,6 +1276,46 @@ export function useChangePasswordMutation(baseOptions?: Apollo.MutationHookOptio
 export type ChangePasswordMutationHookResult = ReturnType<typeof useChangePasswordMutation>;
 export type ChangePasswordMutationResult = Apollo.MutationResult<ChangePasswordMutation>;
 export type ChangePasswordMutationOptions = Apollo.BaseMutationOptions<ChangePasswordMutation, ChangePasswordMutationVariables>;
+export const ChangePostStatusDocument = gql`
+    mutation ChangePostStatus($postId: String!, $postStatus: Int!) {
+  changePostStatus(postId: $postId, postStatus: $postStatus) {
+    errors {
+      ...RegularErrors
+    }
+    post {
+      ...RegularPostDetail
+    }
+  }
+}
+    ${RegularErrorsFragmentDoc}
+${RegularPostDetailFragmentDoc}`;
+export type ChangePostStatusMutationFn = Apollo.MutationFunction<ChangePostStatusMutation, ChangePostStatusMutationVariables>;
+
+/**
+ * __useChangePostStatusMutation__
+ *
+ * To run a mutation, you first call `useChangePostStatusMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useChangePostStatusMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [changePostStatusMutation, { data, loading, error }] = useChangePostStatusMutation({
+ *   variables: {
+ *      postId: // value for 'postId'
+ *      postStatus: // value for 'postStatus'
+ *   },
+ * });
+ */
+export function useChangePostStatusMutation(baseOptions?: Apollo.MutationHookOptions<ChangePostStatusMutation, ChangePostStatusMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<ChangePostStatusMutation, ChangePostStatusMutationVariables>(ChangePostStatusDocument, options);
+      }
+export type ChangePostStatusMutationHookResult = ReturnType<typeof useChangePostStatusMutation>;
+export type ChangePostStatusMutationResult = Apollo.MutationResult<ChangePostStatusMutation>;
+export type ChangePostStatusMutationOptions = Apollo.BaseMutationOptions<ChangePostStatusMutation, ChangePostStatusMutationVariables>;
 export const ChangeUserAvatarDocument = gql`
     mutation ChangeUserAvatar($avatarSeed: String!) {
   changeUserAvatar(avatarSeed: $avatarSeed) {
@@ -2594,7 +2663,7 @@ export type ImageFieldPolicy = {
 	caption?: FieldPolicy<any> | FieldReadFunction<any>,
 	link?: FieldPolicy<any> | FieldReadFunction<any>
 };
-export type MutationKeySpecifier = ('changePassword' | 'forgotPassword' | 'register' | 'login' | 'logout' | 'googleAuthentication' | 'changeUserAvatar' | 'editUserAbout' | 'createTextPost' | 'createImagePost' | 'createComment' | 'deleteMyPost' | 'uploadImage' | 'createCommunity' | 'editCommunityDescription' | 'setCommunityAppearance' | 'joinCommunity' | 'leaveCommunity' | 'vote' | 'createTopic' | MutationKeySpecifier)[];
+export type MutationKeySpecifier = ('changePassword' | 'forgotPassword' | 'register' | 'login' | 'logout' | 'googleAuthentication' | 'changeUserAvatar' | 'editUserAbout' | 'createTextPost' | 'createImagePost' | 'createComment' | 'changePostStatus' | 'deleteMyPost' | 'uploadImage' | 'createCommunity' | 'editCommunityDescription' | 'setCommunityAppearance' | 'joinCommunity' | 'leaveCommunity' | 'vote' | 'createTopic' | MutationKeySpecifier)[];
 export type MutationFieldPolicy = {
 	changePassword?: FieldPolicy<any> | FieldReadFunction<any>,
 	forgotPassword?: FieldPolicy<any> | FieldReadFunction<any>,
@@ -2607,6 +2676,7 @@ export type MutationFieldPolicy = {
 	createTextPost?: FieldPolicy<any> | FieldReadFunction<any>,
 	createImagePost?: FieldPolicy<any> | FieldReadFunction<any>,
 	createComment?: FieldPolicy<any> | FieldReadFunction<any>,
+	changePostStatus?: FieldPolicy<any> | FieldReadFunction<any>,
 	deleteMyPost?: FieldPolicy<any> | FieldReadFunction<any>,
 	uploadImage?: FieldPolicy<any> | FieldReadFunction<any>,
 	createCommunity?: FieldPolicy<any> | FieldReadFunction<any>,
@@ -2622,7 +2692,7 @@ export type PaginatedPostsFieldPolicy = {
 	posts?: FieldPolicy<any> | FieldReadFunction<any>,
 	hasMore?: FieldPolicy<any> | FieldReadFunction<any>
 };
-export type PostKeySpecifier = ('id' | 'createdAt' | 'updatedAt' | 'title' | 'text' | 'points' | 'postType' | 'totalComments' | 'layer' | 'creator' | 'community' | 'children' | 'ancestor' | 'descendant' | 'images' | PostKeySpecifier)[];
+export type PostKeySpecifier = ('id' | 'createdAt' | 'updatedAt' | 'title' | 'text' | 'points' | 'postType' | 'postStatus' | 'totalComments' | 'layer' | 'creator' | 'community' | 'children' | 'ancestor' | 'descendant' | 'images' | PostKeySpecifier)[];
 export type PostFieldPolicy = {
 	id?: FieldPolicy<any> | FieldReadFunction<any>,
 	createdAt?: FieldPolicy<any> | FieldReadFunction<any>,
@@ -2631,6 +2701,7 @@ export type PostFieldPolicy = {
 	text?: FieldPolicy<any> | FieldReadFunction<any>,
 	points?: FieldPolicy<any> | FieldReadFunction<any>,
 	postType?: FieldPolicy<any> | FieldReadFunction<any>,
+	postStatus?: FieldPolicy<any> | FieldReadFunction<any>,
 	totalComments?: FieldPolicy<any> | FieldReadFunction<any>,
 	layer?: FieldPolicy<any> | FieldReadFunction<any>,
 	creator?: FieldPolicy<any> | FieldReadFunction<any>,

@@ -3,25 +3,28 @@ import { FrontendError } from "../../const/errors";
 import { useUploadImageMutation } from "../../generated/graphql";
 import { useSnackbarAlert } from "../../redux/hooks/useSnackbarAlert";
 import { AlertSeverity } from "../../redux/types/types";
+import { useIsAuth } from "../../utils/hooks/useIsAuth";
 
 export function useUploadImage() {
   const [uploadImage] = useUploadImageMutation();
   const [uploading, setUploading] = useState(false);
   const { onOpenSnackbarAlert } = useSnackbarAlert();
+  const { checkIsAuth } = useIsAuth();
 
   const onUpload = useCallback(
     (successCallback: (uploadedImagePath: string) => void) => {
       return (files: File[]) => {
         setUploading(true);
         files.forEach(async (file) => {
+          if (!checkIsAuth()) return false;
           const response = await uploadImage({ variables: { file } }).catch(
-            () => null
+            (err) =>
+              onOpenSnackbarAlert({
+                message: err.message || FrontendError.ERR0002,
+                severity: AlertSeverity.ERROR,
+              })
           );
           if (!response) {
-            onOpenSnackbarAlert({
-              message: FrontendError.ERR0002,
-              severity: AlertSeverity.ERROR,
-            });
             setUploading(false);
             return;
           }
@@ -57,7 +60,7 @@ export function useUploadImage() {
         });
       };
     },
-    [uploadImage]
+    [uploadImage, checkIsAuth]
   );
   return { uploading, onUpload };
 }

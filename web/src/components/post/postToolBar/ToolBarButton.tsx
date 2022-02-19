@@ -18,11 +18,6 @@ const useStyles = makeStyles((theme: Theme) =>
       color: "#9b9b9b",
       borderRadius: 4,
       textTransform: "none",
-      padding: 0,
-      //   paddingTop: 8,
-    },
-    startIcon: {
-      marginRight: 0,
     },
   })
 );
@@ -30,10 +25,7 @@ const useStyles = makeStyles((theme: Theme) =>
 const ToolBarButton = ({ children, ...props }: ToolBarButtonProps) => {
   const classes = useStyles();
   return (
-    <Button
-      classes={{ root: classes.button, startIcon: classes.startIcon }}
-      {...props}
-    >
+    <Button classes={{ root: classes.button }} {...props}>
       {children}
     </Button>
   );

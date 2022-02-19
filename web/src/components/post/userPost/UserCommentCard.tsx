@@ -17,13 +17,15 @@ import { FRONTEND_URL } from "../../../const/const";
 import { RegularPostDetailFragment } from "../../../generated/graphql";
 import {
   createPostDetailModalLinkWithCommentId,
+  createPostDetailPageLinkWithCommentId,
   createUserProfileLink,
 } from "../../../utils/links";
 import CopyLinkButton from "../postToolBar/CopyLinkButton";
-import RemovePostButton from "../postToolBar/RemovePostButton";
+import RemovePostButton from "../postToolBar/DeletePostButton";
 
 interface UserCommentCardProps extends CardProps {
   comment: RegularPostDetailFragment;
+  communityName: string;
 }
 
 const useStyles = makeStyles((theme: Theme) =>
@@ -76,13 +78,22 @@ const useStyles = makeStyles((theme: Theme) =>
   })
 );
 
-const UserCommentCard = ({ comment, ...props }: UserCommentCardProps) => {
+const UserCommentCard = ({
+  comment,
+  communityName,
+  ...props
+}: UserCommentCardProps) => {
   const classes = useStyles();
   const timeago = useMemo(() => format(parseInt(comment.createdAt)), [comment]);
   const router = useRouter();
 
   const postDetailModalLinkWithCommentId = createPostDetailModalLinkWithCommentId(
     router.asPath,
+    comment.ancestor?.id!,
+    comment.id
+  );
+  const postDetailPageLinkWithCommentId = createPostDetailPageLinkWithCommentId(
+    communityName,
     comment.ancestor?.id!,
     comment.id
   );
@@ -105,7 +116,7 @@ const UserCommentCard = ({ comment, ...props }: UserCommentCardProps) => {
           <Box>
             <Box display="flex" alignItems="center" className={classes.title}>
               <NextLink
-                href={createUserProfileLink(comment.creator.username,"posts")}
+                href={createUserProfileLink(comment.creator.username, "posts")}
                 passHref
               >
                 <Link className={classes.userLink}>
@@ -123,7 +134,7 @@ const UserCommentCard = ({ comment, ...props }: UserCommentCardProps) => {
             ></Box>
             <Box display="flex">
               <CopyLinkButton
-                link={FRONTEND_URL + postDetailModalLinkWithCommentId}
+                link={FRONTEND_URL + postDetailPageLinkWithCommentId}
                 withIcon={false}
               />
               <RemovePostButton postId={comment.id} withIcon={false} />

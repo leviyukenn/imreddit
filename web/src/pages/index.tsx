@@ -7,17 +7,11 @@ import { useIsAuth } from "../utils/hooks/useIsAuth";
 const Index = () => {
   const { isAuth } = useIsAuth();
 
-  const MainContent = () => (
-    <>
-      {isAuth ? <CreatePostCard /> : null}
-
-      <HomePostsInfiniteScroll />
-    </>
-  );
   return (
     <HomeContainer>
       <ContentLayout>
-        <MainContent />
+        {isAuth ? <CreatePostCard /> : null}
+        <HomePostsInfiniteScroll />
       </ContentLayout>
     </HomeContainer>
   );

@@ -1,4 +1,4 @@
-import NotInterestedIcon from "@material-ui/icons/NotInterested";
+import CheckCircleOutlineIcon from "@material-ui/icons/CheckCircleOutline";
 import React, { useCallback } from "react";
 import {
   PostStatus,
@@ -6,24 +6,26 @@ import {
 } from "../../../graphql/hooks/useChangePostStatus";
 import ToolBarButton from "./ToolBarButton";
 
-interface RemovePostButtonProps {
+interface ApprovePostButtonProps {
   postId: string;
   postStatus: PostStatus;
   withIcon?: boolean;
 }
 
-const RemovePostButton = ({
+const ApprovePostButton = ({
   postId,
   postStatus,
   withIcon = true,
-}: RemovePostButtonProps) => {
+}: ApprovePostButtonProps) => {
   const { changePostStatus, loading } = useChnagePostStatus();
-  const disabled = postStatus === PostStatus.REMOVED;
+  const disabled = postStatus === PostStatus.APPROVED;
 
   const handleClick = useCallback(
     (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
       event?.stopPropagation();
-      changePostStatus(postId, PostStatus.REMOVED);
+
+      if (disabled) return;
+      changePostStatus(postId, PostStatus.APPROVED);
     },
     [postId, changePostStatus]
   );
@@ -31,12 +33,12 @@ const RemovePostButton = ({
   return (
     <ToolBarButton
       onClick={handleClick}
-      startIcon={withIcon ? <NotInterestedIcon /> : undefined}
-      disabled={loading || disabled}
-      style={disabled ? { color: "#ff585b" } : undefined}
+      startIcon={withIcon ? <CheckCircleOutlineIcon /> : undefined}
+      disabled={loading}
+      style={disabled ? { color: "#46d160" } : undefined}
     >
-      Remove
+      Approve
     </ToolBarButton>
   );
 };
-export default RemovePostButton;
+export default ApprovePostButton;

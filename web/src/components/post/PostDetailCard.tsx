@@ -19,7 +19,10 @@ import NextLink from "next/link";
 import React, { useMemo } from "react";
 import { format } from "timeago.js";
 import { RegularPostDetailFragment } from "../../generated/graphql";
-import { createCommunityHomeLink } from "../../utils/links";
+import {
+  createCommunityHomeLink,
+  createUserProfileLink,
+} from "../../utils/links";
 import CommunityIcon from "../community/CommunityIcon";
 import ImagePostSwiper from "./postCard/ImgaePostSwiper";
 import UpvoteBox from "./upvote/UpvoteBox";
@@ -98,7 +101,19 @@ export const PostDetailCard = ({ post, ...props }: PostDetailProps) => {
               >{`r/${post.community.name}`}</Link>
             </NextLink>
             <span>&nbsp;&#183;&nbsp;</span>
-            <Typography variant="caption">{`Posted by ${post.creator.username} ${timeago}`}</Typography>
+            <Typography variant="caption">
+              Posted by&nbsp;
+              <NextLink
+                href={createUserProfileLink(post.creator.username, "posts")}
+                passHref
+              >
+                <Link
+                  className={classes.communityLink}
+                >{`u/${post.creator.username}`}</Link>
+              </NextLink>
+              &nbsp;
+              {timeago}
+            </Typography>
           </Box>
         }
       />

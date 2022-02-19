@@ -11,7 +11,7 @@ import ArrowUpwardRoundedIcon from "@material-ui/icons/ArrowUpwardRounded";
 import numeral from "numeral";
 import React, { useMemo } from "react";
 import { RegularPostDetailFragment } from "../../../generated/graphql";
-import { useVote } from "../../hooks/hooks";
+import { useVote } from "../../../graphql/hooks/useUpvote";
 import { VoteStatus } from "../../types/types";
 
 interface VerticalUpvoteBoxProps {

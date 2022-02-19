@@ -65,15 +65,6 @@ const useStyles = makeStyles((theme: Theme) =>
     userAbout: {
       margin: "20px 0",
     },
-    userAboutContainer: {
-      cursor: "pointer",
-      transition: "all .1s linear 0s",
-      "&:hover": {
-        border: "1px solid #0079d3",
-        borderRadius: "4px",
-        padding: "0.5em",
-      },
-    },
   })
 );
 
@@ -94,7 +85,7 @@ const UserProfile = ({ user }: UserProfileProps) => {
           {"u/" + user.username}
         </Typography>
         <Box className={classes.userAbout}>
-          <Box className={classes.userAboutContainer}>
+          <Box>
             <Typography variant="body2" component="p">
               {user.about}
             </Typography>

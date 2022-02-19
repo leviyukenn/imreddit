@@ -8,6 +8,7 @@ fragment RegularPostDetail on Post {
   postType
   totalComments
   layer
+  postStatus
   creator {
     ...RegularUser
   }
