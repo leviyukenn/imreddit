@@ -18,9 +18,7 @@ import NextLink from "next/link";
 import { useRouter } from "next/router";
 import React, { useMemo } from "react";
 import { format } from "timeago.js";
-import { FRONTEND_URL } from "../../../const/const";
 import { RegularPostDetailFragment } from "../../../generated/graphql";
-import { useUserCommunityRole } from "../../../graphql/hooks/useUserCommunityRole";
 import {
   createCommunityHomeLink,
   createPostDetailModalLink,
@@ -28,13 +26,10 @@ import {
   createUserProfileLink,
 } from "../../../utils/links";
 import CommunityIcon from "../../community/CommunityIcon";
-import CommentNumberButton from "../postToolBar/CommentNumberButton";
-import CopyLinkButton from "../postToolBar/CopyLinkButton";
-import RemovePostButton from "../postToolBar/RemovePostButton";
+import ToolBar from "../postToolBar/PostToolBar";
 import UpvoteBox from "../upvote/UpvoteBox";
 import ImagePostContent from "./ImagePostContent";
 import TextPostContent from "./TextPostContent";
-import ApprovePostButton from "../postToolBar/ApprovePostButton";
 
 interface PostCardProps extends CardProps {
   post: RegularPostDetailFragment;
@@ -99,47 +94,9 @@ export const PostCard = ({ post, ...props }: PostCardProps) => {
   const classes = useStyles();
 
   const timeago = useMemo(() => format(parseInt(post.createdAt)), [post]);
-  const subHeader = useMemo(
-    () => (
-      <Box display="flex" alignItems="center">
-        <NextLink href={createCommunityHomeLink(post.community.name)} passHref>
-          <Link
-            className={classes.communityLink}
-            onMouseDown={(
-              e: React.MouseEvent<HTMLAnchorElement, MouseEvent>
-            ) => {
-              e.stopPropagation();
-            }}
-          >{`r/${post.community.name}`}</Link>
-        </NextLink>
-        <span>&nbsp;&#183;&nbsp;</span>
-        <Typography variant="caption">
-          Posted by&nbsp;
-          <NextLink
-            href={createUserProfileLink(post.creator.username, "posts")}
-            passHref
-          >
-            <Link
-              className={classes.communityLink}
-            >{`u/${post.creator.username}`}</Link>
-          </NextLink>
-          &nbsp;
-          {timeago}
-        </Typography>
-      </Box>
-    ),
-    []
-  );
 
   const isTextPost = useMemo(() => post.postType === 0, [post]);
   const router = useRouter();
-
-  const postDetailModalLink = createPostDetailModalLink(router.asPath, post.id);
-  const postDetailPageLink = createPostDetailPageLink(
-    post.community.name,
-    post.id
-  );
-  const { userRole } = useUserCommunityRole(post.community.id);
 
   return (
     <Box className={classes.root}>
@@ -155,8 +112,37 @@ export const PostCard = ({ post, ...props }: PostCardProps) => {
         <Card className={classes.card} {...props}>
           <CardHeader
             avatar={<CommunityIcon icon={post.community.icon} size="small" />}
-            subheader={subHeader}
-            // className={classes.header}
+            subheader={
+              <Box display="flex" alignItems="center">
+                <NextLink
+                  href={createCommunityHomeLink(post.community.name)}
+                  passHref
+                >
+                  <Link
+                    className={classes.communityLink}
+                    onMouseDown={(
+                      e: React.MouseEvent<HTMLAnchorElement, MouseEvent>
+                    ) => {
+                      e.stopPropagation();
+                    }}
+                  >{`r/${post.community.name}`}</Link>
+                </NextLink>
+                <span>&nbsp;&#183;&nbsp;</span>
+                <Typography variant="caption">
+                  Posted by&nbsp;
+                  <NextLink
+                    href={createUserProfileLink(post.creator.username, "posts")}
+                    passHref
+                  >
+                    <Link
+                      className={classes.communityLink}
+                    >{`u/${post.creator.username}`}</Link>
+                  </NextLink>
+                  &nbsp;
+                  {timeago}
+                </Typography>
+              </Box>
+            }
             classes={{ root: classes.header, avatar: classes.communityIcon }}
           />
           <CardContent className={classes.cardContent}>
@@ -169,26 +155,7 @@ export const PostCard = ({ post, ...props }: PostCardProps) => {
               <ImagePostContent images={post.images} title={post.title || ""} />
             )}
           </CardContent>
-          <Box className={classes.toolbar}>
-            <CommentNumberButton
-              link={postDetailModalLink}
-              asPath={postDetailPageLink}
-              totalComments={post.totalComments}
-            />
-            <CopyLinkButton link={FRONTEND_URL + postDetailPageLink} />
-            {userRole?.isModerator ? (
-              <>
-                <ApprovePostButton
-                  postId={post.id}
-                  postStatus={post.postStatus}
-                />
-                <RemovePostButton
-                  postId={post.id}
-                  postStatus={post.postStatus}
-                />
-              </>
-            ) : null}
-          </Box>
+          <ToolBar post={post} />
         </Card>
       </NextLink>
     </Box>

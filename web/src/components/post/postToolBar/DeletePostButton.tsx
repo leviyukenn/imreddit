@@ -1,3 +1,4 @@
+import { IconButton, Tooltip } from "@material-ui/core";
 import DeleteIcon from "@material-ui/icons/Delete";
 import React, { useCallback } from "react";
 import { useDeleteMyPost } from "../../../graphql/hooks/useDeleteMyPost";
@@ -6,12 +7,14 @@ import ToolBarButton from "./ToolBarButton";
 
 interface RemovePostButtonProps {
   postId: string;
-  withIcon?: boolean;
+  textButton?: boolean;
+  iconButton?: boolean;
 }
 
 const DeletePostButton = ({
   postId,
-  withIcon = true,
+  textButton = false,
+  iconButton = false,
 }: RemovePostButtonProps) => {
   const { deleteMyPost, loading } = useDeleteMyPost();
   const { open } = useAlertDialog({
@@ -29,10 +32,18 @@ const DeletePostButton = ({
     [open]
   );
 
-  return (
+  return iconButton ? (
+    <Tooltip title="Delete">
+      <IconButton onClick={handleClick} disabled={loading}>
+        <DeleteIcon 
+        style={{color:"#9b9b9b"}}
+        />
+      </IconButton>
+    </Tooltip>
+  ) : (
     <ToolBarButton
       onClick={handleClick}
-      startIcon={withIcon ? <DeleteIcon /> : undefined}
+      startIcon={!textButton ? <DeleteIcon /> : undefined}
       disabled={loading}
     >
       Delete

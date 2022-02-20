@@ -16,17 +16,15 @@ import NextLink from "next/link";
 import { useRouter } from "next/router";
 import React, { useMemo } from "react";
 import { format } from "timeago.js";
-import { FRONTEND_URL, SERVER_URL } from "../../../const/const";
+import { SERVER_URL } from "../../../const/const";
 import { RegularPostDetailFragment } from "../../../generated/graphql";
-import { useIsAuth } from "../../../utils/hooks/useIsAuth";
+import { PostStatus } from "../../../graphql/hooks/useChangePostStatus";
 import {
   createCommunityHomeLink,
   createPostDetailModalLink,
-  createPostDetailPageLink,
 } from "../../../utils/links";
-import CommentNumberButton from "../postToolBar/CommentNumberButton";
-import CopyLinkButton from "../postToolBar/CopyLinkButton";
-import RemovePostButton from "../postToolBar/DeletePostButton";
+import { createComposedClasses } from "../../../utils/utils";
+import PostToolBar from "../postToolBar/PostToolBar";
 import UpvoteBox from "../upvote/UpvoteBox";
 
 interface UserPostCardProps extends CardProps {
@@ -37,14 +35,14 @@ const useStyles = makeStyles((theme: Theme) =>
   createStyles({
     root: {
       position: "relative",
+      backgroundColor: "rgb(248 249 250)",
     },
     card: {
       paddingLeft: theme.spacing(5),
-      // marginBottom: theme.spacing(2),
       borderRadius: 0,
+      backgroundColor: theme.palette.background.paper,
 
       boxShadow: "none",
-      backgroundColor: "#F7F9FA",
       border: "1px solid #CCCCCC",
       cursor: "pointer",
       "&:hover": {
@@ -53,11 +51,18 @@ const useStyles = makeStyles((theme: Theme) =>
     },
     upvoteBox: {
       position: "absolute",
-      top: 0,
-      left: 0,
+      top: 1,
+      left: 1,
+      borderLeft: "4px solid transparent",
+    },
+    removedPost: {
+      borderLeft: "4px solid #ff585b",
     },
     header: {
       backgroundColor: theme.palette.background.paper,
+    },
+    caption: {
+      color: "rgb(120 124 126)",
     },
     communityLink: {
       lineHeight: "20px",
@@ -114,7 +119,6 @@ const useStyles = makeStyles((theme: Theme) =>
 
 const UserPostCard = ({ post, ...props }: UserPostCardProps) => {
   const classes = useStyles();
-  const { me } = useIsAuth();
 
   const timeago = useMemo(() => format(parseInt(post.createdAt)), [post]);
   const postInfo = useMemo(
@@ -131,7 +135,10 @@ const UserPostCard = ({ post, ...props }: UserPostCardProps) => {
           >{`r/${post.community.name}`}</Link>
         </NextLink>
         <span>&nbsp;&#183;&nbsp;</span>
-        <Typography variant="caption">{`Posted by ${post.creator.username} ${timeago}`}</Typography>
+        <Typography
+          variant="caption"
+          className={classes.caption}
+        >{`Posted by u/${post.creator.username} ${timeago}`}</Typography>
       </Box>
     ),
     [post, timeago]
@@ -139,22 +146,19 @@ const UserPostCard = ({ post, ...props }: UserPostCardProps) => {
 
   const router = useRouter();
   const postDetailModalLink = createPostDetailModalLink(router.asPath, post.id);
-  const postDetailLink = createPostDetailPageLink(post.community.name, post.id);
-  const isCreator = me?.id && me.id === post.creator.id;
+  const isRemoved = post.postStatus === PostStatus.REMOVED;
 
   return (
     <Box className={classes.root}>
-      <Box className={classes.upvoteBox}>
-        <Box display="flex" justifyContent="center" alignItems="center">
-          <UpvoteBox post={post} isVerticalLayout={true} />
-        </Box>
-      </Box>
-      <NextLink
-        href={postDetailModalLink}
-        // as={postDetailLink}
-        shallow
-        scroll={false}
+      <Box
+        className={createComposedClasses(
+          classes.upvoteBox,
+          isRemoved ? classes.removedPost : ""
+        )}
       >
+        <UpvoteBox post={post} isVerticalLayout={true} />
+      </Box>
+      <NextLink href={postDetailModalLink} shallow scroll={false}>
         <Card className={classes.card} {...props}>
           <CardContent className={classes.cardContent}>
             {post.images[0]?.path ? (
@@ -174,14 +178,7 @@ const UserPostCard = ({ post, ...props }: UserPostCardProps) => {
                 {post.title}
               </Typography>
               {postInfo}
-              <Box className={classes.toolBar}>
-                <CommentNumberButton
-                  link={postDetailModalLink}
-                  totalComments={post.totalComments}
-                />
-                <CopyLinkButton link={FRONTEND_URL + postDetailLink} />
-                {isCreator ? <RemovePostButton postId={post.id} /> : null}
-              </Box>
+              <PostToolBar post={post} />
             </Box>
           </CardContent>
         </Card>

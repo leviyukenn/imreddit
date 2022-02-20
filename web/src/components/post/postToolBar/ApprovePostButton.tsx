@@ -1,40 +1,43 @@
+import { IconButton, Tooltip } from "@material-ui/core";
 import CheckCircleOutlineIcon from "@material-ui/icons/CheckCircleOutline";
 import React, { useCallback } from "react";
-import {
-  PostStatus,
-  useChnagePostStatus,
-} from "../../../graphql/hooks/useChangePostStatus";
 import ToolBarButton from "./ToolBarButton";
 
 interface ApprovePostButtonProps {
-  postId: string;
-  postStatus: PostStatus;
-  withIcon?: boolean;
+  onApprove: () => void;
+  disabled: boolean;
+  textButton?: boolean;
+  iconButton?: boolean;
 }
 
 const ApprovePostButton = ({
-  postId,
-  postStatus,
-  withIcon = true,
+  onApprove,
+  disabled,
+  textButton = false,
+  iconButton = false,
 }: ApprovePostButtonProps) => {
-  const { changePostStatus, loading } = useChnagePostStatus();
-  const disabled = postStatus === PostStatus.APPROVED;
-
   const handleClick = useCallback(
     (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
       event?.stopPropagation();
-
       if (disabled) return;
-      changePostStatus(postId, PostStatus.APPROVED);
+      onApprove();
     },
-    [postId, changePostStatus]
+    [onApprove, disabled]
   );
 
-  return (
+  return iconButton ? (
+    <Tooltip title="Approve">
+      <IconButton
+        onClick={handleClick}
+        style={disabled ? { color: "#46d160" } : { color: "#9b9b9b" }}
+      >
+        <CheckCircleOutlineIcon />
+      </IconButton>
+    </Tooltip>
+  ) : (
     <ToolBarButton
       onClick={handleClick}
-      startIcon={withIcon ? <CheckCircleOutlineIcon /> : undefined}
-      disabled={loading}
+      startIcon={!textButton ? <CheckCircleOutlineIcon /> : undefined}
       style={disabled ? { color: "#46d160" } : undefined}
     >
       Approve

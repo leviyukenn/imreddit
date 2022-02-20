@@ -24,7 +24,7 @@ import { usePostDetail } from "../../graphql/hooks/usePostDetail";
 import { usePostInfoRoute } from "../../utils/hooks/usePostInfoRoute";
 import { createCommunityHomeLink } from "../../utils/links";
 import CommunityDescription from "../community/description/CommunityDescription";
-import ContentLayout from "../ContentLayout";
+import ModalContentLayout from "../ModalContentLayout";
 import PostDetail from "./PostDetail";
 
 interface PostDetailModalProps {}
@@ -166,7 +166,7 @@ const PostDetailModal = ({}: PostDetailModalProps) => {
             style={backgroundStyle}
             ref={scrollerRef}
           >
-            <ContentLayout
+            <ModalContentLayout
               rightSideContent={<CommunityDescription community={community} />}
               backToTop={
                 scrollerRef.current
@@ -179,7 +179,7 @@ const PostDetailModal = ({}: PostDetailModalProps) => {
               }
             >
               <PostDetail post={post}></PostDetail>
-            </ContentLayout>
+            </ModalContentLayout>
           </DialogContent>
         </>
       ) : null}

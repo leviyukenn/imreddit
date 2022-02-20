@@ -25,6 +25,7 @@ const useStyles = makeStyles((theme: Theme) =>
       backgroundColor: theme.palette.background.paper,
     },
     commentForm: {
+      width: "calc(100% - 24px)",
       maxWidth: "650px",
       margin: "0px auto 48px",
     },

@@ -26,6 +26,7 @@ import {
 import CommunityIcon from "../community/CommunityIcon";
 import ImagePostSwiper from "./postCard/ImgaePostSwiper";
 import UpvoteBox from "./upvote/UpvoteBox";
+import ToolBar from "./postToolBar/PostToolBar";
 
 interface PostDetailProps extends CardProps {
   post: RegularPostDetailFragment;
@@ -131,6 +132,7 @@ export const PostDetailCard = ({ post, ...props }: PostDetailProps) => {
           <ImagePostSwiper images={post.images} />
         )}
       </CardContent>
+      <ToolBar post={post} />
     </Card>
   );
 };

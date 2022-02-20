@@ -1,7 +1,6 @@
 import {
   Avatar,
   Box,
-  Button,
   CardProps,
   createStyles,
   Link,
@@ -26,6 +25,8 @@ import React, {
 import { usePostDetail } from "../../graphql/hooks/usePostDetail";
 import { createUserProfileLink } from "../../utils/links";
 import CommentEditor from "./post-editor/CommentEditor";
+import CommentToolBar from "./postToolBar/CommentToolBar";
+import ToolBarButton from "./postToolBar/ToolBarButton";
 import UpvoteBox from "./upvote/UpvoteBox";
 
 interface PostDetailProps extends CardProps {
@@ -118,6 +119,7 @@ export const CommentCard = ({ postId, ...props }: PostDetailProps) => {
     [postId, router]
   );
 
+  //if the query parameters contain a comment id, scroll to the comment
   useEffect(() => {
     if (!(post?.id && router.query.commentId && commentRef.current)) return;
 
@@ -130,7 +132,7 @@ export const CommentCard = ({ postId, ...props }: PostDetailProps) => {
   }, [post?.id, router.query.commentId, commentRef.current]);
 
   if (loading) return <LoadingCommentCard />;
-  
+
   if (!post) return null;
 
   return (
@@ -182,7 +184,6 @@ export const CommentCard = ({ postId, ...props }: PostDetailProps) => {
             style={{ color: "#7C7C7C" }}
           >{`${timeago}`}</Typography>
         </div>
-
         {showThread ? (
           <Box className={classes.content}>
             <Box style={backgroundColor}>
@@ -193,22 +194,21 @@ export const CommentCard = ({ postId, ...props }: PostDetailProps) => {
               ></Box>
               <Box display="flex">
                 <UpvoteBox post={post} isVerticalLayout={false} />
-                <Button
-                  size="small"
+                <ToolBarButton
                   startIcon={<ChatBubbleOutlineIcon />}
                   onClick={toggleShowCommentEditor}
-                  className={classes.replyButton}
                 >
                   Reply
-                </Button>
+                </ToolBarButton>
+                <CommentToolBar post={post} />
               </Box>
+              {showCommentEditor ? (
+                <CommentEditor
+                  replyTo={post}
+                  setShowCommentEditor={setShowCommentEditor}
+                />
+              ) : null}
             </Box>
-            {showCommentEditor ? (
-              <CommentEditor
-                replyTo={post}
-                setShowCommentEditor={setShowCommentEditor}
-              />
-            ) : null}
             {post.children.map((child) => (
               <CommentCard key={child.id} postId={child.id} />
             ))}

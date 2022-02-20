@@ -15,11 +15,13 @@ import { useRouter } from "next/router";
 import React, { useMemo } from "react";
 import { format } from "timeago.js";
 import { RegularPostDetailFragment } from "../../../generated/graphql";
+import { PostStatus } from "../../../graphql/hooks/useChangePostStatus";
 import {
   createCommunityHomeLink,
   createPostDetailModalLink,
   createUserProfileLink,
 } from "../../../utils/links";
+import { createComposedClasses } from "../../../utils/utils";
 import UserComments from "./UserComments";
 
 interface UserCommentedPostCardProps extends CardProps {
@@ -39,6 +41,13 @@ const useStyles = makeStyles((theme: Theme) =>
       border: "1px solid #CCCCCC",
       cursor: "pointer",
       "&:hover": {
+        border: "1px solid #818181",
+      },
+    },
+    removedPost: {
+      borderLeft: "4px solid #ff585b",
+      "&:hover": {
+        borderLeft: "4px solid #ff585b",
         border: "1px solid #818181",
       },
     },
@@ -152,7 +161,7 @@ const UserCommentedPostCard = ({
     // createPostDetailPageLink(post.community.name, post.id),
     post.id
   );
-  //   const postDetailLink = createPostDetailPageLink(post.community.name, post.id);
+  const isRemoved = post.postStatus === PostStatus.REMOVED;
 
   return (
     <Box className={classes.root}>
@@ -163,7 +172,13 @@ const UserCommentedPostCard = ({
         scroll={false}
         passHref
       >
-        <Card className={classes.card} {...props}>
+        <Card
+          className={createComposedClasses(
+            classes.card,
+            isRemoved ? classes.removedPost : ""
+          )}
+          {...props}
+        >
           <CardContent className={classes.cardContent}>
             <ChatBubbleOutlineIcon className={classes.commentIcon} />
             <Box className={classes.postInfoContainer}>

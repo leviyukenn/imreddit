@@ -1,38 +1,43 @@
+import { IconButton, Tooltip } from "@material-ui/core";
 import NotInterestedIcon from "@material-ui/icons/NotInterested";
 import React, { useCallback } from "react";
-import {
-  PostStatus,
-  useChnagePostStatus,
-} from "../../../graphql/hooks/useChangePostStatus";
 import ToolBarButton from "./ToolBarButton";
 
 interface RemovePostButtonProps {
-  postId: string;
-  postStatus: PostStatus;
-  withIcon?: boolean;
+  onRemove: () => void;
+  disabled: boolean;
+  textButton?: boolean;
+  iconButton?: boolean;
 }
 
 const RemovePostButton = ({
-  postId,
-  postStatus,
-  withIcon = true,
+  onRemove,
+  disabled,
+  textButton = false,
+  iconButton = false,
 }: RemovePostButtonProps) => {
-  const { changePostStatus, loading } = useChnagePostStatus();
-  const disabled = postStatus === PostStatus.REMOVED;
-
   const handleClick = useCallback(
     (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
       event?.stopPropagation();
-      changePostStatus(postId, PostStatus.REMOVED);
+      if (disabled) return;
+      onRemove();
     },
-    [postId, changePostStatus]
+    [onRemove, disabled]
   );
 
-  return (
+  return iconButton ? (
+    <Tooltip title="Remove">
+      <IconButton
+        onClick={handleClick}
+        style={disabled ? { color: "#ff585b" } : { color: "#9b9b9b" }}
+      >
+        <NotInterestedIcon />
+      </IconButton>
+    </Tooltip>
+  ) : (
     <ToolBarButton
       onClick={handleClick}
-      startIcon={withIcon ? <NotInterestedIcon /> : undefined}
-      disabled={loading || disabled}
+      startIcon={!textButton ? <NotInterestedIcon /> : undefined}
       style={disabled ? { color: "#ff585b" } : undefined}
     >
       Remove

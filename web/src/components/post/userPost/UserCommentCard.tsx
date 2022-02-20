@@ -13,15 +13,16 @@ import NextLink from "next/link";
 import { useRouter } from "next/router";
 import React, { useMemo } from "react";
 import { format } from "timeago.js";
-import { FRONTEND_URL } from "../../../const/const";
 import { RegularPostDetailFragment } from "../../../generated/graphql";
+import { PostStatus } from "../../../graphql/hooks/useChangePostStatus";
 import {
   createPostDetailModalLinkWithCommentId,
   createPostDetailPageLinkWithCommentId,
   createUserProfileLink,
 } from "../../../utils/links";
-import CopyLinkButton from "../postToolBar/CopyLinkButton";
-import RemovePostButton from "../postToolBar/DeletePostButton";
+import { createComposedClasses } from "../../../utils/utils";
+import CommentToolBar from "../postToolBar/CommentToolBar";
+import UserCommentToolBar from "../postToolBar/UserCommentToolBar";
 
 interface UserCommentCardProps extends CardProps {
   comment: RegularPostDetailFragment;
@@ -43,11 +44,19 @@ const useStyles = makeStyles((theme: Theme) =>
     cardContent: {
       display: "flex",
       //   alignItems: "center",
-
       padding: 8,
       "&:last-child": {
         paddingBottom: 8,
       },
+    },
+    comment: {
+      flex: 1,
+      padding: "4px 0 0 4px",
+      border: "2px solid transparent",
+    },
+    removedComment: {
+      border: "2px solid #ff585b",
+      backgroundColor: "rgba(255,88,91,.05)",
     },
     commentThreadLine: {
       //   height: "10px",
@@ -97,6 +106,9 @@ const UserCommentCard = ({
     comment.ancestor?.id!,
     comment.id
   );
+
+  const isRemoved = comment.postStatus === PostStatus.REMOVED;
+
   return (
     <NextLink
       href={postDetailModalLinkWithCommentId}
@@ -113,7 +125,12 @@ const UserCommentCard = ({
               className={classes.commentThreadLine}
             ></div>
           ))}
-          <Box>
+          <Box
+            className={createComposedClasses(
+              classes.comment,
+              isRemoved ? classes.removedComment : ""
+            )}
+          >
             <Box display="flex" alignItems="center" className={classes.title}>
               <NextLink
                 href={createUserProfileLink(comment.creator.username, "posts")}
@@ -132,13 +149,7 @@ const UserCommentCard = ({
                 __html: DOMPurify.sanitize(comment.text || ""),
               }}
             ></Box>
-            <Box display="flex">
-              <CopyLinkButton
-                link={FRONTEND_URL + postDetailPageLinkWithCommentId}
-                withIcon={false}
-              />
-              <RemovePostButton postId={comment.id} withIcon={false} />
-            </Box>
+            <UserCommentToolBar post={comment} />
           </Box>
         </CardContent>
       </Card>

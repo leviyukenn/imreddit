@@ -20,3 +20,14 @@ export async function copyTextToClipboard(text: string) {
     return document.execCommand("copy", true, text);
   }
 }
+
+export function createComposedClasses(
+  mainClass: string,
+  ...subClasses: string[]
+) {
+  let composedClasses = "";
+  subClasses.forEach((value) => {
+    composedClasses += " " + value;
+  });
+  return mainClass + composedClasses;
+}
