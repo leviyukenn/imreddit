@@ -22,12 +22,16 @@ import React, {
   useRef,
   useState,
 } from "react";
+import { PostStatus } from "../../graphql/hooks/useChangePostStatus";
 import { usePostDetail } from "../../graphql/hooks/usePostDetail";
+import { useIsAuth } from "../../utils/hooks/useIsAuth";
 import { createUserProfileLink } from "../../utils/links";
+import { createComposedClasses } from "../../utils/utils";
 import CommentEditor from "./post-editor/CommentEditor";
 import CommentToolBar from "./postToolBar/CommentToolBar";
 import ToolBarButton from "./postToolBar/ToolBarButton";
 import UpvoteBox from "./upvote/UpvoteBox";
+import PostRemovedWarning from "./warning/PostRemovedWarning";
 
 interface PostDetailProps extends CardProps {
   postId: string;
@@ -36,7 +40,7 @@ interface PostDetailProps extends CardProps {
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
     root: {
-      position: "relative",
+      // position: "relative",
       paddingLeft: theme.spacing(1),
       paddingTop: theme.spacing(1),
       minHeight: "72px",
@@ -72,6 +76,14 @@ const useStyles = makeStyles((theme: Theme) =>
     content: {
       paddingTop: 0,
     },
+    comment: {
+      padding: 4,
+      border: "2px solid transparent",
+    },
+    removedComment: {
+      border: "2px solid #ff585b",
+      backgroundColor: "rgba(255,88,91,.05)",
+    },
     smallAvatar: {
       width: "28px",
       height: "28px",
@@ -102,6 +114,7 @@ export const CommentCard = ({ postId, ...props }: PostDetailProps) => {
   const commentRef = useRef<HTMLDivElement>(null);
 
   const { post, loading, timeago } = usePostDetail(postId);
+  const { me } = useIsAuth();
 
   const toggleShowThread = useCallback(() => {
     setShowThread((prevState) => !prevState);
@@ -124,12 +137,26 @@ export const CommentCard = ({ postId, ...props }: PostDetailProps) => {
     if (!(post?.id && router.query.commentId && commentRef.current)) return;
 
     if (post.id === router.query.commentId) {
-      commentRef.current.scrollIntoView({
-        block: "start",
+      commentRef.current.offsetParent?.scrollTo({
+        top: commentRef.current.offsetTop,
         behavior: "smooth",
       });
     }
-  }, [post?.id, router.query.commentId, commentRef.current]);
+  }, [post, router, commentRef]);
+
+  const isRemovedComment = post?.postStatus === PostStatus.REMOVED;
+  const commentContent = useMemo(() => {
+    if (!post) return null;
+    const isCreator = me?.id && me.id === post?.creator.id;
+    if (isRemovedComment && !isCreator) return null;
+    return (
+      <Box
+        dangerouslySetInnerHTML={{
+          __html: DOMPurify.sanitize(post.text || ""),
+        }}
+      ></Box>
+    );
+  }, [post, me, isRemovedComment]);
 
   if (loading) return <LoadingCommentCard />;
 
@@ -186,12 +213,17 @@ export const CommentCard = ({ postId, ...props }: PostDetailProps) => {
         </div>
         {showThread ? (
           <Box className={classes.content}>
-            <Box style={backgroundColor}>
-              <Box
-                dangerouslySetInnerHTML={{
-                  __html: DOMPurify.sanitize(post.text || ""),
-                }}
-              ></Box>
+            <Box
+              style={backgroundColor}
+              className={createComposedClasses(
+                classes.comment,
+                isRemovedComment ? classes.removedComment : ""
+              )}
+            >
+              {isRemovedComment ? (
+                <PostRemovedWarning communityName={post.community.name} />
+              ) : null}
+              {commentContent}
               <Box display="flex">
                 <UpvoteBox post={post} isVerticalLayout={false} />
                 <ToolBarButton

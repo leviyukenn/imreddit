@@ -19,14 +19,17 @@ import NextLink from "next/link";
 import React, { useMemo } from "react";
 import { format } from "timeago.js";
 import { RegularPostDetailFragment } from "../../generated/graphql";
+import { PostStatus } from "../../graphql/hooks/useChangePostStatus";
+import { useIsAuth } from "../../utils/hooks/useIsAuth";
 import {
   createCommunityHomeLink,
   createUserProfileLink,
 } from "../../utils/links";
 import CommunityIcon from "../community/CommunityIcon";
 import ImagePostSwiper from "./postCard/ImgaePostSwiper";
-import UpvoteBox from "./upvote/UpvoteBox";
 import ToolBar from "./postToolBar/PostToolBar";
+import UpvoteBox from "./upvote/UpvoteBox";
+import PostRemovedWarning from "./warning/PostRemovedWarning";
 
 interface PostDetailProps extends CardProps {
   post: RegularPostDetailFragment;
@@ -73,12 +76,36 @@ const useStyles = makeStyles((theme: Theme) =>
   })
 );
 
+enum PostType {
+  TEXT_POST,
+  IMAGE_POST,
+  COMMENT,
+}
+
 export const PostDetailCard = ({ post, ...props }: PostDetailProps) => {
   const classes = useStyles();
 
   const timeago = useMemo(() => format(parseInt(post.createdAt)), [post]);
 
   const isTextPost = useMemo(() => post.images.length === 0, [post]);
+
+  const { me } = useIsAuth();
+  const isRemovedPost = post?.postStatus === PostStatus.REMOVED;
+
+  const postContent = useMemo(() => {
+    const isCreator = me?.id && me.id === post?.creator.id;
+    if (isRemovedPost && !isCreator) return null;
+    const isTextPost = post.postType === PostType.TEXT_POST;
+    return isTextPost ? (
+      <Box
+        dangerouslySetInnerHTML={{
+          __html: DOMPurify.sanitize(post.text || ""),
+        }}
+      ></Box>
+    ) : (
+      <ImagePostSwiper images={post.images} />
+    );
+  }, [post, isRemovedPost, me]);
 
   return (
     <Card className={classes.root} {...props}>
@@ -122,15 +149,10 @@ export const PostDetailCard = ({ post, ...props }: PostDetailProps) => {
         <Typography variant="h6" gutterBottom>
           {post.title}
         </Typography>
-        {isTextPost ? (
-          <Box
-            dangerouslySetInnerHTML={{
-              __html: DOMPurify.sanitize(post.text || ""),
-            }}
-          ></Box>
-        ) : (
-          <ImagePostSwiper images={post.images} />
-        )}
+        {isRemovedPost ? (
+          <PostRemovedWarning communityName={post.community.name} />
+        ) : null}
+        {postContent}
       </CardContent>
       <ToolBar post={post} />
     </Card>

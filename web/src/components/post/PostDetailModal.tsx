@@ -56,6 +56,7 @@ const useStyles = makeStyles((theme: Theme) =>
       padding: "0 32px",
     },
     content: {
+      position: "relative",
       // display: "flex",
       // justifyContent: "center",
       // padding: 0,
