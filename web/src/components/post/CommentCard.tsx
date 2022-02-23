@@ -11,6 +11,7 @@ import {
 import { blue } from "@material-ui/core/colors";
 import ChatBubbleOutlineIcon from "@material-ui/icons/ChatBubbleOutline";
 import ControlPointIcon from "@material-ui/icons/ControlPoint";
+import FaceIcon from "@material-ui/icons/Face";
 import { Skeleton } from "@material-ui/lab";
 import DOMPurify from "dompurify";
 import NextLink from "next/link";
@@ -41,6 +42,7 @@ const useStyles = makeStyles((theme: Theme) =>
   createStyles({
     root: {
       // position: "relative",
+      // padding: theme.spacing(1),
       paddingLeft: theme.spacing(1),
       paddingTop: theme.spacing(1),
       minHeight: "72px",
@@ -89,6 +91,13 @@ const useStyles = makeStyles((theme: Theme) =>
       height: "28px",
       marginTop: theme.spacing(1),
       marginBottom: theme.spacing(1),
+    },
+    smallAvatarIcon: {
+      width: "28px",
+      height: "28px",
+      marginTop: theme.spacing(1),
+      marginBottom: theme.spacing(1),
+      color: "#7C7C7C",
     },
     usernameLink: {
       color: "#1a1a1b",
@@ -145,18 +154,7 @@ export const CommentCard = ({ postId, ...props }: PostDetailProps) => {
   }, [post, router, commentRef]);
 
   const isRemovedComment = post?.postStatus === PostStatus.REMOVED;
-  const commentContent = useMemo(() => {
-    if (!post) return null;
-    const isCreator = me?.id && me.id === post?.creator.id;
-    if (isRemovedComment && !isCreator) return null;
-    return (
-      <Box
-        dangerouslySetInnerHTML={{
-          __html: DOMPurify.sanitize(post.text || ""),
-        }}
-      ></Box>
-    );
-  }, [post, me, isRemovedComment]);
+  const isCreator = me?.id && me.id === post?.creator.id;
 
   if (loading) return <LoadingCommentCard />;
 
@@ -174,16 +172,25 @@ export const CommentCard = ({ postId, ...props }: PostDetailProps) => {
               onClick={toggleShowThread}
             />
           ) : null}
-          <NextLink
-            href={createUserProfileLink(post.creator.username, "posts")}
-            passHref
-          >
-            <Link>
-              <img className={classes.smallAvatar} src={post.creator.avatar} />
-            </Link>
-          </NextLink>
+
+          {isRemovedComment && !isCreator ? (
+            <FaceIcon className={classes.smallAvatarIcon} />
+          ) : (
+            <NextLink
+              href={createUserProfileLink(post.creator.username, "posts")}
+              passHref
+            >
+              <Link>
+                <img
+                  className={classes.smallAvatar}
+                  src={post.creator.avatar}
+                />
+              </Link>
+            </NextLink>
+          )}
         </Box>
-        {showThread ? (
+        {showThread &&
+        !(isRemovedComment && !isCreator && post.children.length === 0) ? (
           <Box
             flexGrow={1}
             className={classes.threadLineBox}
@@ -195,16 +202,22 @@ export const CommentCard = ({ postId, ...props }: PostDetailProps) => {
       </Box>
       <div className={classes.commentBox}>
         <div className={classes.header} ref={commentRef}>
-          <NextLink
-            href={createUserProfileLink(post.creator.username, "posts")}
-            passHref
-          >
-            <Link>
-              <Typography variant="caption" className={classes.usernameLink}>
-                {`${post.creator.username} `}
-              </Typography>
-            </Link>
-          </NextLink>
+          {isRemovedComment && !isCreator ? (
+            <Typography variant="caption" style={{ color: "#7C7C7C" }}>
+              Comment removed by moderator
+            </Typography>
+          ) : (
+            <NextLink
+              href={createUserProfileLink(post.creator.username, "posts")}
+              passHref
+            >
+              <Link>
+                <Typography variant="caption" className={classes.usernameLink}>
+                  {`${post.creator.username} `}
+                </Typography>
+              </Link>
+            </NextLink>
+          )}
           &nbsp;&#183;&nbsp;
           <Typography
             variant="caption"
@@ -213,34 +226,40 @@ export const CommentCard = ({ postId, ...props }: PostDetailProps) => {
         </div>
         {showThread ? (
           <Box className={classes.content}>
-            <Box
-              style={backgroundColor}
-              className={createComposedClasses(
-                classes.comment,
-                isRemovedComment ? classes.removedComment : ""
-              )}
-            >
-              {isRemovedComment ? (
-                <PostRemovedWarning communityName={post.community.name} />
-              ) : null}
-              {commentContent}
-              <Box display="flex">
-                <UpvoteBox post={post} isVerticalLayout={false} />
-                <ToolBarButton
-                  startIcon={<ChatBubbleOutlineIcon />}
-                  onClick={toggleShowCommentEditor}
-                >
-                  Reply
-                </ToolBarButton>
-                <CommentToolBar post={post} />
+            {isRemovedComment && !isCreator ? null : (
+              <Box
+                style={backgroundColor}
+                className={createComposedClasses(
+                  classes.comment,
+                  isRemovedComment ? classes.removedComment : ""
+                )}
+              >
+                {isRemovedComment ? (
+                  <PostRemovedWarning communityName={post.community.name} />
+                ) : null}
+                <Box
+                  dangerouslySetInnerHTML={{
+                    __html: DOMPurify.sanitize(post.text || ""),
+                  }}
+                ></Box>
+                <Box display="flex">
+                  <UpvoteBox post={post} isVerticalLayout={false} />
+                  <ToolBarButton
+                    startIcon={<ChatBubbleOutlineIcon />}
+                    onClick={toggleShowCommentEditor}
+                  >
+                    Reply
+                  </ToolBarButton>
+                  <CommentToolBar post={post} />
+                </Box>
+                {showCommentEditor ? (
+                  <CommentEditor
+                    replyTo={post}
+                    setShowCommentEditor={setShowCommentEditor}
+                  />
+                ) : null}
               </Box>
-              {showCommentEditor ? (
-                <CommentEditor
-                  replyTo={post}
-                  setShowCommentEditor={setShowCommentEditor}
-                />
-              ) : null}
-            </Box>
+            )}
             {post.children.map((child) => (
               <CommentCard key={child.id} postId={child.id} />
             ))}

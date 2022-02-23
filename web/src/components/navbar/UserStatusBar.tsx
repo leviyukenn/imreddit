@@ -9,7 +9,7 @@ const UserStatusBar = ({}: UserStatusBarProps) => {
   const { me } = useIsAuth();
 
   if (me) {
-    return <UserDropDown />;
+    return <UserDropDown me={me} />;
   } else {
     return <LoginRegisterButtonGroup />;
   }

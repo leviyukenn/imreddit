@@ -8,18 +8,17 @@ import {
 } from "@material-ui/core";
 import ExpandMoreRoundedIcon from "@material-ui/icons/ExpandMoreRounded";
 import React, { useState } from "react";
-import { useIsAuth } from "../../../utils/hooks/useIsAuth";
+import { RegularUserFragment } from "../../../generated/graphql";
 import UserDropDownList from "./UserDropDownList";
 
-interface UserDropDownProps {}
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
     root: {
       fontSize: "0.875rem",
+      width: "100%",
     },
     button: {
       width: "100%",
-      maxWidth: 210,
       height: 36,
       display: "flex",
       justifyContent: "space-between",
@@ -45,11 +44,19 @@ const useStyles = makeStyles((theme: Theme) =>
       zIndex: 10000,
       backgroundColor: "#ffffff",
     },
+    smallAvatar: {
+      width: "28px",
+      height: "28px",
+      margin: theme.spacing(1),
+    },
   })
 );
 
-const UserDropDown = ({}: UserDropDownProps) => {
-  const { me } = useIsAuth();
+interface UserDropDownProps {
+  me: RegularUserFragment;
+}
+
+const UserDropDown = ({ me }: UserDropDownProps) => {
   const classes = useStyles();
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const handleClick = (event: React.MouseEvent<HTMLElement>) => {
@@ -66,7 +73,10 @@ const UserDropDown = ({}: UserDropDownProps) => {
           onClick={handleClick}
         >
           <Box display="flex" alignItems="center">
-            {me?.username}
+            <img className={classes.smallAvatar} src={me.avatar} />
+            <Box display="flex" alignItems="center">
+              {me.username}
+            </Box>
           </Box>
           <ExpandMoreRoundedIcon />
         </ButtonBase>
@@ -78,8 +88,8 @@ const UserDropDown = ({}: UserDropDownProps) => {
         className={classes.popper}
       >
         <UserDropDownList
-          onClickAway={() => !open || setAnchorEl(null)}
-          userName={me?.username!}
+          onClickAway={() => open && setAnchorEl(null)}
+          userName={me.username}
         />
       </Popper>
     </React.Fragment>

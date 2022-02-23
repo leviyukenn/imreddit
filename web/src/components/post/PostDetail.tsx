@@ -5,6 +5,7 @@ import {
   Theme,
   Typography,
 } from "@material-ui/core";
+import ForumIcon from "@material-ui/icons/Forum";
 import React from "react";
 import { PostDetailQuery } from "../../generated/graphql";
 import { useIsAuth } from "../../utils/hooks/useIsAuth";
@@ -40,6 +41,31 @@ const useStyles = makeStyles((theme: Theme) =>
     loginRegisterText: {
       color: "#7c7c7c",
     },
+    commnetCards: {
+      paddingRight: 8,
+    },
+    noComments: {
+      display: "flex",
+      flexDirection: "column",
+      justifyContent: "center",
+      alignItems: "center",
+      minHeight: 340,
+    },
+    noCommentsIcon: {
+      height: 28,
+      width: 28,
+      color: "rgb(0 121 211 / 40%)",
+    },
+    noCommentsYet: {
+      fontWeight: 500,
+      color: "#7c7c7c",
+      opacity: 0.6,
+    },
+    beTheFirst: {
+      fontWeight: 500,
+      color: "#7c7c7c",
+      opacity: 0.6,
+    },
   })
 );
 
@@ -72,9 +98,31 @@ const PostDetail = ({ post }: PostDetailProps) => {
           )}
         </Box>
 
-        {post.children.map((child) => (
-          <CommentCard key={child.id} postId={child.id} />
-        ))}
+        <Box className={classes.commnetCards}>
+          {post.children.map((child) => (
+            <CommentCard key={child.id} postId={child.id} />
+          ))}
+        </Box>
+        {post.children.length === 0 ? (
+          <Box className={classes.noComments}>
+            <ForumIcon className={classes.noCommentsIcon} />
+            <Typography
+              variant="h6"
+              component="p"
+              className={classes.noCommentsYet}
+              gutterBottom
+            >
+              No Comments Yet
+            </Typography>
+            <Typography
+              variant="subtitle2"
+              component="p"
+              className={classes.beTheFirst}
+            >
+              Be the first to share what you think!
+            </Typography>
+          </Box>
+        ) : null}
       </Box>
     </>
   );

@@ -35,7 +35,8 @@ const useStyles = makeStyles((theme: Theme) =>
       alignItems: "center",
     },
     rightContainer: {
-      // flex: 1,
+      flex: 1,
+      maxWidth: 210,
       display: "flex",
       alignItems: "center",
     },

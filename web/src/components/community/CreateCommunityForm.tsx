@@ -17,11 +17,12 @@ import {
   useCreateCommunityMutation,
   useTopicsQuery,
 } from "../../generated/graphql";
+import { useSnackbarAlert } from "../../redux/hooks/useSnackbarAlert";
 import { AlertSeverity } from "../../redux/types/types";
+import { useIsAuth } from "../../utils/hooks/useIsAuth";
 import { createCommunityHomeLink } from "../../utils/links";
 import { toErrorMap } from "../../utils/toErrorMap";
 import { SelectField, TextAreaField, TextInputField } from "../InputField";
-import { useSnackbarAlert } from "../../redux/hooks/useSnackbarAlert";
 
 interface FormData {
   name: string;
@@ -55,20 +56,24 @@ const useCreateCommunity = () => {
   const [createCommunity] = useCreateCommunityMutation();
   const router = useRouter();
   const { onOpenSnackbarAlert } = useSnackbarAlert();
+  const { me, redirectToLoginIfNotLoggedIn } = useIsAuth();
 
   const onCreateCommunity = useCallback(
     async (values: FormData, actions: FormikHelpers<FormData>) => {
+      if (!me) redirectToLoginIfNotLoggedIn();
       const response = await createCommunity({ variables: values }).catch(
-        () => null
+        (err) => {
+          onOpenSnackbarAlert({
+            message: err.message || FrontendError.ERR0002,
+            severity: AlertSeverity.ERROR,
+          });
+
+          return null;
+        }
       );
       const createCommunityResult = response?.data?.createCommunity;
 
       if (!createCommunityResult) {
-        onOpenSnackbarAlert({
-          message: FrontendError.ERR0002,
-          severity: AlertSeverity.ERROR,
-        });
-
         return;
       }
 
@@ -82,7 +87,7 @@ const useCreateCommunity = () => {
         );
       }
     },
-    []
+    [me, redirectToLoginIfNotLoggedIn, createCommunity, onOpenSnackbarAlert]
   );
 
   const { data: topicsResponse } = useTopicsQuery({
