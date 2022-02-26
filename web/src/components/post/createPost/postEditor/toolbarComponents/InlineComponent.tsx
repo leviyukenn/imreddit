@@ -10,7 +10,8 @@ import FormatBoldIcon from "@material-ui/icons/FormatBold";
 import FormatItalicIcon from "@material-ui/icons/FormatItalic";
 import StrikethroughSIcon from "@material-ui/icons/StrikethroughS";
 import { useCallback } from "react";
-import SuperscriptIcon from "../../../../images/icons/superscript.svg";
+// import SuperscriptIcon from "../../../../images/icons/superscript.svg";
+import SuperscriptIcon from "../../../../../images/icons/superscript.svg";
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({

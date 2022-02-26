@@ -12,8 +12,8 @@ import DescriptionOutlinedIcon from "@material-ui/icons/DescriptionOutlined";
 import ImageOutlinedIcon from "@material-ui/icons/ImageOutlined";
 import React, { useCallback, useEffect, useState } from "react";
 import Container from "../components/HomeContainer";
-import CreatePostForm from "../components/post/CreatePostForm";
-import SelectCommunity from "../components/post/SelectCommunity";
+import CreatePostForm from "../components/post/createPost/CreatePostForm";
+import SelectCommunity from "../components/post/createPost/SelectCommunity";
 import { PostType } from "../components/types/types";
 import { useIsAuth } from "../utils/hooks/useIsAuth";
 

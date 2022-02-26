@@ -13,14 +13,14 @@ import SearchIcon from "@material-ui/icons/Search";
 import { Autocomplete } from "@material-ui/lab";
 import NextLink from "next/link";
 import React, { useEffect, useMemo } from "react";
-import { useCommunitiesQuery } from "../../generated/graphql";
+import { useUserRolesQuery } from "../../../generated/graphql";
 import {
   CommunitySelectionOption,
   CommunitySelectionOptionGroupType,
   CommunitySelectionOptionIconType,
-} from "../../utils/factory/communitySelectionOption";
-import { createCommunityPageLink } from "../../utils/links";
-import CommunityIcon from "../community/CommunityIcon";
+} from "../../../utils/factory/communitySelectionOption";
+import { createCommunityPageLink } from "../../../utils/links";
+import CommunityIcon from "../../community/CommunityIcon";
 
 interface SelectCommunityProps {
   setCommunityId: React.Dispatch<React.SetStateAction<string>>;
@@ -100,13 +100,20 @@ const useStyles = makeStyles((theme: Theme) =>
 );
 
 function useCommunitySelectionOption(userId: string) {
-  const { data: communitiesResponse } = useCommunitiesQuery({
+  const { data: userRolesResponse } = useUserRolesQuery({
     variables: { userId },
   });
 
-  const communities = useMemo(() => communitiesResponse?.communities || [], [
-    communitiesResponse,
+  const userRoles = useMemo(() => userRolesResponse?.userRoles || [], [
+    userRolesResponse,
   ]);
+
+  const communities = useMemo(
+    () =>
+      userRoles.filter((role) => role?.isMember).map((role) => role!.community),
+    [userRoles]
+  );
+
   const myCommunitiesItems: CommunitySelectionOption[] = useMemo(() => {
     if (communities.length == 0) return [];
     const myCommunities = communities.map((community) =>
@@ -146,13 +153,13 @@ export default function SelectCommunity({
   ] = React.useState<CommunitySelectionOption | null>(null);
 
   const inputIcon = useMemo(() => {
+    if (typeof pendingValue?.icon === "string") {
+      return <CommunityIcon icon={pendingValue.icon} size="extraSmall" />;
+    }
     if (!pendingValue?.icon) {
       return <span className={classes.circle}></span>;
     }
-    if (typeof pendingValue.icon === "string") {
-      return <CommunityIcon icon={pendingValue.icon} size="small" />;
-    }
-    return pendingValue.icon;
+    return iconMap.get(pendingValue.icon);
   }, [pendingValue]);
 
   useEffect(() => {
@@ -180,7 +187,7 @@ export default function SelectCommunity({
       renderOption={(option) => (
         <React.Fragment>
           {typeof option.icon === "string" ? (
-            <CommunityIcon icon={option.icon} size="small" />
+            <CommunityIcon icon={option.icon} size="extraSmall" />
           ) : (
             iconMap.get(option.icon)
           )}

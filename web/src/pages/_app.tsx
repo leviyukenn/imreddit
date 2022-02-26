@@ -8,9 +8,9 @@ import apolloClient from "../apollo-client/apollo-client";
 import AlertDialog from "../components/errorHandling/AlertDialog";
 import { SnackbarAlert } from "../components/errorHandling/SnackbarAlert";
 import PostDetailModal from "../components/post/PostDetailModal";
-import LoginRegisterModal from "../components/user/LoginRegisterModal";
 import store from "../redux/store";
 import theme from "../theme";
+import LoginRegisterModal from "../components/user/LoginRegisterModal";
 
 function MyApp({ Component, pageProps }: AppProps) {
   useEffect(() => {

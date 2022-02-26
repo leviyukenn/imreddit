@@ -25,7 +25,6 @@ export function useJoinLeaveCommunity(
             existing: Reference[],
             { storeFieldName, toReference, readField }
           ) {
-            debugger;
             const userRole = roleResponse?.joinCommunity.role;
             if (!userRole) {
               return existing;
@@ -79,7 +78,7 @@ export function useJoinLeaveCommunity(
 
     if (userRole.role?.isMember) {
       onOpenSnackbarAlert({
-        message: `Successfully joined r/${communityName}`,
+        message: `Successfully joined r/${userRole.role.community.name}`,
         severity: AlertSeverity.SUCCESS,
       });
       return;
@@ -114,7 +113,7 @@ export function useJoinLeaveCommunity(
 
     if (userRole.role?.isMember === false) {
       onOpenSnackbarAlert({
-        message: `Successfully left r/${communityName}`,
+        message: `Successfully left r/${userRole.role.community.name}`,
         severity: AlertSeverity.SUCCESS,
       });
       return;

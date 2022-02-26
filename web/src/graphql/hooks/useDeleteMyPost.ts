@@ -4,10 +4,8 @@ import { FrontendError } from "../../const/errors";
 import { useDeleteMyPostMutation } from "../../generated/graphql";
 import { useSnackbarAlert } from "../../redux/hooks/useSnackbarAlert";
 import { AlertSeverity } from "../../redux/types/types";
-import { useIsAuth } from "../../utils/hooks/useIsAuth";
 
-export function useDeleteMyPost() {
-  const { me, checkIsAuth } = useIsAuth();
+export function useDeleteMyPost(userName: string) {
   const { onOpenSnackbarAlert } = useSnackbarAlert();
   const [deleteMyPostMutation, { loading, error }] = useDeleteMyPostMutation({
     update(cache, { data: deleteMyPostResponse }) {
@@ -33,8 +31,7 @@ export function useDeleteMyPost() {
             },
             { storeFieldName }
           ) {
-            if (!me?.username || !storeFieldName.includes(me.username))
-              return existingUserPostRefs;
+            if (!storeFieldName.includes(userName)) return existingUserPostRefs;
             const merged = { ...existingUserPostRefs.posts };
             delete merged[deleteMyPostResponse.deleteMyPost.postId!];
             return {
@@ -49,7 +46,6 @@ export function useDeleteMyPost() {
 
   const deleteMyPost = useCallback(
     async (postId: string) => {
-      if (!checkIsAuth()) return;
       const response = await deleteMyPostMutation({
         variables: { postId },
       }).catch((err) => {
@@ -89,7 +85,7 @@ export function useDeleteMyPost() {
       }
       return false;
     },
-    [checkIsAuth, deleteMyPostMutation, onOpenSnackbarAlert]
+    [ deleteMyPostMutation, onOpenSnackbarAlert]
   );
 
   return { deleteMyPost, loading };

@@ -1,6 +1,6 @@
 import React from "react";
 import { useIsAuth } from "../../utils/hooks/useIsAuth";
-import CreatePostCard from "../post/CreatePostCard";
+import CreatePostCard from "../post/createPost/CreatePostCard";
 import { CommunityPostsInfiniteScroll } from "../post/PostInfiniteScroll";
 
 const CommunityHomeHeartContent = ({
@@ -8,10 +8,10 @@ const CommunityHomeHeartContent = ({
 }: {
   communityName: string;
 }) => {
-  const { isAuth } = useIsAuth();
+  const { me } = useIsAuth();
   return (
     <>
-      {isAuth ? <CreatePostCard /> : null}
+      {me ? <CreatePostCard avatar={me.avatar} /> : null}
       <CommunityPostsInfiniteScroll communityName={communityName} />
     </>
   );

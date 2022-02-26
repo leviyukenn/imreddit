@@ -4,7 +4,6 @@ import {
   CardContent,
   CardProps,
   createStyles,
-  Link,
   makeStyles,
   Theme,
   Typography,
@@ -14,16 +13,13 @@ import ViewHeadlineIcon from "@material-ui/icons/ViewHeadline";
 import { Skeleton } from "@material-ui/lab";
 import NextLink from "next/link";
 import { useRouter } from "next/router";
-import React, { useMemo } from "react";
-import { format } from "timeago.js";
+import React from "react";
 import { SERVER_URL } from "../../../const/const";
 import { RegularPostDetailFragment } from "../../../generated/graphql";
 import { PostStatus } from "../../../graphql/hooks/useChangePostStatus";
-import {
-  createCommunityHomeLink,
-  createPostDetailModalLink,
-} from "../../../utils/links";
+import { createPostDetailModalLink } from "../../../utils/links";
 import { createComposedClasses } from "../../../utils/utils";
+import PostInfo from "../PostInfo";
 import PostToolBar from "../postToolBar/PostToolBar";
 import UpvoteBox from "../upvote/UpvoteBox";
 
@@ -120,29 +116,20 @@ const useStyles = makeStyles((theme: Theme) =>
 const UserPostCard = ({ post, ...props }: UserPostCardProps) => {
   const classes = useStyles();
 
-  const timeago = useMemo(() => format(parseInt(post.createdAt)), [post]);
-  const postInfo = useMemo(
-    () => (
-      <Box display="flex" alignItems="center">
-        <NextLink href={createCommunityHomeLink(post.community.name)} passHref>
-          <Link
-            className={classes.communityLink}
-            // onMouseDown={(
-            //   e: React.MouseEvent<HTMLAnchorElement, MouseEvent>
-            // ) => {
-            //   e.stopPropagation();
-            // }}
-          >{`r/${post.community.name}`}</Link>
-        </NextLink>
-        <span>&nbsp;&#183;&nbsp;</span>
-        <Typography
-          variant="caption"
-          className={classes.caption}
-        >{`Posted by u/${post.creator.username} ${timeago}`}</Typography>
-      </Box>
-    ),
-    [post, timeago]
-  );
+  // const timeago = useMemo(() => format(parseInt(post.createdAt)), [post]);
+  // const postInfo = useMemo(
+  //   () => (
+  //     <Box display="flex" alignItems="center">
+  //       <CommunityLink communityName={post.community.name} />
+  //       <span>&nbsp;&#183;&nbsp;</span>
+  //       <Typography
+  //         variant="caption"
+  //         className={classes.caption}
+  //       >{`Posted by u/${post.creator.username} ${timeago}`}</Typography>
+  //     </Box>
+  //   ),
+  //   [post, timeago]
+  // );
 
   const router = useRouter();
   const postDetailModalLink = createPostDetailModalLink(router.asPath, post.id);
@@ -177,7 +164,11 @@ const UserPostCard = ({ post, ...props }: UserPostCardProps) => {
               <Typography variant="subtitle1" className={classes.postTitle}>
                 {post.title}
               </Typography>
-              {postInfo}
+              <PostInfo
+                communityName={post.community.name}
+                userName={post.creator.username}
+                postCreatedAt={post.createdAt}
+              />
               <PostToolBar post={post} />
             </Box>
           </CardContent>

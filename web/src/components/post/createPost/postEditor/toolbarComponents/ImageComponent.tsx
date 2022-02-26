@@ -13,8 +13,8 @@ import ImageIcon from "@material-ui/icons/Image";
 import MuiAlert from "@material-ui/lab/Alert";
 import { DropzoneArea } from "material-ui-dropzone";
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import { SERVER_URL } from "../../../../const/const";
-import { useUploadImageMutation } from "../../../../generated/graphql";
+import { SERVER_URL } from "../../../../../const/const";
+import { useUploadImageMutation } from "../../../../../generated/graphql";
 
 interface ImageComponentProps {
   onChange: (

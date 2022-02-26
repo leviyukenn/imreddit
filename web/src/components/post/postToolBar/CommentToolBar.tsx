@@ -83,7 +83,11 @@ const CommentToolBar = ({ post }: CommentToolBarProps) => {
       />
       {moderatorButtons}
       {isCreator ? (
-        <DeletePostButton postId={post.id} iconButton={true} />
+        <DeletePostButton
+          postId={post.id}
+          userName={me!.username}
+          iconButton={true}
+        />
       ) : null}
     </Box>
   );

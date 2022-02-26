@@ -11,8 +11,8 @@ import AddOutlinedIcon from "@material-ui/icons/AddOutlined";
 import HighlightOffTwoToneIcon from "@material-ui/icons/HighlightOffTwoTone";
 import React, { ChangeEvent, useCallback, useEffect } from "react";
 import { useDropzone } from "react-dropzone";
-import { SERVER_URL } from "../../../const/const";
-import { UploadedImage } from "../../types/types";
+import { SERVER_URL } from "../../../../const/const";
+import { UploadedImage } from "../../../types/types";
 
 interface ImagePostEditorPreviewProps {
   onDrop: (files: File[]) => void;

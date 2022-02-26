@@ -28,7 +28,7 @@ import { usePostDetail } from "../../graphql/hooks/usePostDetail";
 import { useIsAuth } from "../../utils/hooks/useIsAuth";
 import { createUserProfileLink } from "../../utils/links";
 import { createComposedClasses } from "../../utils/utils";
-import CommentEditor from "./post-editor/CommentEditor";
+import CommentEditor from "./createPost/postEditor/CommentEditor";
 import CommentToolBar from "./postToolBar/CommentToolBar";
 import ToolBarButton from "./postToolBar/ToolBarButton";
 import UpvoteBox from "./upvote/UpvoteBox";

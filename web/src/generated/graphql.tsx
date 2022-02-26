@@ -292,7 +292,7 @@ export type Query = {
   postDetail?: Maybe<Post>;
   communities: Array<Community>;
   community?: Maybe<Community>;
-  userRoles: Array<Maybe<Role>>;
+  userRoles: Array<Role>;
   userRole?: Maybe<Role>;
   getUpvote?: Maybe<Upvote>;
   topics: Array<Topic>;
@@ -385,6 +385,7 @@ export type Role = {
   __typename?: 'Role';
   userId: Scalars['String'];
   communityId: Scalars['String'];
+  community: Community;
   joinedAt: Scalars['String'];
   isMember: Scalars['Boolean'];
   isModerator: Scalars['Boolean'];
@@ -483,6 +484,10 @@ export type RegularPostDetailFragment = (
 export type RegularRoleFragment = (
   { __typename?: 'Role' }
   & Pick<Role, 'userId' | 'communityId' | 'joinedAt' | 'isMember' | 'isModerator'>
+  & { community: (
+    { __typename?: 'Community' }
+    & Pick<Community, 'id' | 'name' | 'icon' | 'totalMemberships'>
+  ) }
 );
 
 export type RegularTextPostFragment = (
@@ -1101,10 +1106,10 @@ export type UserRolesQueryVariables = Exact<{
 
 export type UserRolesQuery = (
   { __typename?: 'Query' }
-  & { userRoles: Array<Maybe<(
+  & { userRoles: Array<(
     { __typename?: 'Role' }
     & RegularRoleFragment
-  )>> }
+  )> }
 );
 
 export type UserUpvotedPostsQueryVariables = Exact<{
@@ -1200,6 +1205,12 @@ export const RegularRoleFragmentDoc = gql`
   joinedAt
   isMember
   isModerator
+  community {
+    id
+    name
+    icon
+    totalMemberships
+  }
 }
     `;
 export const RegularTextPostFragmentDoc = gql`
@@ -2735,10 +2746,11 @@ export type QueryFieldPolicy = {
 	getUpvote?: FieldPolicy<any> | FieldReadFunction<any>,
 	topics?: FieldPolicy<any> | FieldReadFunction<any>
 };
-export type RoleKeySpecifier = ('userId' | 'communityId' | 'joinedAt' | 'isMember' | 'isModerator' | RoleKeySpecifier)[];
+export type RoleKeySpecifier = ('userId' | 'communityId' | 'community' | 'joinedAt' | 'isMember' | 'isModerator' | RoleKeySpecifier)[];
 export type RoleFieldPolicy = {
 	userId?: FieldPolicy<any> | FieldReadFunction<any>,
 	communityId?: FieldPolicy<any> | FieldReadFunction<any>,
+	community?: FieldPolicy<any> | FieldReadFunction<any>,
 	joinedAt?: FieldPolicy<any> | FieldReadFunction<any>,
 	isMember?: FieldPolicy<any> | FieldReadFunction<any>,
 	isModerator?: FieldPolicy<any> | FieldReadFunction<any>

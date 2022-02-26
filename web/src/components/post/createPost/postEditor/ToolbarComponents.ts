@@ -1,8 +1,8 @@
-import { BlockTypeButtons } from "./post-editor-toolbar-components/BlockComponent";
-import ImageComponent from "./post-editor-toolbar-components/ImageComponent";
-import { InlineButtons } from "./post-editor-toolbar-components/InlineComponent";
-import LinkComponent from "./post-editor-toolbar-components/LinkComponent";
-import { ListButtons } from "./post-editor-toolbar-components/ListComponents";
+import { BlockTypeButtons } from "./toolbarComponents/BlockComponent";
+import ImageComponent from "./toolbarComponents/ImageComponent";
+import { InlineButtons } from "./toolbarComponents/InlineComponent";
+import LinkComponent from "./toolbarComponents/LinkComponent";
+import { ListButtons } from "./toolbarComponents/ListComponents";
 
 export const createPostToolbarConfig = {
   options: ["inline", "blockType", "list", "link", "image"],

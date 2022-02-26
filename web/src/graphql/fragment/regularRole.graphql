@@ -4,4 +4,10 @@ fragment RegularRole on Role {
   joinedAt
   isMember
   isModerator
+  community {
+    id
+    name
+    icon
+    totalMemberships
+  }
 }

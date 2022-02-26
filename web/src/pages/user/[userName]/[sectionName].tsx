@@ -2,15 +2,13 @@ import { useRouter } from "next/router";
 import { useMemo } from "react";
 import ContentLayout from "../../../components/ContentLayout";
 import HomeContainer from "../../../components/HomeContainer";
-import MyProfile from "../../../components/userProfile/profile/MyProfile";
-import UserProfile from "../../../components/userProfile/profile/UserProfile";
 import UserCommentsContent from "../../../components/userProfile/UserCommentsContent";
+import UserPageRightSideContent from "../../../components/userProfile/UserPageRightSideContent";
 import UserPostsContent from "../../../components/userProfile/UserPostsContents";
 import UserProfileNavigation from "../../../components/userProfile/UserProfileNavigation";
 import UserUpvotedPostsContent, {
   UpvoteType,
 } from "../../../components/userProfile/UserUpvotedPostsContent";
-import { useFindUser } from "../../../graphql/hooks/useFindUser";
 import { useIsAuth } from "../../../utils/hooks/useIsAuth";
 
 interface UserProfileProps {}
@@ -31,11 +29,6 @@ const UserProfilePage = ({}: UserProfileProps) => {
       ? router.query.sectionName
       : "";
   const isMe = me?.username && me.username === userName;
-  const user = useFindUser(userName);
-  const profile = useMemo(() => {
-    if (isMe) return <MyProfile user={me!} />;
-    return user ? <UserProfile user={user} /> : undefined;
-  }, [isMe, user]);
 
   const content = useMemo(() => {
     switch (sectionName) {
@@ -73,7 +66,10 @@ const UserProfilePage = ({}: UserProfileProps) => {
         ) : undefined
       }
     >
-      <ContentLayout fullWidth={true} rightSideContent={profile}>
+      <ContentLayout
+        fullWidth={true}
+        rightSideContent={<UserPageRightSideContent />}
+      >
         {content}
       </ContentLayout>
     </HomeContainer>

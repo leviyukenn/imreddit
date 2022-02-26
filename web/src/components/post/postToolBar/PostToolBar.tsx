@@ -61,7 +61,7 @@ const PostToolBar = ({ post }: PostToolBarProps) => {
           />
         </>
       ) : null}
-      {isCreator ? <DeletePostButton postId={post.id} /> : null}
+      {isCreator ? <DeletePostButton postId={post.id} userName={me!.username}/> : null}
     </Box>
   );
 };

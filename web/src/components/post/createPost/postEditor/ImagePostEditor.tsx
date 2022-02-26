@@ -1,7 +1,7 @@
 import { Box } from "@material-ui/core";
 import React, { useMemo, useState } from "react";
-import { useUploadImage } from "../../../graphql/hooks/useUploadImage";
-import { UploadedImage } from "../../types/types";
+import { useUploadImage } from "../../../../graphql/hooks/useUploadImage";
+import { UploadedImage } from "../../../types/types";
 import ImagePostEditorDropZone from "./ImagePostEditorDropZone";
 import ImagePostEditorPreview from "./ImagePostEditorPreview";
 

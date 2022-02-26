@@ -3,8 +3,8 @@ import draftToHtml from "draftjs-to-html";
 import { draftToMarkdown, markdownToDraft } from "markdown-draft-js";
 import React, { useCallback, useState } from "react";
 import "react-draft-wysiwyg/dist/react-draft-wysiwyg.css";
-import { RegularPostDetailFragment } from "../../../generated/graphql";
-import { useCreateComment } from "../../../graphql/hooks/useCreateComment";
+import { RegularPostDetailFragment } from "../../../../generated/graphql";
+import { useCreateComment } from "../../../../graphql/hooks/useCreateComment";
 import CommentMarkdownEditor from "./CommentMarkdownEditor";
 import CommentRichEditor from "./CommentRichEditor";
 

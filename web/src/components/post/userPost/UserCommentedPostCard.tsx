@@ -7,21 +7,19 @@ import {
   Link,
   makeStyles,
   Theme,
-  Typography,
 } from "@material-ui/core";
 import ChatBubbleOutlineIcon from "@material-ui/icons/ChatBubbleOutline";
 import NextLink from "next/link";
 import { useRouter } from "next/router";
 import React, { useMemo } from "react";
-import { format } from "timeago.js";
 import { RegularPostDetailFragment } from "../../../generated/graphql";
 import { PostStatus } from "../../../graphql/hooks/useChangePostStatus";
 import {
-  createCommunityHomeLink,
   createPostDetailModalLink,
   createUserProfileLink,
 } from "../../../utils/links";
 import { createComposedClasses } from "../../../utils/utils";
+import PostInfo from "../PostInfo";
 import UserComments from "./UserComments";
 
 interface UserCommentedPostCardProps extends CardProps {
@@ -116,29 +114,6 @@ const UserCommentedPostCard = ({
   ...props
 }: UserCommentedPostCardProps) => {
   const classes = useStyles();
-  const timeago = useMemo(() => format(parseInt(post.createdAt)), [post]);
-  const postInfo = useMemo(
-    () => (
-      <Box display="flex" alignItems="center">
-        <NextLink href={createCommunityHomeLink(post.community.name)} passHref>
-          <Link
-            className={classes.communityLink}
-            // onMouseDown={(
-            //   e: React.MouseEvent<HTMLAnchorElement, MouseEvent>
-            // ) => {
-            //   e.stopPropagation();
-            // }}
-          >{`r/${post.community.name}`}</Link>
-        </NextLink>
-        <span>&nbsp;&#183;&nbsp;</span>
-        <Typography
-          variant="caption"
-          style={{ color: "rgb(120, 124, 126)" }}
-        >{`Posted by ${post.creator.username} ${timeago}`}</Typography>
-      </Box>
-    ),
-    [post, timeago]
-  );
   const title = useMemo(
     () => (
       <Box display="flex" alignItems="center" className={classes.title}>
@@ -156,11 +131,7 @@ const UserCommentedPostCard = ({
   );
   const router = useRouter();
 
-  const postDetailModalLink = createPostDetailModalLink(
-    router.asPath,
-    // createPostDetailPageLink(post.community.name, post.id),
-    post.id
-  );
+  const postDetailModalLink = createPostDetailModalLink(router.asPath, post.id);
   const isRemoved = post.postStatus === PostStatus.REMOVED;
 
   return (
@@ -183,7 +154,11 @@ const UserCommentedPostCard = ({
             <ChatBubbleOutlineIcon className={classes.commentIcon} />
             <Box className={classes.postInfoContainer}>
               {title}
-              {postInfo}
+              <PostInfo
+                communityName={post.community.name}
+                userName={post.creator.username}
+                postCreatedAt={post.createdAt}
+              />
             </Box>
           </CardContent>
         </Card>

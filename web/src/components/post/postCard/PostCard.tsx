@@ -7,7 +7,6 @@ import {
   CardProps,
   createStyles,
   IconButton,
-  Link,
   makeStyles,
   Theme,
   Typography,
@@ -20,16 +19,15 @@ import React, { useMemo } from "react";
 import { format } from "timeago.js";
 import { RegularPostDetailFragment } from "../../../generated/graphql";
 import {
-  createCommunityHomeLink,
   createPostDetailModalLink,
   createPostDetailPageLink,
-  createUserProfileLink,
 } from "../../../utils/links";
 import CommunityIcon from "../../community/CommunityIcon";
 import ToolBar from "../postToolBar/PostToolBar";
 import UpvoteBox from "../upvote/UpvoteBox";
 import ImagePostContent from "./ImagePostContent";
 import TextPostContent from "./TextPostContent";
+import PostInfo from "../PostInfo";
 
 interface PostCardProps extends CardProps {
   post: RegularPostDetailFragment;
@@ -111,37 +109,15 @@ export const PostCard = ({ post, ...props }: PostCardProps) => {
       >
         <Card className={classes.card} {...props}>
           <CardHeader
-            avatar={<CommunityIcon icon={post.community.icon} size="small" />}
+            avatar={
+              <CommunityIcon icon={post.community.icon} size="extraSmall" />
+            }
             subheader={
-              <Box display="flex" alignItems="center">
-                <NextLink
-                  href={createCommunityHomeLink(post.community.name)}
-                  passHref
-                >
-                  <Link
-                    className={classes.communityLink}
-                    onMouseDown={(
-                      e: React.MouseEvent<HTMLAnchorElement, MouseEvent>
-                    ) => {
-                      e.stopPropagation();
-                    }}
-                  >{`r/${post.community.name}`}</Link>
-                </NextLink>
-                <span>&nbsp;&#183;&nbsp;</span>
-                <Typography variant="caption">
-                  Posted by&nbsp;
-                  <NextLink
-                    href={createUserProfileLink(post.creator.username, "posts")}
-                    passHref
-                  >
-                    <Link
-                      className={classes.communityLink}
-                    >{`u/${post.creator.username}`}</Link>
-                  </NextLink>
-                  &nbsp;
-                  {timeago}
-                </Typography>
-              </Box>
+              <PostInfo
+                communityName={post.community.name}
+                userName={post.creator.username}
+                postCreatedAt={post.createdAt}
+              />
             }
             classes={{ root: classes.header, avatar: classes.communityIcon }}
           />

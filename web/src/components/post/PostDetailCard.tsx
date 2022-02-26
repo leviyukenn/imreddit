@@ -7,7 +7,6 @@ import {
   CardProps,
   createStyles,
   IconButton,
-  Link,
   makeStyles,
   Theme,
   Typography,
@@ -15,18 +14,13 @@ import {
 import { red } from "@material-ui/core/colors";
 import { Skeleton } from "@material-ui/lab";
 import DOMPurify from "dompurify";
-import NextLink from "next/link";
 import React, { useMemo } from "react";
-import { format } from "timeago.js";
 import { RegularPostDetailFragment } from "../../generated/graphql";
 import { PostStatus } from "../../graphql/hooks/useChangePostStatus";
 import { useIsAuth } from "../../utils/hooks/useIsAuth";
-import {
-  createCommunityHomeLink,
-  createUserProfileLink,
-} from "../../utils/links";
 import CommunityIcon from "../community/CommunityIcon";
 import ImagePostSwiper from "./postCard/ImgaePostSwiper";
+import PostInfo from "./PostInfo";
 import ToolBar from "./postToolBar/PostToolBar";
 import UpvoteBox from "./upvote/UpvoteBox";
 import PostRemovedWarning from "./warning/PostRemovedWarning";
@@ -85,10 +79,6 @@ enum PostType {
 export const PostDetailCard = ({ post, ...props }: PostDetailProps) => {
   const classes = useStyles();
 
-  const timeago = useMemo(() => format(parseInt(post.createdAt)), [post]);
-
-  const isTextPost = useMemo(() => post.images.length === 0, [post]);
-
   const { me } = useIsAuth();
   const isRemovedPost = post?.postStatus === PostStatus.REMOVED;
 
@@ -114,35 +104,14 @@ export const PostDetailCard = ({ post, ...props }: PostDetailProps) => {
       </Box>
 
       <CardHeader
-        avatar={<CommunityIcon icon={post.community.icon} size="small" />}
+        avatar={<CommunityIcon icon={post.community.icon} size="extraSmall" />}
         classes={{ avatar: classes.communityIcon }}
         subheader={
-          <Box display="flex" alignItems="center">
-            <NextLink href={createCommunityHomeLink(post.community.name)}>
-              <Link
-                className={classes.communityLink}
-                onMouseDown={(
-                  e: React.MouseEvent<HTMLAnchorElement, MouseEvent>
-                ) => {
-                  e.stopPropagation();
-                }}
-              >{`r/${post.community.name}`}</Link>
-            </NextLink>
-            <span>&nbsp;&#183;&nbsp;</span>
-            <Typography variant="caption">
-              Posted by&nbsp;
-              <NextLink
-                href={createUserProfileLink(post.creator.username, "posts")}
-                passHref
-              >
-                <Link
-                  className={classes.communityLink}
-                >{`u/${post.creator.username}`}</Link>
-              </NextLink>
-              &nbsp;
-              {timeago}
-            </Typography>
-          </Box>
+          <PostInfo
+            communityName={post.community.name}
+            userName={post.creator.username}
+            postCreatedAt={post.createdAt}
+          />
         }
       />
       <CardContent className={classes.content}>

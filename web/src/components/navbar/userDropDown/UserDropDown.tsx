@@ -1,15 +1,25 @@
 import {
   Box,
   ButtonBase,
+  ClickAwayListener,
   createStyles,
+  Divider,
+  List,
+  ListItem,
+  ListItemText,
   makeStyles,
   Popper,
   Theme,
 } from "@material-ui/core";
+import AccountCircleIcon from "@material-ui/icons/AccountCircle";
+import ExitToAppIcon from "@material-ui/icons/ExitToApp";
 import ExpandMoreRoundedIcon from "@material-ui/icons/ExpandMoreRounded";
 import React, { useState } from "react";
 import { RegularUserFragment } from "../../../generated/graphql";
-import UserDropDownList from "./UserDropDownList";
+import { createUserProfileLink } from "../../../utils/links";
+import UserDropDownListItem from "./UserDropDownListItem";
+import { useRouter } from "next/router";
+import { useLogout } from "../../../graphql/hooks/useLogout";
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -49,6 +59,10 @@ const useStyles = makeStyles((theme: Theme) =>
       height: "28px",
       margin: theme.spacing(1),
     },
+    menuTitle: {
+      color: "#878a8c",
+      fontWeight: 700,
+    },
   })
 );
 
@@ -63,6 +77,8 @@ const UserDropDown = ({ me }: UserDropDownProps) => {
     setAnchorEl(anchorEl ? null : event.currentTarget);
   };
   const open = Boolean(anchorEl);
+  const router = useRouter();
+  const { logout } = useLogout();
 
   return (
     <React.Fragment>
@@ -87,10 +103,32 @@ const UserDropDown = ({ me }: UserDropDownProps) => {
         placement="bottom-start"
         className={classes.popper}
       >
-        <UserDropDownList
-          onClickAway={() => open && setAnchorEl(null)}
-          userName={me.username}
-        />
+        <ClickAwayListener onClickAway={() => open && setAnchorEl(null)}>
+          <List>
+            <ListItem>
+              <ListItemText
+                primary="MY STUFF"
+                primaryTypographyProps={{ variant: "caption" }}
+                // className={classes.menuTitle}
+                classes={{ primary: classes.menuTitle }}
+              />
+            </ListItem>
+            <UserDropDownListItem
+              icon={<AccountCircleIcon />}
+              text="Profile"
+              onClick={() => {
+                router.push(createUserProfileLink(me.username, "posts"));
+                setAnchorEl(null);
+              }}
+            />
+            <Divider />
+            <UserDropDownListItem
+              icon={<ExitToAppIcon />}
+              text="Logout"
+              onClick={logout}
+            />
+          </List>
+        </ClickAwayListener>
       </Popper>
     </React.Fragment>
   );

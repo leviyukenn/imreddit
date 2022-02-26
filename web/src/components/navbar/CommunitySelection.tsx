@@ -12,10 +12,7 @@ import Autocomplete, {
 } from "@material-ui/lab/Autocomplete";
 import { useRouter } from "next/router";
 import React, { useEffect, useMemo, useState } from "react";
-import {
-  useCommunitiesQuery,
-  useUserRolesQuery,
-} from "../../generated/graphql";
+import { useUserRolesQuery } from "../../generated/graphql";
 import {
   CommunitySelectionOption,
   CommunitySelectionOptionGroupType,
@@ -144,16 +141,16 @@ const iconMap = new Map<CommunitySelectionOptionIconType, JSX.Element>([
 ]);
 
 function useCommunitySelectionOption(userId: string) {
-  const { data: communitiesResponse } = useCommunitiesQuery({
-    variables: { userId },
-  });
+  // const { data: communitiesResponse } = useCommunitiesQuery({
+  //   variables: { userId },
+  // });
   const { data: userRolesResponse } = useUserRolesQuery({
     variables: { userId },
   });
 
-  const communities = useMemo(() => communitiesResponse?.communities || [], [
-    communitiesResponse,
-  ]);
+  // const communities = useMemo(() => communitiesResponse?.communities || [], [
+  //   communitiesResponse,
+  // ]);
 
   const userRoles = useMemo(() => userRolesResponse?.userRoles || [], [
     userRolesResponse,
@@ -161,16 +158,12 @@ function useCommunitySelectionOption(userId: string) {
 
   const myCommunities = useMemo(
     () =>
-      communities.filter(
-        (community) =>
-          userRoles.find((userRole) => userRole?.communityId == community.id)
-            ?.isMember
-      ),
-    [communities, userRoles]
+      userRoles.filter((role) => role?.isMember).map((role) => role!.community),
+    [userRoles]
   );
 
   const myCommunitiesItems: CommunitySelectionOption[] = useMemo(() => {
-    if (communities.length == 0) return [];
+    if (myCommunities.length == 0) return [];
     const myCommunityOptions = myCommunities.map((community) =>
       CommunitySelectionOption.createOption({
         id: community.id,
@@ -193,12 +186,10 @@ function useCommunitySelectionOption(userId: string) {
 
   const moderatingCommunities = useMemo(
     () =>
-      communities.filter(
-        (community) =>
-          userRoles.find((userRole) => userRole?.communityId == community.id)
-            ?.isModerator
-      ),
-    [communities, userRoles]
+      userRoles
+        .filter((role) => role?.isModerator)
+        .map((role) => role!.community),
+    [userRoles]
   );
 
   const moderatingItems = useMemo(
@@ -246,7 +237,7 @@ export default function CommunitySelection({ userId }: { userId: string }) {
   const inputIcon = useMemo(() => {
     if (!pendingValue) return null;
     if (typeof pendingValue.icon === "string") {
-      return <CommunityIcon icon={pendingValue.icon} size={"small"} />;
+      return <CommunityIcon icon={pendingValue.icon} size="extraSmall" />;
     }
     return iconMap.get(pendingValue.icon);
   }, [pendingValue]);
@@ -329,7 +320,7 @@ export default function CommunitySelection({ userId }: { userId: string }) {
           renderOption={(option) => (
             <Box display="flex" alignItems="center" key={option.id}>
               {typeof option.icon === "string" ? (
-                <CommunityIcon icon={option.icon} size={"small"} />
+                <CommunityIcon icon={option.icon} size="extraSmall" />
               ) : (
                 iconMap.get(option.icon)
               )}

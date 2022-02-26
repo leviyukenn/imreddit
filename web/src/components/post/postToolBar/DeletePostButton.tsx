@@ -7,16 +7,18 @@ import ToolBarButton from "./ToolBarButton";
 
 interface RemovePostButtonProps {
   postId: string;
+  userName: string;
   textButton?: boolean;
   iconButton?: boolean;
 }
 
 const DeletePostButton = ({
   postId,
+  userName,
   textButton = false,
   iconButton = false,
 }: RemovePostButtonProps) => {
-  const { deleteMyPost, loading } = useDeleteMyPost();
+  const { deleteMyPost, loading } = useDeleteMyPost(userName);
   const { open } = useAlertDialog({
     title: "Delete post?",
     text: "Are you sure you want to delete your post? You can't undo this.",
@@ -35,9 +37,7 @@ const DeletePostButton = ({
   return iconButton ? (
     <Tooltip title="Delete">
       <IconButton onClick={handleClick} disabled={loading}>
-        <DeleteIcon 
-        style={{color:"#9b9b9b"}}
-        />
+        <DeleteIcon style={{ color: "#9b9b9b" }} />
       </IconButton>
     </Tooltip>
   ) : (

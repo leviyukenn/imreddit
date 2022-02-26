@@ -1,16 +1,18 @@
 import ContentLayout from "../components/ContentLayout";
 import HomeContainer from "../components/HomeContainer";
-import CreatePostCard from "../components/post/CreatePostCard";
+import CreatePostCard from "../components/post/createPost/CreatePostCard";
 import { HomePostsInfiniteScroll } from "../components/post/PostInfiniteScroll";
-import { useIsAuth } from "../utils/hooks/useIsAuth";
+import { useMeQuery } from "../generated/graphql";
 
 const Index = () => {
-  const { isAuth } = useIsAuth();
+  const { data: meResponse } = useMeQuery();
 
   return (
     <HomeContainer>
       <ContentLayout>
-        {isAuth ? <CreatePostCard /> : null}
+        {meResponse?.me ? (
+          <CreatePostCard avatar={meResponse.me.avatar} />
+        ) : null}
         <HomePostsInfiniteScroll />
       </ContentLayout>
     </HomeContainer>

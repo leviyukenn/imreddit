@@ -11,7 +11,7 @@ import { PostDetailQuery } from "../../generated/graphql";
 import { useIsAuth } from "../../utils/hooks/useIsAuth";
 import LoginRegisterButtonGroup from "../navbar/LoginRegisterButtonGroup";
 import { CommentCard } from "./CommentCard";
-import CommentEditor from "./post-editor/CommentEditor";
+import CommentEditor from "./createPost/postEditor/CommentEditor";
 import { LoadingPostDetailCard, PostDetailCard } from "./PostDetailCard";
 
 interface PostDetailProps {

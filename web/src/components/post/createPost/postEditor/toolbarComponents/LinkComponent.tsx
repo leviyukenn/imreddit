@@ -12,7 +12,7 @@ import LinkIcon from "@material-ui/icons/Link";
 import { Field, Form, Formik } from "formik";
 import React, { useCallback, useRef, useState } from "react";
 import * as Yup from "yup";
-import { SmallTextInputField } from "../../../InputField";
+import { SmallTextInputField } from "../../../../InputField";
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({

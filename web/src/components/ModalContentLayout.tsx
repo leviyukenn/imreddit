@@ -23,9 +23,10 @@ const useStyles = makeStyles((theme: Theme) =>
     },
     backToTopButton: {
       position: "sticky",
-      top: "calc(100vh - 80px)",
+      top: "calc(100vh - 180px)",
       textTransform: "none",
       fontWeight: 700,
+      marginLeft: 90,
     },
     backToTopButtonIcon: {
       fontSize: "1.25rem",

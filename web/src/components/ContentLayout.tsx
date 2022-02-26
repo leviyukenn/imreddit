@@ -17,6 +17,7 @@ const useStyles = makeStyles((theme: Theme) =>
       marginLeft: "2rem",
       display: "none",
       flex: "0 0 312px",
+      // textAlign: "center",
       [theme.breakpoints.up("md")]: {
         display: "block",
       },
@@ -24,8 +25,11 @@ const useStyles = makeStyles((theme: Theme) =>
     backToTopButton: {
       position: "sticky",
       top: "calc(100vh - 80px)",
+      left: "50%",
       textTransform: "none",
       fontWeight: 700,
+      // margin: "0 auto",
+      marginLeft: 90,
     },
     backToTopButtonIcon: {
       fontSize: "1.25rem",
@@ -66,6 +70,7 @@ const ContentLayout = ({
         {rightSideContent ? (
           <Box className={classes.rightSideContainer}>
             {rightSideContent}
+            {/* <Box display="flex" justifyContent="center" marginTop="20px"> */}
             <Fab
               variant="extended"
               color="primary"
@@ -77,7 +82,8 @@ const ContentLayout = ({
               Back to Top
             </Fab>
           </Box>
-        ) : null}
+        ) : // </Box>
+        null}
       </Box>
     </>
   );

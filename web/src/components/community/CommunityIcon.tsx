@@ -4,14 +4,20 @@ import DefaultCommunityIcon from "../utility/DefaultCommunityIcon";
 
 interface CommunityIconProps {
   icon: string;
-  size: "small" | "medium" | "large";
+  size: "extraSmall" | "small" | "medium" | "large";
 }
 
 const useImageStyles = makeStyles((theme: Theme) =>
   createStyles({
-    small: {
+    extraSmall: {
       width: 20,
       height: 20,
+      backgroundColor: "rgb(0 121 211)",
+      borderRadius: "100%",
+    },
+    small: {
+      width: 32,
+      height: 32,
       backgroundColor: "rgb(0 121 211)",
       borderRadius: "100%",
     },
@@ -34,9 +40,17 @@ const useImageStyles = makeStyles((theme: Theme) =>
 
 const useDefaultIconStyles = makeStyles((theme: Theme) =>
   createStyles({
-    small: {
+    extraSmall: {
       height: 20,
       width: 20,
+      boxSizing: "border-box",
+      background: "#ffffff",
+      display: "inline-block",
+      fill: "#0079d3",
+    },
+    small: {
+      height: 32,
+      width: 32,
       boxSizing: "border-box",
       background: "#ffffff",
       display: "inline-block",

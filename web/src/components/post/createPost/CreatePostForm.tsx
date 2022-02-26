@@ -10,12 +10,12 @@ import { EditorState } from "draft-js";
 import { Field, Form, Formik, FormikHelpers } from "formik";
 import React, { useCallback, useState } from "react";
 import * as Yup from "yup";
-import { useCreateImagePost } from "../../graphql/hooks/useCreateImagePost";
-import { useCreateTextPost } from "../../graphql/hooks/useCreateTextPost";
-import { TextInputField } from "../InputField";
-import { PostType, UploadedImage } from "../types/types";
-import ImagePostEditor from "./post-editor/ImagePostEditor";
-import PostEditor from "./post-editor/PostEditor";
+import { useCreateImagePost } from "../../../graphql/hooks/useCreateImagePost";
+import { useCreateTextPost } from "../../../graphql/hooks/useCreateTextPost";
+import { TextInputField } from "../../InputField";
+import { PostType, UploadedImage } from "../../types/types";
+import ImagePostEditor from "./postEditor/ImagePostEditor";
+import PostEditor from "./postEditor/PostEditor";
 
 interface FormData {
   title: string;
