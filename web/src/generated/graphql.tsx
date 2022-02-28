@@ -78,12 +78,6 @@ export type CreateTextPostInput = {
   communityId: Scalars['String'];
 };
 
-export type DeletePostResponse = {
-  __typename?: 'DeletePostResponse';
-  errors?: Maybe<Array<FieldError>>;
-  postId?: Maybe<Scalars['String']>;
-};
-
 export type FieldError = {
   __typename?: 'FieldError';
   field: Scalars['String'];
@@ -129,7 +123,7 @@ export type Mutation = {
   createImagePost: PostResponse;
   createComment: PostResponse;
   changePostStatus: PostResponse;
-  deleteMyPost: DeletePostResponse;
+  deleteMyPost: Scalars['String'];
   uploadImage: UploadResponse;
   createCommunity: CommunityResponse;
   editCommunityDescription: CommunityResponse;
@@ -342,6 +336,8 @@ export type QueryCommunityPostsArgs = {
 export type QueryPaginatedPostsArgs = {
   cursor?: Maybe<Scalars['String']>;
   limit?: Maybe<Scalars['Int']>;
+  userId?: Maybe<Scalars['String']>;
+  orderType?: Maybe<Scalars['Int']>;
 };
 
 
@@ -663,14 +659,7 @@ export type DeleteMyPostMutationVariables = Exact<{
 
 export type DeleteMyPostMutation = (
   { __typename?: 'Mutation' }
-  & { deleteMyPost: (
-    { __typename?: 'DeletePostResponse' }
-    & Pick<DeletePostResponse, 'postId'>
-    & { errors?: Maybe<Array<(
-      { __typename?: 'FieldError' }
-      & RegularErrorsFragment
-    )>> }
-  ) }
+  & Pick<Mutation, 'deleteMyPost'>
 );
 
 export type EditCommunityDescriptionMutationVariables = Exact<{
@@ -975,6 +964,8 @@ export type MeQuery = (
 );
 
 export type PostsQueryVariables = Exact<{
+  orderType?: Maybe<Scalars['Int']>;
+  userId?: Maybe<Scalars['String']>;
   limit?: Maybe<Scalars['Int']>;
   cursor?: Maybe<Scalars['String']>;
 }>;
@@ -1535,14 +1526,9 @@ export type CreateTextPostMutationResult = Apollo.MutationResult<CreateTextPostM
 export type CreateTextPostMutationOptions = Apollo.BaseMutationOptions<CreateTextPostMutation, CreateTextPostMutationVariables>;
 export const DeleteMyPostDocument = gql`
     mutation DeleteMyPost($postId: String!) {
-  deleteMyPost(postId: $postId) {
-    postId
-    errors {
-      ...RegularErrors
-    }
-  }
+  deleteMyPost(postId: $postId)
 }
-    ${RegularErrorsFragmentDoc}`;
+    `;
 export type DeleteMyPostMutationFn = Apollo.MutationFunction<DeleteMyPostMutation, DeleteMyPostMutationVariables>;
 
 /**
@@ -2252,8 +2238,13 @@ export type MeQueryHookResult = ReturnType<typeof useMeQuery>;
 export type MeLazyQueryHookResult = ReturnType<typeof useMeLazyQuery>;
 export type MeQueryResult = Apollo.QueryResult<MeQuery, MeQueryVariables>;
 export const PostsDocument = gql`
-    query Posts($limit: Int, $cursor: String) {
-  paginatedPosts(limit: $limit, cursor: $cursor) {
+    query Posts($orderType: Int, $userId: String, $limit: Int, $cursor: String) {
+  paginatedPosts(
+    orderType: $orderType
+    userId: $userId
+    limit: $limit
+    cursor: $cursor
+  ) {
     hasMore
     posts {
       ...RegularPostDetail
@@ -2274,6 +2265,8 @@ export const PostsDocument = gql`
  * @example
  * const { data, loading, error } = usePostsQuery({
  *   variables: {
+ *      orderType: // value for 'orderType'
+ *      userId: // value for 'userId'
  *      limit: // value for 'limit'
  *      cursor: // value for 'cursor'
  *   },
@@ -2656,11 +2649,6 @@ export type CompleteResponseFieldPolicy = {
 	errors?: FieldPolicy<any> | FieldReadFunction<any>,
 	isComplete?: FieldPolicy<any> | FieldReadFunction<any>
 };
-export type DeletePostResponseKeySpecifier = ('errors' | 'postId' | DeletePostResponseKeySpecifier)[];
-export type DeletePostResponseFieldPolicy = {
-	errors?: FieldPolicy<any> | FieldReadFunction<any>,
-	postId?: FieldPolicy<any> | FieldReadFunction<any>
-};
 export type FieldErrorKeySpecifier = ('field' | 'errorCode' | 'message' | FieldErrorKeySpecifier)[];
 export type FieldErrorFieldPolicy = {
 	field?: FieldPolicy<any> | FieldReadFunction<any>,
@@ -2808,10 +2796,6 @@ export type TypedTypePolicies = TypePolicies & {
 	CompleteResponse?: Omit<TypePolicy, "fields" | "keyFields"> & {
 		keyFields?: false | CompleteResponseKeySpecifier | (() => undefined | CompleteResponseKeySpecifier),
 		fields?: CompleteResponseFieldPolicy,
-	},
-	DeletePostResponse?: Omit<TypePolicy, "fields" | "keyFields"> & {
-		keyFields?: false | DeletePostResponseKeySpecifier | (() => undefined | DeletePostResponseKeySpecifier),
-		fields?: DeletePostResponseFieldPolicy,
 	},
 	FieldError?: Omit<TypePolicy, "fields" | "keyFields"> & {
 		keyFields?: false | FieldErrorKeySpecifier | (() => undefined | FieldErrorKeySpecifier),

@@ -1,14 +1,15 @@
 import { useCallback, useState } from "react";
-import { FrontendError } from "../../const/errors";
 import { useUploadImageMutation } from "../../generated/graphql";
 import { useSnackbarAlert } from "../../redux/hooks/useSnackbarAlert";
 import { AlertSeverity } from "../../redux/types/types";
 import { useIsAuth } from "../../utils/hooks/useIsAuth";
 
 export function useUploadImage() {
-  const [uploadImage] = useUploadImageMutation();
+  const { onOpenSnackbarAlert, handleMutationError } = useSnackbarAlert();
+  const [uploadImage] = useUploadImageMutation({
+    onError: handleMutationError,
+  });
   const [uploading, setUploading] = useState(false);
-  const { onOpenSnackbarAlert } = useSnackbarAlert();
   const { checkIsAuth } = useIsAuth();
 
   const onUpload = useCallback(
@@ -17,13 +18,7 @@ export function useUploadImage() {
         setUploading(true);
         files.forEach(async (file) => {
           if (!checkIsAuth()) return false;
-          const response = await uploadImage({ variables: { file } }).catch(
-            (err) =>
-              onOpenSnackbarAlert({
-                message: err.message || FrontendError.ERR0002,
-                severity: AlertSeverity.ERROR,
-              })
-          );
+          const response = await uploadImage({ variables: { file } });
           if (!response) {
             setUploading(false);
             return;

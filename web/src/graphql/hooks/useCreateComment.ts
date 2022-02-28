@@ -1,7 +1,6 @@
 import { Reference } from "@apollo/client";
 import { useRouter } from "next/router";
 import { useCallback } from "react";
-import { FrontendError } from "../../const/errors";
 import {
   RegularPostDetailFragment,
   RegularPostDetailFragmentDoc,
@@ -13,9 +12,10 @@ import { useIsAuth } from "../../utils/hooks/useIsAuth";
 
 export function useCreateComment(replyTo: RegularPostDetailFragment) {
   const { checkIsAuth } = useIsAuth();
-  const { onOpenSnackbarAlert } = useSnackbarAlert();
+  const { onOpenSnackbarAlert, handleMutationError } = useSnackbarAlert();
   const router = useRouter();
   const [createCommentMutation, { loading }] = useCreateCommentMutation({
+    onError: handleMutationError,
     update(cache, { data: createCommentResponse }) {
       cache.modify({
         id: cache.identify(replyTo),
@@ -55,12 +55,8 @@ export function useCreateComment(replyTo: RegularPostDetailFragment) {
           parentId: replyTo.id,
           ancestorId: replyTo.ancestor?.id || replyTo.id,
         },
-      }).catch(() => null);
+      });
       if (!response) {
-        onOpenSnackbarAlert({
-          message: FrontendError.ERR0002,
-          severity: AlertSeverity.ERROR,
-        });
         return false;
       }
 

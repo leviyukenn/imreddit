@@ -1,16 +1,15 @@
-import { ApolloProvider } from "@apollo/client";
 import CssBaseline from "@material-ui/core/CssBaseline";
 import { ThemeProvider } from "@material-ui/core/styles";
 import { AppProps } from "next/app";
 import React, { useEffect } from "react";
 import { Provider } from "react-redux";
-import apolloClient from "../apollo-client/apollo-client";
+import ApolloProviderWithErrorHanding from "../components/apolloProvider/ApolloProviderWithErrorHanding";
 import AlertDialog from "../components/errorHandling/AlertDialog";
 import { SnackbarAlert } from "../components/errorHandling/SnackbarAlert";
 import PostDetailModal from "../components/post/PostDetailModal";
+import LoginRegisterModal from "../components/user/LoginRegisterModal";
 import store from "../redux/store";
 import theme from "../theme";
-import LoginRegisterModal from "../components/user/LoginRegisterModal";
 
 function MyApp({ Component, pageProps }: AppProps) {
   useEffect(() => {
@@ -23,7 +22,8 @@ function MyApp({ Component, pageProps }: AppProps) {
 
   return (
     <Provider store={store}>
-      <ApolloProvider client={apolloClient}>
+      {/* <ApolloProvider client={apolloClient}> */}
+      <ApolloProviderWithErrorHanding>
         <CssBaseline />
         <ThemeProvider theme={theme}>
           <Component {...pageProps} />
@@ -32,7 +32,8 @@ function MyApp({ Component, pageProps }: AppProps) {
           <LoginRegisterModal />
           <PostDetailModal />
         </ThemeProvider>
-      </ApolloProvider>
+      </ApolloProviderWithErrorHanding>
+      {/* </ApolloProvider> */}
     </Provider>
   );
 }

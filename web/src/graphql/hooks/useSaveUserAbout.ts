@@ -1,25 +1,20 @@
 import { useCallback } from "react";
-import { FrontendError } from "../../const/errors";
 import { useEditUserAboutMutation } from "../../generated/graphql";
 import { useSnackbarAlert } from "../../redux/hooks/useSnackbarAlert";
 import { AlertSeverity } from "../../redux/types/types";
 import { useIsAuth } from "../../utils/hooks/useIsAuth";
 
 export const useSaveUserAbout = () => {
-  const { onOpenSnackbarAlert } = useSnackbarAlert();
-  const [saveAboutMutation] = useEditUserAboutMutation();
+  const { onOpenSnackbarAlert, handleMutationError } = useSnackbarAlert();
+  const [saveAboutMutation] = useEditUserAboutMutation({
+    onError: handleMutationError,
+  });
   const { checkIsAuth } = useIsAuth();
   const onSaveAbout = useCallback(
     async (about: string) => {
       if (!checkIsAuth) return false;
       const result = await saveAboutMutation({
         variables: { about },
-      }).catch((err) => {
-        onOpenSnackbarAlert({
-          message: err.message || FrontendError.ERR0002,
-          severity: AlertSeverity.ERROR,
-        });
-        return null;
       });
       if (!result) {
         return false;

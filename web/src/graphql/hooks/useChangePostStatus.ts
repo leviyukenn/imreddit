@@ -12,21 +12,15 @@ export enum PostStatus {
 }
 export function useChnagePostStatus() {
   const { checkIsAuth } = useIsAuth();
-  const { onOpenSnackbarAlert } = useSnackbarAlert();
-  const [changePostStatusMutation, { loading }] = useChangePostStatusMutation();
+  const { onOpenSnackbarAlert,handleMutationError } = useSnackbarAlert();
+  const [changePostStatusMutation, { loading }] = useChangePostStatusMutation({onError:handleMutationError});
 
   const changePostStatus = useCallback(
     async (postId: string, postStatus: PostStatus) => {
       if (!checkIsAuth()) return;
       const response = await changePostStatusMutation({
         variables: { postId, postStatus },
-      }).catch((err) => {
-        onOpenSnackbarAlert({
-          message: err.message || FrontendError.ERR0002,
-          severity: AlertSeverity.ERROR,
-        });
-        return null;
-      });
+      })
       if (!response) {
         return false;
       }

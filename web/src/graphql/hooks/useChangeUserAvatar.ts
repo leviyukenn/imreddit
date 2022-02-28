@@ -5,8 +5,10 @@ import { AlertSeverity } from "../../redux/types/types";
 import { useIsAuth } from "../../utils/hooks/useIsAuth";
 
 export const useChangeUserAvatar = () => {
-  const { onOpenSnackbarAlert } = useSnackbarAlert();
-  const [changeUserAvatarMutation] = useChangeUserAvatarMutation();
+  const { onOpenSnackbarAlert, handleMutationError } = useSnackbarAlert();
+  const [changeUserAvatarMutation] = useChangeUserAvatarMutation({
+    onError: handleMutationError,
+  });
   const { redirectToLoginIfNotLoggedIn, me } = useIsAuth();
   const onSaveAvatar = useCallback(
     async (avatarSeed: string) => {
@@ -16,11 +18,6 @@ export const useChangeUserAvatar = () => {
       }
       const result = await changeUserAvatarMutation({
         variables: { avatarSeed },
-      }).catch((err) => {
-        onOpenSnackbarAlert({
-          message: err.message,
-          severity: AlertSeverity.ERROR,
-        });
       });
       if (!result) {
         return false;

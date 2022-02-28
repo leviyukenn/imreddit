@@ -1,7 +1,6 @@
 import { Reference } from "@apollo/client";
 import { useRouter } from "next/router";
 import { useCallback } from "react";
-import { FrontendError } from "../../const/errors";
 import {
   CreateTextPostMutationVariables,
   RegularPostDetailFragmentDoc,
@@ -14,9 +13,10 @@ import { createPostDetailPageLink } from "../../utils/links";
 
 export function useCreateTextPost() {
   const { redirectToLoginIfNotLoggedIn } = useIsAuth();
-  const { onOpenSnackbarAlert } = useSnackbarAlert();
+  const { onOpenSnackbarAlert, handleMutationError } = useSnackbarAlert();
   const router = useRouter();
   const [createTextPostMutation, { loading }] = useCreateTextPostMutation({
+    onError: handleMutationError,
     update(cache, { data: createPostResponse }) {
       cache.modify({
         fields: {
@@ -49,14 +49,8 @@ export function useCreateTextPost() {
   const createTextPost = useCallback(
     async (variables: CreateTextPostMutationVariables) => {
       redirectToLoginIfNotLoggedIn();
-      const response = await createTextPostMutation({ variables }).catch(
-        () => null
-      );
+      const response = await createTextPostMutation({ variables });
       if (!response) {
-        onOpenSnackbarAlert({
-          message: FrontendError.ERR0002,
-          severity: AlertSeverity.ERROR,
-        });
         return false;
       }
 

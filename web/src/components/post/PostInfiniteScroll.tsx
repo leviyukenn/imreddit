@@ -3,6 +3,7 @@ import { RegularPostDetailFragment } from "../../generated/graphql";
 import { useCommunityPosts } from "../../graphql/hooks/useCommunityPosts";
 import { useHomePosts } from "../../graphql/hooks/useHomePosts";
 import { LoadingPostCard, PostCard } from "./postCard/PostCard";
+import { OrderType } from "../../graphql/types/types";
 
 interface PostInfiniteScrollProps {
   posts: RegularPostDetailFragment[];
@@ -30,7 +31,7 @@ const PostInfiniteScroll = ({
 };
 
 export const HomePostsInfiniteScroll = () => {
-  const { posts, hasMore, next, loading } = useHomePosts();
+  const { posts, hasMore, next, loading } = useHomePosts(OrderType.NEW);
   return (
     <PostInfiniteScroll
       posts={posts}

@@ -1,5 +1,10 @@
-query Posts($limit: Int, $cursor: String) {
-  paginatedPosts(limit: $limit, cursor: $cursor) {
+query Posts($orderType: Int, $userId: String, $limit: Int, $cursor: String) {
+  paginatedPosts(
+    orderType: $orderType
+    userId: $userId
+    limit: $limit
+    cursor: $cursor
+  ) {
     hasMore
     posts {
       ...RegularPostDetail

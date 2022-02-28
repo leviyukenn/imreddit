@@ -1,9 +1,9 @@
 import { useCallback, useMemo } from "react";
+import { VoteStatus } from "../../components/types/types";
 import { useGetMyUpvoteQuery, useVoteMutation } from "../../generated/graphql";
 import { useSnackbarAlert } from "../../redux/hooks/useSnackbarAlert";
 import { AlertSeverity } from "../../redux/types/types";
 import { useIsAuth } from "../../utils/hooks/useIsAuth";
-import { VoteStatus } from "../../components/types/types";
 
 enum VoteType {
   UPVOTE = 1,
@@ -12,8 +12,9 @@ enum VoteType {
 
 export function useVote(post: { __typename?: string; id: string }) {
   const { checkIsAuth, meLoading, me } = useIsAuth();
-  const { onOpenSnackbarAlert } = useSnackbarAlert();
+  const { onOpenSnackbarAlert, handleMutationError } = useSnackbarAlert();
   const [vote, { loading: voteLoading }] = useVoteMutation({
+    onError: handleMutationError,
     update(cache, { data: voteResponse }) {
       if (!voteResponse) return;
       cache.modify({

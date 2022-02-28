@@ -3,11 +3,14 @@ import {
   RegularPostDetailFragment,
   usePostsQuery,
 } from "../../generated/graphql";
+import { useIsAuth } from "../../utils/hooks/useIsAuth";
+import { OrderType } from "../types/types";
 
-export function useHomePosts() {
+export function useHomePosts(orderType: OrderType) {
+  const { me } = useIsAuth();
   const { data: postsResponse, fetchMore, loading } = usePostsQuery({
     skip: typeof window === "undefined",
-    variables: { limit: 10 },
+    variables: { orderType, userId: me?.id, limit: 10 },
   });
   const posts: RegularPostDetailFragment[] = useMemo(
     () => (postsResponse ? postsResponse.paginatedPosts.posts : []),
@@ -22,6 +25,8 @@ export function useHomePosts() {
     try {
       await fetchMore({
         variables: {
+          orderType,
+          userId: me?.id,
           limit: 10,
           cursor: posts[posts.length - 1]?.createdAt,
         },

@@ -1,16 +1,16 @@
 import { Reference } from "@apollo/client";
 import { useCallback } from "react";
-import { FrontendError } from "../../const/errors";
 import { useDeleteMyPostMutation } from "../../generated/graphql";
 import { useSnackbarAlert } from "../../redux/hooks/useSnackbarAlert";
 import { AlertSeverity } from "../../redux/types/types";
 
 export function useDeleteMyPost(userName: string) {
-  const { onOpenSnackbarAlert } = useSnackbarAlert();
-  const [deleteMyPostMutation, { loading, error }] = useDeleteMyPostMutation({
+  const { onOpenSnackbarAlert, handleMutationError } = useSnackbarAlert();
+  const [deleteMyPostMutation, { loading }] = useDeleteMyPostMutation({
+    onError: handleMutationError,
     update(cache, { data: deleteMyPostResponse }) {
-      if (!deleteMyPostResponse?.deleteMyPost.postId) return;
-      cache.evict({ id: deleteMyPostResponse.deleteMyPost.postId });
+      if (!deleteMyPostResponse?.deleteMyPost) return;
+      cache.evict({ id: deleteMyPostResponse.deleteMyPost });
       cache.gc();
       cache.modify({
         fields: {
@@ -21,7 +21,7 @@ export function useDeleteMyPost(userName: string) {
             } = { posts: {}, hasMore: false }
           ) {
             const merged = { ...existingPostRefs.posts };
-            delete merged[deleteMyPostResponse.deleteMyPost.postId!];
+            delete merged[deleteMyPostResponse.deleteMyPost];
             return { posts: merged, hasMore: existingPostRefs.hasMore };
           },
           userPosts(
@@ -33,7 +33,7 @@ export function useDeleteMyPost(userName: string) {
           ) {
             if (!storeFieldName.includes(userName)) return existingUserPostRefs;
             const merged = { ...existingUserPostRefs.posts };
-            delete merged[deleteMyPostResponse.deleteMyPost.postId!];
+            delete merged[deleteMyPostResponse.deleteMyPost];
             return {
               posts: merged,
               hasMore: existingUserPostRefs.hasMore,
@@ -46,37 +46,13 @@ export function useDeleteMyPost(userName: string) {
 
   const deleteMyPost = useCallback(
     async (postId: string) => {
-      const response = await deleteMyPostMutation({
+      const { data } = await deleteMyPostMutation({
         variables: { postId },
-      }).catch((err) => {
-        onOpenSnackbarAlert({
-          message: err.message || FrontendError.ERR0002,
-          severity: AlertSeverity.ERROR,
-        });
-        return null;
       });
-      if (!response) {
-        return false;
-      }
 
-      if (response.errors?.length) {
-        onOpenSnackbarAlert({
-          message: response.errors[0].message,
-          severity: AlertSeverity.ERROR,
-        });
-        return false;
-      }
+      const deleteMyPostResult = data?.deleteMyPost;
 
-      const deleteMyPostResult = response.data?.deleteMyPost;
-      if (deleteMyPostResult?.errors?.length) {
-        onOpenSnackbarAlert({
-          message: deleteMyPostResult.errors[0].message,
-          severity: AlertSeverity.ERROR,
-        });
-        return false;
-      }
-
-      if (deleteMyPostResult?.postId) {
+      if (deleteMyPostResult) {
         onOpenSnackbarAlert({
           message: "Post deleted successfully.",
           severity: AlertSeverity.SUCCESS,
@@ -85,7 +61,7 @@ export function useDeleteMyPost(userName: string) {
       }
       return false;
     },
-    [ deleteMyPostMutation, onOpenSnackbarAlert]
+    [deleteMyPostMutation, onOpenSnackbarAlert]
   );
 
   return { deleteMyPost, loading };

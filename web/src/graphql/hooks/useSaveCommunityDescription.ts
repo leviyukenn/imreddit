@@ -5,8 +5,10 @@ import { useSnackbarAlert } from "../../redux/hooks/useSnackbarAlert";
 import { AlertSeverity } from "../../redux/types/types";
 
 export const useSaveCommunityDescription = () => {
-  const { onOpenSnackbarAlert } = useSnackbarAlert();
-  const [saveDescription] = useEditCommunityDescriptionMutation();
+  const { onOpenSnackbarAlert, handleMutationError } = useSnackbarAlert();
+  const [saveDescription] = useEditCommunityDescriptionMutation({
+    onError: handleMutationError,
+  });
   const onSaveDescription = useCallback(
     async (communityId: string, description: string) => {
       const result = await saveDescription({

@@ -15,9 +15,10 @@ export function useJoinLeaveCommunity(
 ) {
   const { me, checkIsAuth } = useIsAuth();
 
-  const { onOpenSnackbarAlert } = useSnackbarAlert();
+  const { onOpenSnackbarAlert, handleMutationError } = useSnackbarAlert();
 
   const [join] = useJoinCommunityMutation({
+    onError: handleMutationError,
     update(cache, { data: roleResponse }) {
       cache.modify({
         fields: {
@@ -58,13 +59,9 @@ export function useJoinLeaveCommunity(
     }
     const joinCommunityResponse = await join({
       variables: { userId: me?.id!, communityId },
-    }).catch(() => null);
+    });
     const userRole = joinCommunityResponse?.data?.joinCommunity;
     if (!userRole) {
-      onOpenSnackbarAlert({
-        message: FrontendError.ERR0002,
-        severity: AlertSeverity.ERROR,
-      });
       return;
     }
 
@@ -93,13 +90,9 @@ export function useJoinLeaveCommunity(
   const leaveCommunity = useCallback(async () => {
     const leaveCommunityResponse = await leave({
       variables: { userId: me?.id!, communityId },
-    }).catch(() => null);
+    })
     const userRole = leaveCommunityResponse?.data?.leaveCommunity;
     if (!userRole) {
-      onOpenSnackbarAlert({
-        message: FrontendError.ERR0002,
-        severity: AlertSeverity.ERROR,
-      });
       return;
     }
 

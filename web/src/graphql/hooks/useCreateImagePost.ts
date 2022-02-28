@@ -1,7 +1,6 @@
 import { Reference } from "@apollo/client";
 import { useRouter } from "next/router";
 import { useCallback } from "react";
-import { FrontendError } from "../../const/errors";
 import {
   CreateImagePostMutationVariables,
   RegularPostDetailFragmentDoc,
@@ -14,10 +13,11 @@ import { createPostDetailPageLink } from "../../utils/links";
 
 export function useCreateImagePost() {
   const { redirectToLoginIfNotLoggedIn } = useIsAuth();
-  const { onOpenSnackbarAlert } = useSnackbarAlert();
+  const { onOpenSnackbarAlert, handleMutationError } = useSnackbarAlert();
   const router = useRouter();
 
   const [createImagePostMutation, { loading }] = useCreateImagePostMutation({
+    onError: handleMutationError,
     update(cache, { data: createPostResponse }) {
       cache.modify({
         fields: {
@@ -50,14 +50,8 @@ export function useCreateImagePost() {
   const createImagePost = useCallback(
     async (variables: CreateImagePostMutationVariables) => {
       redirectToLoginIfNotLoggedIn();
-      const response = await createImagePostMutation({ variables }).catch(
-        () => null
-      );
+      const response = await createImagePostMutation({ variables });
       if (!response) {
-        onOpenSnackbarAlert({
-          message: FrontendError.ERR0002,
-          severity: AlertSeverity.ERROR,
-        });
         return false;
       }
 

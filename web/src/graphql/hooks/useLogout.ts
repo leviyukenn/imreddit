@@ -5,8 +5,9 @@ import { useSnackbarAlert } from "../../redux/hooks/useSnackbarAlert";
 import { AlertSeverity } from "../../redux/types/types";
 
 export function useLogout() {
-  const { onOpenSnackbarAlert } = useSnackbarAlert();
+  const { onOpenSnackbarAlert,handleMutationError } = useSnackbarAlert();
   const [logout, { loading: logoutLoading }] = useLogoutMutation({
+    onError:handleMutationError,
     update(cache, { data: logoutResponse }) {
       cache.modify({
         fields: {
