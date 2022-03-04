@@ -1,9 +1,10 @@
+import { useEffect } from "react";
 import InfiniteScroll from "react-infinite-scroll-component";
 import { RegularPostDetailFragment } from "../../generated/graphql";
 import { useCommunityPosts } from "../../graphql/hooks/useCommunityPosts";
 import { useHomePosts } from "../../graphql/hooks/useHomePosts";
-import { LoadingPostCard, PostCard } from "./postCard/PostCard";
 import { OrderType } from "../../graphql/types/types";
+import { LoadingPostCard, PostCard } from "./postCard/PostCard";
 
 interface PostInfiniteScrollProps {
   posts: RegularPostDetailFragment[];
@@ -16,6 +17,13 @@ const PostInfiniteScroll = ({
   hasMore,
   next,
 }: PostInfiniteScrollProps) => {
+  // console.log({ posts, hasMore });
+  useEffect(() => {
+    console.log("mountInfiniteScroll");
+    return () => {
+      console.log("unmountInfiniteScroll");
+    };
+  }, []);
   return (
     <InfiniteScroll
       dataLength={posts.length}
@@ -30,15 +38,21 @@ const PostInfiniteScroll = ({
   );
 };
 
-export const HomePostsInfiniteScroll = () => {
-  const { posts, hasMore, next, loading } = useHomePosts(OrderType.NEW);
-  return (
+export const HomePostsInfiniteScroll = ({
+  orderType,
+}: {
+  orderType: OrderType;
+}) => {
+  const { posts, hasMore, next, loading } = useHomePosts(orderType);
+  const postInfiniteScroll = (
     <PostInfiniteScroll
       posts={posts}
       hasMore={hasMore && !loading}
       next={next}
     />
   );
+
+  return postInfiniteScroll;
 };
 
 export const CommunityPostsInfiniteScroll = ({

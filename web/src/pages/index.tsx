@@ -1,19 +1,12 @@
 import ContentLayout from "../components/ContentLayout";
 import HomeContainer from "../components/HomeContainer";
-import CreatePostCard from "../components/post/createPost/CreatePostCard";
-import { HomePostsInfiniteScroll } from "../components/post/PostInfiniteScroll";
-import { useMeQuery } from "../generated/graphql";
+import HomeMainContent from "../components/HomeMainContent";
 
 const Index = () => {
-  const { data: meResponse } = useMeQuery();
-
   return (
     <HomeContainer>
       <ContentLayout>
-        {meResponse?.me ? (
-          <CreatePostCard avatar={meResponse.me.avatar} />
-        ) : null}
-        <HomePostsInfiniteScroll />
+        <HomeMainContent />
       </ContentLayout>
     </HomeContainer>
   );

@@ -22,6 +22,8 @@ const ApolloProviderWithErrorHanding = ({
   const errorLink = useMemo(
     () =>
       onError(({ graphQLErrors, networkError, forward, operation }) => {
+          console.log(graphQLErrors)
+          console.log(networkError)
         if (graphQLErrors && graphQLErrors.length !== 0) {
           onOpenSnackbarAlert({
             message: graphQLErrors[0].message,
