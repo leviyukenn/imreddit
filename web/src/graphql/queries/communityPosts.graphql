@@ -1,8 +1,9 @@
-query CommunityPosts($limit: Int, $cursor: String, $communityName: String!) {
+query CommunityPosts($limit: Int, $cursor: String, $communityName: String!,$orderType:Int) {
   communityPosts(
     limit: $limit
     cursor: $cursor
     communityName: $communityName
+    orderType:$orderType
   ) {
     hasMore
     posts {

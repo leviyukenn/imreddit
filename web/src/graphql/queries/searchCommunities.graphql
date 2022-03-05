@@ -1,0 +1,8 @@
+query SearchCommunities($communityName: String!) {
+  searchCommunities(communityName: $communityName) {
+    id
+    name
+    icon
+    totalMemberships
+  }
+}

@@ -1,15 +1,23 @@
+import { ReactElement } from "react";
+import CommunityHomeContainer from "../components/community/CommunityHomeContainer";
 import ContentLayout from "../components/ContentLayout";
-import HomeContainer from "../components/HomeContainer";
 import HomeMainContent from "../components/HomeMainContent";
 
 const Index = () => {
   return (
-    <HomeContainer>
+    <CommunityHomeContainer>
       <ContentLayout>
         <HomeMainContent />
       </ContentLayout>
-    </HomeContainer>
+    </CommunityHomeContainer>
   );
 };
+
+// Index.getLayout = function getLayout(page: ReactElement) { return (
+//     <CommunityHomeContainer>
+//       <ContentLayout>{page}</ContentLayout>
+//     </CommunityHomeContainer>
+//   );
+// };
 
 export default Index;

@@ -26,6 +26,7 @@ export const createPostDetailPageLinkWithCommentId = (
 export const createUserProfileLink = (userName: string, sectionName: string) =>
   `/user/${userName}/${sectionName}`;
 
+export const homeLink = "/";
 export const createPostLink = "/create-post";
 export const loginPageLink = "/login";
 export const registerPageLink = "/register";

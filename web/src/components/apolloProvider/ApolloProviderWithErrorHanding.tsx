@@ -1,8 +1,7 @@
-import { ApolloClient, ApolloProvider, from, HttpLink } from "@apollo/client";
+import { ApolloClient, ApolloProvider, from } from "@apollo/client";
 import { onError } from "@apollo/client/link/error";
 import React, { useMemo } from "react";
 import apolloClient from "../../apollo-client/apollo-client";
-import { GRAPHQL_SERVER_URL } from "../../const/const";
 import { FrontendError } from "../../const/errors";
 import { useSnackbarAlert } from "../../redux/hooks/useSnackbarAlert";
 import { AlertSeverity } from "../../redux/types/types";
@@ -15,15 +14,9 @@ const ApolloProviderWithErrorHanding = ({
   children,
 }: ApolloProviderWithErrorHandingProps) => {
   const { onOpenSnackbarAlert } = useSnackbarAlert();
-  const httpLink = new HttpLink({
-    uri: GRAPHQL_SERVER_URL,
-    credentials: "include",
-  });
   const errorLink = useMemo(
     () =>
       onError(({ graphQLErrors, networkError, forward, operation }) => {
-          console.log(graphQLErrors)
-          console.log(networkError)
         if (graphQLErrors && graphQLErrors.length !== 0) {
           onOpenSnackbarAlert({
             message: graphQLErrors[0].message,
@@ -45,10 +38,10 @@ const ApolloProviderWithErrorHanding = ({
     () =>
       new ApolloClient({
         cache: apolloClient.cache,
-        link: from([errorLink,httpLink]),
+        link: from([errorLink, apolloClient.link]),
       }),
 
-    []
+    [apolloClient]
   );
 
   return (

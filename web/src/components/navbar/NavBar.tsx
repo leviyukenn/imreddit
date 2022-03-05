@@ -8,6 +8,7 @@ import MenuIcon from "@material-ui/icons/Menu";
 import NextLink from "next/link";
 import React from "react";
 import { useMeQuery } from "../../generated/graphql";
+import CommunitySearchBar from "./CommunitySearchBar";
 import CommunitySelection from "./CommunitySelection";
 import UserStatusBar from "./UserStatusBar";
 
@@ -31,11 +32,12 @@ const useStyles = makeStyles((theme: Theme) =>
       alignItems: "stretch",
     },
     leftContainer: {
+      flex: 1,
       display: "flex",
       alignItems: "center",
     },
     rightContainer: {
-      flex: 1,
+      // flex: 1,
       maxWidth: 210,
       display: "flex",
       alignItems: "center",
@@ -68,9 +70,12 @@ export default function NavBar() {
           </NextLink>
           {meResponse?.me ? (
             <Box marginLeft="1em">
-              <CommunitySelection userId={meResponse.me.id} />
+              <CommunitySelection me={meResponse.me} />
             </Box>
           ) : null}
+          <Box marginLeft="1em" flex={1}>
+            <CommunitySearchBar />
+          </Box>
         </Box>
         <Box className={classes.rightContainer}>
           <UserStatusBar />

@@ -286,6 +286,7 @@ export type Query = {
   postDetail?: Maybe<Post>;
   communities: Array<Community>;
   community?: Maybe<Community>;
+  searchCommunities: Array<Community>;
   userRoles: Array<Role>;
   userRole?: Maybe<Role>;
   getUpvote?: Maybe<Upvote>;
@@ -323,6 +324,7 @@ export type QueryUserPostsArgs = {
   userName: Scalars['String'];
   cursor?: Maybe<Scalars['String']>;
   limit?: Maybe<Scalars['Int']>;
+  orderType?: Maybe<Scalars['Int']>;
 };
 
 
@@ -330,6 +332,7 @@ export type QueryCommunityPostsArgs = {
   communityName: Scalars['String'];
   cursor?: Maybe<Scalars['String']>;
   limit?: Maybe<Scalars['Int']>;
+  orderType?: Maybe<Scalars['Int']>;
 };
 
 
@@ -352,6 +355,11 @@ export type QueryCommunitiesArgs = {
 
 
 export type QueryCommunityArgs = {
+  communityName: Scalars['String'];
+};
+
+
+export type QuerySearchCommunitiesArgs = {
   communityName: Scalars['String'];
 };
 
@@ -924,6 +932,7 @@ export type CommunityPostsQueryVariables = Exact<{
   limit?: Maybe<Scalars['Int']>;
   cursor?: Maybe<Scalars['String']>;
   communityName: Scalars['String'];
+  orderType?: Maybe<Scalars['Int']>;
 }>;
 
 
@@ -1000,6 +1009,19 @@ export type PostDetailQuery = (
   )> }
 );
 
+export type SearchCommunitiesQueryVariables = Exact<{
+  communityName: Scalars['String'];
+}>;
+
+
+export type SearchCommunitiesQuery = (
+  { __typename?: 'Query' }
+  & { searchCommunities: Array<(
+    { __typename?: 'Community' }
+    & Pick<Community, 'id' | 'name' | 'icon' | 'totalMemberships'>
+  )> }
+);
+
 export type TopicsQueryVariables = Exact<{ [key: string]: never; }>;
 
 
@@ -1059,6 +1081,7 @@ export type UserCommentsQuery = (
 
 export type UserPostsQueryVariables = Exact<{
   userName: Scalars['String'];
+  orderType?: Maybe<Scalars['Int']>;
   limit?: Maybe<Scalars['Int']>;
   cursor?: Maybe<Scalars['String']>;
 }>;
@@ -2127,8 +2150,13 @@ export type CommunityQueryHookResult = ReturnType<typeof useCommunityQuery>;
 export type CommunityLazyQueryHookResult = ReturnType<typeof useCommunityLazyQuery>;
 export type CommunityQueryResult = Apollo.QueryResult<CommunityQuery, CommunityQueryVariables>;
 export const CommunityPostsDocument = gql`
-    query CommunityPosts($limit: Int, $cursor: String, $communityName: String!) {
-  communityPosts(limit: $limit, cursor: $cursor, communityName: $communityName) {
+    query CommunityPosts($limit: Int, $cursor: String, $communityName: String!, $orderType: Int) {
+  communityPosts(
+    limit: $limit
+    cursor: $cursor
+    communityName: $communityName
+    orderType: $orderType
+  ) {
     hasMore
     posts {
       ...RegularPostDetail
@@ -2152,6 +2180,7 @@ export const CommunityPostsDocument = gql`
  *      limit: // value for 'limit'
  *      cursor: // value for 'cursor'
  *      communityName: // value for 'communityName'
+ *      orderType: // value for 'orderType'
  *   },
  * });
  */
@@ -2321,6 +2350,44 @@ export function usePostDetailLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions
 export type PostDetailQueryHookResult = ReturnType<typeof usePostDetailQuery>;
 export type PostDetailLazyQueryHookResult = ReturnType<typeof usePostDetailLazyQuery>;
 export type PostDetailQueryResult = Apollo.QueryResult<PostDetailQuery, PostDetailQueryVariables>;
+export const SearchCommunitiesDocument = gql`
+    query SearchCommunities($communityName: String!) {
+  searchCommunities(communityName: $communityName) {
+    id
+    name
+    icon
+    totalMemberships
+  }
+}
+    `;
+
+/**
+ * __useSearchCommunitiesQuery__
+ *
+ * To run a query within a React component, call `useSearchCommunitiesQuery` and pass it any options that fit your needs.
+ * When your component renders, `useSearchCommunitiesQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useSearchCommunitiesQuery({
+ *   variables: {
+ *      communityName: // value for 'communityName'
+ *   },
+ * });
+ */
+export function useSearchCommunitiesQuery(baseOptions: Apollo.QueryHookOptions<SearchCommunitiesQuery, SearchCommunitiesQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<SearchCommunitiesQuery, SearchCommunitiesQueryVariables>(SearchCommunitiesDocument, options);
+      }
+export function useSearchCommunitiesLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<SearchCommunitiesQuery, SearchCommunitiesQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<SearchCommunitiesQuery, SearchCommunitiesQueryVariables>(SearchCommunitiesDocument, options);
+        }
+export type SearchCommunitiesQueryHookResult = ReturnType<typeof useSearchCommunitiesQuery>;
+export type SearchCommunitiesLazyQueryHookResult = ReturnType<typeof useSearchCommunitiesLazyQuery>;
+export type SearchCommunitiesQueryResult = Apollo.QueryResult<SearchCommunitiesQuery, SearchCommunitiesQueryVariables>;
 export const TopicsDocument = gql`
     query Topics {
   topics {
@@ -2468,8 +2535,13 @@ export type UserCommentsQueryHookResult = ReturnType<typeof useUserCommentsQuery
 export type UserCommentsLazyQueryHookResult = ReturnType<typeof useUserCommentsLazyQuery>;
 export type UserCommentsQueryResult = Apollo.QueryResult<UserCommentsQuery, UserCommentsQueryVariables>;
 export const UserPostsDocument = gql`
-    query UserPosts($userName: String!, $limit: Int, $cursor: String) {
-  userPosts(userName: $userName, limit: $limit, cursor: $cursor) {
+    query UserPosts($userName: String!, $orderType: Int, $limit: Int, $cursor: String) {
+  userPosts(
+    userName: $userName
+    orderType: $orderType
+    limit: $limit
+    cursor: $cursor
+  ) {
     hasMore
     posts {
       ...RegularPostDetail
@@ -2491,6 +2563,7 @@ export const UserPostsDocument = gql`
  * const { data, loading, error } = useUserPostsQuery({
  *   variables: {
  *      userName: // value for 'userName'
+ *      orderType: // value for 'orderType'
  *      limit: // value for 'limit'
  *      cursor: // value for 'cursor'
  *   },
@@ -2715,7 +2788,7 @@ export type PostResponseFieldPolicy = {
 	errors?: FieldPolicy<any> | FieldReadFunction<any>,
 	post?: FieldPolicy<any> | FieldReadFunction<any>
 };
-export type QueryKeySpecifier = ('user' | 'me' | 'userComments' | 'userUpvotedPosts' | 'userCommentedPosts' | 'userPosts' | 'communityPosts' | 'paginatedPosts' | 'allPosts' | 'postDetail' | 'communities' | 'community' | 'userRoles' | 'userRole' | 'getUpvote' | 'topics' | QueryKeySpecifier)[];
+export type QueryKeySpecifier = ('user' | 'me' | 'userComments' | 'userUpvotedPosts' | 'userCommentedPosts' | 'userPosts' | 'communityPosts' | 'paginatedPosts' | 'allPosts' | 'postDetail' | 'communities' | 'community' | 'searchCommunities' | 'userRoles' | 'userRole' | 'getUpvote' | 'topics' | QueryKeySpecifier)[];
 export type QueryFieldPolicy = {
 	user?: FieldPolicy<any> | FieldReadFunction<any>,
 	me?: FieldPolicy<any> | FieldReadFunction<any>,
@@ -2729,6 +2802,7 @@ export type QueryFieldPolicy = {
 	postDetail?: FieldPolicy<any> | FieldReadFunction<any>,
 	communities?: FieldPolicy<any> | FieldReadFunction<any>,
 	community?: FieldPolicy<any> | FieldReadFunction<any>,
+	searchCommunities?: FieldPolicy<any> | FieldReadFunction<any>,
 	userRoles?: FieldPolicy<any> | FieldReadFunction<any>,
 	userRole?: FieldPolicy<any> | FieldReadFunction<any>,
 	getUpvote?: FieldPolicy<any> | FieldReadFunction<any>,

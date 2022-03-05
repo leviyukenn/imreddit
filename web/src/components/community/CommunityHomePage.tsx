@@ -24,9 +24,10 @@ const CommunityHomePage = ({
 }: CommunityProps) => {
   const { community } = useCommunity(communityName, serverSideCommunity);
   const { userRole } = useUserCommunityRole(community?.id);
-  const { initiateCommunityAppearance } = useSaveOrInitCommunityAppearance(
-    community
-  );
+  const {
+    initiateCommunityAppearance,
+    clearCommunityAppearance,
+  } = useSaveOrInitCommunityAppearance(community);
   const [openDrawer, setOpenDrawer] = useState(false);
 
   useEffect(() => {
@@ -34,6 +35,7 @@ const CommunityHomePage = ({
       return;
     }
     initiateCommunityAppearance();
+    return () => clearCommunityAppearance();
   }, [community]);
 
   const communityDescription = useMemo(() => {

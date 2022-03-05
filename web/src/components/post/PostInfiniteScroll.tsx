@@ -1,10 +1,12 @@
-import { useEffect } from "react";
+import { Box } from "@material-ui/core";
 import InfiniteScroll from "react-infinite-scroll-component";
 import { RegularPostDetailFragment } from "../../generated/graphql";
 import { useCommunityPosts } from "../../graphql/hooks/useCommunityPosts";
 import { useHomePosts } from "../../graphql/hooks/useHomePosts";
+import { useUserPosts } from "../../graphql/hooks/useUserPosts";
 import { OrderType } from "../../graphql/types/types";
 import { LoadingPostCard, PostCard } from "./postCard/PostCard";
+import UserPostCard, { LoadingUserPostCard } from "./userPost/UserPostCard";
 
 interface PostInfiniteScrollProps {
   posts: RegularPostDetailFragment[];
@@ -17,13 +19,6 @@ const PostInfiniteScroll = ({
   hasMore,
   next,
 }: PostInfiniteScrollProps) => {
-  // console.log({ posts, hasMore });
-  useEffect(() => {
-    console.log("mountInfiniteScroll");
-    return () => {
-      console.log("unmountInfiniteScroll");
-    };
-  }, []);
   return (
     <InfiniteScroll
       dataLength={posts.length}
@@ -44,6 +39,7 @@ export const HomePostsInfiniteScroll = ({
   orderType: OrderType;
 }) => {
   const { posts, hasMore, next, loading } = useHomePosts(orderType);
+
   const postInfiniteScroll = (
     <PostInfiniteScroll
       posts={posts}
@@ -57,15 +53,54 @@ export const HomePostsInfiniteScroll = ({
 
 export const CommunityPostsInfiniteScroll = ({
   communityName,
+  orderType,
 }: {
   communityName: string;
+  orderType: OrderType;
 }) => {
-  const { posts, hasMore, next, loading } = useCommunityPosts(communityName);
+  const { posts, hasMore, next, loading } = useCommunityPosts(
+    communityName,
+    orderType
+  );
   return (
     <PostInfiniteScroll
       posts={posts}
       hasMore={hasMore && !loading}
       next={next}
     />
+  );
+};
+
+export const UserPostsInfiniteScroll = ({
+  userName,
+  orderType,
+}: {
+  userName: string;
+  orderType: OrderType;
+}) => {
+  const { posts, hasMore, next, loading } = useUserPosts(userName, orderType);
+  if (!loading && !posts.length) {
+    return (
+      <Box
+        display="flex"
+        justifyContent="center"
+        alignItems="center"
+        height="100vh"
+      >
+        hmm... looks like there is no post here.
+      </Box>
+    );
+  }
+  return (
+    <InfiniteScroll
+      dataLength={posts.length}
+      next={next}
+      hasMore={hasMore}
+      loader={<LoadingUserPostCard />}
+    >
+      {posts.map((post) => {
+        return <UserPostCard post={post} key={post.id} />;
+      })}
+    </InfiniteScroll>
   );
 };

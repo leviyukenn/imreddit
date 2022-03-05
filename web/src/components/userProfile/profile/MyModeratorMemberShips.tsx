@@ -56,7 +56,8 @@ const MyModeratorMemberShips = ({
           <Box className={classes.communityInfo}>
             <CommunityLink communityName={community.name} />
             <Typography variant="caption" component="p">
-              {community.totalMemberships + " member"}
+              {community.totalMemberships +
+                (community.totalMemberships > 1 ? " members" : " member")}
             </Typography>
           </Box>
           <CommunityJoinLeaveButton

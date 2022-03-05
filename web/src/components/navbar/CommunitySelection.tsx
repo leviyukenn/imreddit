@@ -1,5 +1,5 @@
 /* eslint-disable no-use-before-define */
-import { Box, Typography } from "@material-ui/core";
+import { Box, Link, Typography, useMediaQuery } from "@material-ui/core";
 import ButtonBase from "@material-ui/core/ButtonBase";
 import InputBase from "@material-ui/core/InputBase";
 import Popper from "@material-ui/core/Popper";
@@ -10,18 +10,24 @@ import HomeIcon from "@material-ui/icons/Home";
 import Autocomplete, {
   AutocompleteCloseReason,
 } from "@material-ui/lab/Autocomplete";
+import NextLink from "next/link";
 import { useRouter } from "next/router";
-import React, { useEffect, useMemo, useState } from "react";
-import { useUserRolesQuery } from "../../generated/graphql";
+import React, { useMemo, useState } from "react";
+import {
+  RegularUserFragment,
+  useUserRolesQuery,
+} from "../../generated/graphql";
+import theme from "../../theme";
 import {
   CommunitySelectionOption,
   CommunitySelectionOptionGroupType,
   CommunitySelectionOptionIconType,
 } from "../../utils/factory/communitySelectionOption";
-import { usePostInfoRoute } from "../../utils/hooks/usePostInfoRoute";
 import {
   createCommunityHomeLink,
   createCommunityPageLink,
+  createUserProfileLink,
+  homeLink,
 } from "../../utils/links";
 import CommunityIcon from "../community/CommunityIcon";
 
@@ -31,7 +37,10 @@ const useStyles = makeStyles((theme: Theme) =>
       fontSize: "0.875rem",
     },
     button: {
-      width: 270,
+      width: 72,
+      [theme.breakpoints.up("md")]: {
+        width: 270,
+      },
       height: 36,
       display: "flex",
       justifyContent: "space-between",
@@ -97,13 +106,20 @@ const useStyles = makeStyles((theme: Theme) =>
     option: {
       minHeight: "auto",
       alignItems: "flex-start",
-      padding: "0.5rem 0.25rem",
+      padding: 0,
       '&[aria-selected="true"]': {
         backgroundColor: "transparent",
       },
       '&[data-focus="true"]': {
         backgroundColor: theme.palette.action.hover,
       },
+      "&.MuiAutocomplete-option": {
+        padding: 0,
+      },
+    },
+    optionLink: {
+      flex: 1,
+      padding: "0.5rem 1rem",
     },
     popperDisablePortal: {
       position: "relative",
@@ -140,17 +156,10 @@ const iconMap = new Map<CommunitySelectionOptionIconType, JSX.Element>([
   [CommunitySelectionOptionIconType.CREATE_COMMUNITY, <AddIcon />],
 ]);
 
-function useCommunitySelectionOption(userId: string) {
-  // const { data: communitiesResponse } = useCommunitiesQuery({
-  //   variables: { userId },
-  // });
+function useCommunitySelectionOption(me: RegularUserFragment) {
   const { data: userRolesResponse } = useUserRolesQuery({
-    variables: { userId },
+    variables: { userId: me.id },
   });
-
-  // const communities = useMemo(() => communitiesResponse?.communities || [], [
-  //   communitiesResponse,
-  // ]);
 
   const userRoles = useMemo(() => userRolesResponse?.userRoles || [], [
     userRolesResponse,
@@ -180,9 +189,23 @@ function useCommunitySelectionOption(userId: string) {
       link: createCommunityPageLink,
       group: CommunitySelectionOptionGroupType.MY_COMMUNITIES,
     });
+    const HomeItem = CommunitySelectionOption.createOption({
+      id: "home",
+      name: "Home",
+      icon: CommunitySelectionOptionIconType.HOME,
+      link: homeLink,
+      group: CommunitySelectionOptionGroupType.MY_COMMUNITIES,
+    });
+    const MyPageItem = CommunitySelectionOption.createOption({
+      id: me.id,
+      name: "u/" + me.username,
+      icon: me.avatar,
+      link: createUserProfileLink(me.username, "posts"),
+      group: CommunitySelectionOptionGroupType.MY_COMMUNITIES,
+    });
 
-    return [createCommunityItem, ...myCommunityOptions];
-  }, [myCommunities]);
+    return [createCommunityItem, HomeItem, MyPageItem, ...myCommunityOptions];
+  }, [myCommunities, me]);
 
   const moderatingCommunities = useMemo(
     () =>
@@ -209,38 +232,40 @@ function useCommunitySelectionOption(userId: string) {
   return [...moderatingItems, ...myCommunitiesItems];
 }
 
-export default function CommunitySelection({ userId }: { userId: string }) {
+export default function CommunitySelection({
+  me,
+}: {
+  me: RegularUserFragment;
+}) {
   const classes = useStyles();
   const router = useRouter();
 
-  const communitySelectionOptions = useCommunitySelectionOption(userId);
+  const communitySelectionOptions = useCommunitySelectionOption(me);
 
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [isButtonClicked, setIsButtonClicked] = useState(false);
-  const { communityName } = usePostInfoRoute();
-  const [
-    pendingValue,
-    setPendingValue,
-  ] = React.useState<CommunitySelectionOption | null>(() => {
-    const selectedCommunity = communitySelectionOptions.find(
-      (option) => option.name === `r/${communityName}`
-    );
-    return selectedCommunity || null;
-  });
 
-  useEffect(() => {
-    if (!pendingValue) return;
-    if (pendingValue.name === `r/${communityName}`) return;
-    router.push(pendingValue.link);
-  }, [pendingValue, communityName]);
-
+  const selectedOption = useMemo(
+    () =>
+      communitySelectionOptions.find(
+        (option) =>
+          option.link === router.asPath ||
+          option.link ===
+            createUserProfileLink(router.query.userName as string, "posts")
+      ),
+    [router, communitySelectionOptions, me]
+  );
   const inputIcon = useMemo(() => {
-    if (!pendingValue) return null;
-    if (typeof pendingValue.icon === "string") {
-      return <CommunityIcon icon={pendingValue.icon} size="extraSmall" />;
+    if (!selectedOption) return null;
+    if (typeof selectedOption.icon === "string") {
+      return selectedOption.icon.includes("https://") ? (
+        <img style={{ width: 28, height: 28 }} src={me.avatar} />
+      ) : (
+        <CommunityIcon icon={selectedOption.icon} size="extraSmall" />
+      );
     }
-    return iconMap.get(pendingValue.icon);
-  }, [pendingValue]);
+    return iconMap.get(selectedOption.icon);
+  }, [selectedOption]);
 
   const handleClick = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(anchorEl ? null : event.currentTarget);
@@ -265,6 +290,7 @@ export default function CommunitySelection({ userId }: { userId: string }) {
 
   const open = Boolean(anchorEl);
   const id = open ? "community-name" : undefined;
+  const matches = useMediaQuery(theme.breakpoints.up("md"));
 
   return (
     <React.Fragment>
@@ -278,7 +304,7 @@ export default function CommunitySelection({ userId }: { userId: string }) {
           onMouseUp={(e) => setIsButtonClicked(false)}
         >
           <Box display="flex" alignItems="center">
-            {!pendingValue ? (
+            {!selectedOption ? (
               <>
                 <HomeIcon />
                 <Box className={classes.placeholder}>Home</Box>
@@ -286,7 +312,9 @@ export default function CommunitySelection({ userId }: { userId: string }) {
             ) : (
               <>
                 {inputIcon}
-                <div className={classes.tag}>{pendingValue.name}</div>
+                {matches ? (
+                  <div className={classes.tag}>{selectedOption.name}</div>
+                ) : null}
               </>
             )}
           </Box>
@@ -309,25 +337,33 @@ export default function CommunitySelection({ userId }: { userId: string }) {
             option: classes.option,
             popperDisablePortal: classes.popperDisablePortal,
           }}
-          value={pendingValue}
-          onChange={(event, newValue) => {
-            setPendingValue(newValue);
-          }}
           disablePortal
           renderTags={() => null}
           noOptionsText="Nothing found"
           groupBy={(option) => option.group}
           renderOption={(option) => (
-            <Box display="flex" alignItems="center" key={option.id}>
-              {typeof option.icon === "string" ? (
-                <CommunityIcon icon={option.icon} size="extraSmall" />
-              ) : (
-                iconMap.get(option.icon)
-              )}
-              <Typography className={classes.text} variant="subtitle2">
-                {option.name}
-              </Typography>
-            </Box>
+            <NextLink href={option.link} passHref>
+              <Link
+                underline="none"
+                color="textPrimary"
+                className={classes.optionLink}
+              >
+                <Box display="flex" alignItems="center" key={option.id}>
+                  {typeof option.icon === "string" ? (
+                    option.icon.includes("https://") ? (
+                      <img style={{ width: 28, height: 28 }} src={me.avatar} />
+                    ) : (
+                      <CommunityIcon icon={option.icon} size="extraSmall" />
+                    )
+                  ) : (
+                    iconMap.get(option.icon)
+                  )}
+                  <Typography className={classes.text} variant="subtitle2">
+                    {option.name}
+                  </Typography>
+                </Box>
+              </Link>
+            </NextLink>
           )}
           options={communitySelectionOptions}
           getOptionLabel={(option) => option.name}

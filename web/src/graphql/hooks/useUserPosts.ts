@@ -3,11 +3,12 @@ import {
   RegularPostDetailFragment,
   useUserPostsQuery,
 } from "../../generated/graphql";
+import { OrderType } from "../types/types";
 
-export function useUserPosts(userName: string) {
+export function useUserPosts(userName: string,orderType:OrderType) {
   const response = useUserPostsQuery({
     skip: typeof window === "undefined",
-    variables: { limit: 10, userName },
+    variables: { limit: 10, userName,orderType },
   });
 
   const posts: RegularPostDetailFragment[] = useMemo(
@@ -21,10 +22,14 @@ export function useUserPosts(userName: string) {
   );
   const next = () => {
     try {
+      const cursor =
+        orderType === OrderType.NEW
+          ? posts[posts.length - 1]?.createdAt
+          : String(posts[posts.length - 1]?.points);
       response.fetchMore({
         variables: {
           limit: 10,
-          cursor: posts[posts.length - 1]?.createdAt,
+          cursor,
         },
       });
     } catch (e) {}

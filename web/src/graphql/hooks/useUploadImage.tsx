@@ -15,9 +15,10 @@ export function useUploadImage() {
   const onUpload = useCallback(
     (successCallback: (uploadedImagePath: string) => void) => {
       return (files: File[]) => {
+        if (!checkIsAuth()) return false;
         setUploading(true);
+        debugger;
         files.forEach(async (file) => {
-          if (!checkIsAuth()) return false;
           const response = await uploadImage({ variables: { file } });
           if (!response) {
             setUploading(false);

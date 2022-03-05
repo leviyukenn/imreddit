@@ -74,6 +74,18 @@ export function useSaveOrInitCommunityAppearance(
   const [setCommunityAppearance] = useSetCommunityAppearanceMutation();
   const [uploading, setUploading] = useState(false);
 
+  const clearCommunityAppearance = useCallback(() => {
+    dispatch(
+      initCommunityAppearance({
+        background: "",
+        backgroundColor: "#DAE0E6",
+        banner: "",
+        bannerColor: "#33a8ff",
+        icon: "",
+      })
+    );
+  }, []);
+
   const initiateCommunityAppearance = useCallback(() => {
     if (!communityInitAppearance) return;
     dispatch(initCommunityAppearance(communityInitAppearance));
@@ -136,5 +148,6 @@ export function useSaveOrInitCommunityAppearance(
     initiateCommunityAppearance,
     saveCommunityAppearance,
     hasSettingsChanged,
+    clearCommunityAppearance
   };
 }

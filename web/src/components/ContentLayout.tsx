@@ -58,34 +58,30 @@ const ContentLayout = ({
   }, []);
 
   return (
-    <>
-      <Box display="flex" justifyContent="center">
-        <Box
-          className={
-            fullWidth ? classes.fullWidthHeartContainer : classes.heartContainer
-          }
-        >
-          {children}
-        </Box>
-        {rightSideContent ? (
-          <Box className={classes.rightSideContainer}>
-            {rightSideContent}
-            {/* <Box display="flex" justifyContent="center" marginTop="20px"> */}
-            <Fab
-              variant="extended"
-              color="primary"
-              onClick={backToTop || defaultBackToTop}
-              size="small"
-              className={classes.backToTopButton}
-            >
-              <NavigationIcon className={classes.backToTopButtonIcon} />
-              Back to Top
-            </Fab>
-          </Box>
-        ) : // </Box>
-        null}
+    <Box display="flex" justifyContent="center">
+      <Box
+        className={
+          fullWidth ? classes.fullWidthHeartContainer : classes.heartContainer
+        }
+      >
+        {children}
       </Box>
-    </>
+      {rightSideContent ? (
+        <Box className={classes.rightSideContainer}>
+          {rightSideContent}
+          <Fab
+            variant="extended"
+            color="primary"
+            onClick={backToTop || defaultBackToTop}
+            size="small"
+            className={classes.backToTopButton}
+          >
+            <NavigationIcon className={classes.backToTopButtonIcon} />
+            Back to Top
+          </Fab>
+        </Box>
+      ) : null}
+    </Box>
   );
 };
 

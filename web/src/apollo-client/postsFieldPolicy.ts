@@ -52,7 +52,7 @@ export const postsFieldPolicy: FieldPolicy<
       };
     }
 
-    //sort cached posts by create time
+    //sort cached posts
     const sortedPosts = posts.sort(sortFn);
 
     return {

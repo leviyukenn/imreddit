@@ -18,7 +18,7 @@ const HomeMainContent = ({}: HomeMainContentProps) => {
     <>
       {meResponse?.me ? <CreatePostCard avatar={meResponse.me.avatar} /> : null}
       <PostOrderTypeTabs orderType={orderType} setOrderType={setOrderType} />
-      {<Scroll />}
+      <Scroll />
     </>
   );
 };
