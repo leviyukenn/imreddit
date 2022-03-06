@@ -3,9 +3,13 @@ import InfiniteScroll from "react-infinite-scroll-component";
 import { RegularPostDetailFragment } from "../../generated/graphql";
 import { useCommunityPosts } from "../../graphql/hooks/useCommunityPosts";
 import { useHomePosts } from "../../graphql/hooks/useHomePosts";
+import { useSearchPosts } from "../../graphql/hooks/useSearchPosts";
 import { useUserPosts } from "../../graphql/hooks/useUserPosts";
 import { OrderType } from "../../graphql/types/types";
 import { LoadingPostCard, PostCard } from "./postCard/PostCard";
+import SearchPostCard, {
+  LoadingSearchPostCard,
+} from "./searchPosts/SearchPostCard";
 import UserPostCard, { LoadingUserPostCard } from "./userPost/UserPostCard";
 
 interface PostInfiniteScrollProps {
@@ -100,6 +104,46 @@ export const UserPostsInfiniteScroll = ({
     >
       {posts.map((post) => {
         return <UserPostCard post={post} key={post.id} />;
+      })}
+    </InfiniteScroll>
+  );
+};
+
+export const SearchPostsInfiniteScroll = ({
+  keyword,
+  orderType,
+  communityName,
+}: {
+  keyword: string;
+  orderType: OrderType;
+  communityName?: string;
+}) => {
+  const { posts, hasMore, next, loading } = useSearchPosts(
+    keyword,
+    orderType,
+    communityName
+  );
+  if (!loading && !posts.length) {
+    return (
+      <Box
+        display="flex"
+        justifyContent="center"
+        alignItems="center"
+        height="100vh"
+      >
+        hmm... looks like there is no post here.
+      </Box>
+    );
+  }
+  return (
+    <InfiniteScroll
+      dataLength={posts.length}
+      next={next}
+      hasMore={hasMore}
+      loader={<LoadingSearchPostCard />}
+    >
+      {posts.map((post) => {
+        return <SearchPostCard post={post} keyword={keyword} key={post.id} />;
       })}
     </InfiniteScroll>
   );

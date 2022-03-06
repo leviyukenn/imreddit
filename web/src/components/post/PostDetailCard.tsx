@@ -18,7 +18,6 @@ import React, { useMemo } from "react";
 import { RegularPostDetailFragment } from "../../generated/graphql";
 import { PostStatus } from "../../graphql/hooks/useChangePostStatus";
 import { useIsAuth } from "../../utils/hooks/useIsAuth";
-import CommunityIcon from "../community/CommunityIcon";
 import ImagePostSwiper from "./postCard/ImgaePostSwiper";
 import PostInfo from "./PostInfo";
 import ToolBar from "./postToolBar/PostToolBar";
@@ -104,13 +103,14 @@ export const PostDetailCard = ({ post, ...props }: PostDetailProps) => {
       </Box>
 
       <CardHeader
-        avatar={<CommunityIcon icon={post.community.icon} size="extraSmall" />}
+        // avatar={<CommunityIcon icon={post.community.icon} size="extraSmall" />}
         classes={{ avatar: classes.communityIcon }}
         subheader={
           <PostInfo
             communityName={post.community.name}
             userName={post.creator.username}
             postCreatedAt={post.createdAt}
+            communityIcon={post.community.icon}
           />
         }
       />

@@ -16,18 +16,17 @@ import { Skeleton } from "@material-ui/lab";
 import NextLink from "next/link";
 import { useRouter } from "next/router";
 import React, { useMemo } from "react";
-import { format } from "timeago.js";
 import { RegularPostDetailFragment } from "../../../generated/graphql";
 import {
   createPostDetailModalLink,
   createPostDetailPageLink,
 } from "../../../utils/links";
 import CommunityIcon from "../../community/CommunityIcon";
+import PostInfo from "../PostInfo";
 import ToolBar from "../postToolBar/PostToolBar";
 import UpvoteBox from "../upvote/UpvoteBox";
 import ImagePostContent from "./ImagePostContent";
 import TextPostContent from "./TextPostContent";
-import PostInfo from "../PostInfo";
 
 interface PostCardProps extends CardProps {
   post: RegularPostDetailFragment;
@@ -91,8 +90,6 @@ const useStyles = makeStyles((theme: Theme) =>
 export const PostCard = ({ post, ...props }: PostCardProps) => {
   const classes = useStyles();
 
-  const timeago = useMemo(() => format(parseInt(post.createdAt)), [post]);
-
   const isTextPost = useMemo(() => post.postType === 0, [post]);
   const router = useRouter();
 
@@ -109,14 +106,15 @@ export const PostCard = ({ post, ...props }: PostCardProps) => {
       >
         <Card className={classes.card} {...props}>
           <CardHeader
-            avatar={
-              <CommunityIcon icon={post.community.icon} size="extraSmall" />
-            }
+            // avatar={
+            //   <CommunityIcon icon={post.community.icon} size="extraSmall" />
+            // }
             subheader={
               <PostInfo
                 communityName={post.community.name}
                 userName={post.creator.username}
                 postCreatedAt={post.createdAt}
+                communityIcon={post.community.icon}
               />
             }
             classes={{ root: classes.header, avatar: classes.communityIcon }}

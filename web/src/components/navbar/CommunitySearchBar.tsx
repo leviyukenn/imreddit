@@ -1,10 +1,12 @@
 import {
   Box,
+  Chip,
   createStyles,
   makeStyles,
   TextField,
   Theme,
   Typography,
+  useMediaQuery,
 } from "@material-ui/core";
 import SearchIcon from "@material-ui/icons/Search";
 import { Autocomplete } from "@material-ui/lab";
@@ -14,7 +16,13 @@ import {
   SearchCommunitiesQuery,
   useSearchCommunitiesLazyQuery,
 } from "../../generated/graphql";
-import { createCommunityHomeLink } from "../../utils/links";
+import { useCommunity } from "../../graphql/hooks/useCommunity";
+import theme from "../../theme";
+import { usePostInfoRoute } from "../../utils/hooks/usePostInfoRoute";
+import {
+  createCommunityHomeLink,
+  createSearchResultPageLink,
+} from "../../utils/links";
 import CommunityIcon from "../community/CommunityIcon";
 
 interface CommunitySearchBarProps {}
@@ -52,6 +60,11 @@ const useStyles = makeStyles((theme: Theme) =>
       flex: 1,
       padding: "0.5rem 1rem",
     },
+    chip: {
+      padding: "0px 6px",
+      fontWeight: 500,
+      height: 24,
+    },
   })
 );
 
@@ -59,13 +72,26 @@ type SearchResult = SearchCommunitiesQuery["searchCommunities"];
 type SelectedCommunity = SearchResult[0];
 
 const CommunitySearchBar = ({}: CommunitySearchBarProps) => {
+  const router = useRouter();
   const [open, setOpen] = useState(false);
-  const [searchValue, setSearchValue] = useState("");
+  const [searchValue, setSearchValue] = useState<string>("");
+  useEffect(() => {
+    setSearchValue((router.query.keyword || "") as string);
+  }, [router]);
+
   const [
     selectedOption,
     setSelectedOption,
   ] = useState<SelectedCommunity | null>(null);
-  const router = useRouter();
+  const { communityName: postInfoCommunityName } = usePostInfoRoute();
+  const [communityName, setCommunityName] = useState(
+    () =>
+      postInfoCommunityName ||
+      (router.query.communityName as string) ||
+      undefined
+  );
+  const { community } = useCommunity(communityName);
+
   const [
     searchCommuniites,
     { data: searchResult, loading },
@@ -73,11 +99,16 @@ const CommunitySearchBar = ({}: CommunitySearchBarProps) => {
   const options = useMemo(() => searchResult?.searchCommunities || [], [
     searchResult,
   ]);
-  const onSearchValueChange = useCallback(
-    (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-      setSearchValue(event.target.value);
+  const onSearchValueChange = useCallback((event: any, value: string) => {
+    setSearchValue(value);
+  }, []);
+
+  const onSearch = useCallback(
+    (event: React.KeyboardEvent<HTMLDivElement>) => {
+      if (event.key !== "Enter" || !searchValue) return;
+      router.push(createSearchResultPageLink(searchValue, community?.name));
     },
-    []
+    [searchValue, router, community]
   );
 
   useEffect(() => {
@@ -90,8 +121,7 @@ const CommunitySearchBar = ({}: CommunitySearchBarProps) => {
     router.push(createCommunityHomeLink(selectedOption.name));
   }, [selectedOption]);
 
-   
-
+  const matches = useMediaQuery(theme.breakpoints.up("md"));
   const classes = useStyles();
 
   return (
@@ -102,6 +132,7 @@ const CommunitySearchBar = ({}: CommunitySearchBarProps) => {
         input: classes.input,
       }}
       open={open}
+      clearOnBlur={false}
       onOpen={() => {
         setOpen(true);
       }}
@@ -113,27 +144,13 @@ const CommunitySearchBar = ({}: CommunitySearchBarProps) => {
         setSelectedOption(value)
       }
       getOptionSelected={(option, value) => option.name === value.name}
-      onKeyPress={(event) => console.log(event)}
+      onKeyPress={onSearch}
       getOptionLabel={(option) => option.name}
       options={options}
       loading={loading}
       clearOnEscape={true}
       forcePopupIcon={false}
-      //   renderTags={(value: SearchResult, getTagProps) => {
-      //     // console.log(value, getTagProps);
-
-      //     debugger;
-      //     return value.map((option: SelectedCommunity, index: number) => (
-      //       <Chip variant="outlined" label={option} {...getTagProps({ index })} />
-      //     ));
-      //   }}
       renderOption={(option) => (
-        // <NextLink href={createCommunityHomeLink(option.name)} passHref>
-        //   <Link
-        //     underline="none"
-        //     color="textPrimary"
-        //     className={classes.optionLink}
-        //   >
         <Box display="flex" alignItems="center" marginBottom="0.5rem">
           <CommunityIcon icon={option.icon} size="small" />
           <Box className={classes.communityInfo}>
@@ -146,25 +163,34 @@ const CommunitySearchBar = ({}: CommunitySearchBarProps) => {
             </Typography>
           </Box>
         </Box>
-        //   </Link>
-        // </NextLink>
       )}
+      inputValue={searchValue}
+      onInputChange={onSearchValueChange}
       renderInput={(params) => (
         <TextField
           {...params}
           variant="outlined"
-          value={searchValue}
-          onChange={onSearchValueChange}
-          placeholder="Search Communities"
+          //   value={searchValue}
+          //   onChange={onSearchValueChange}
+          placeholder="Search"
           InputProps={{
             ...params.InputProps,
-            // endAdornment: (
-            //   <IconButton onClick={() => setSearchValue("")} size="small">
-            //     <CloseIcon />
-            //   </IconButton>
-            // ),
+            startAdornment: (
+              <>
+                <SearchIcon color="disabled" />
 
-            startAdornment: <SearchIcon color="disabled" />,
+                {community && matches ? (
+                  <Chip
+                    avatar={
+                      <CommunityIcon icon={community.icon} size="extraSmall" />
+                    }
+                    onDelete={() => setCommunityName(undefined)}
+                    label={"r/" + community.name}
+                    className={classes.chip}
+                  />
+                ) : null}
+              </>
+            ),
           }}
         />
       )}

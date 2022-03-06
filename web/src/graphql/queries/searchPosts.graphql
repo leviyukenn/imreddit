@@ -1,0 +1,20 @@
+query SearchPosts(
+  $keyword: String!
+  $communityName: String
+  $orderType: Int
+  $limit: Int
+  $cursor: String
+) {
+  searchPosts(
+    keyword: $keyword
+    communityName: $communityName
+    orderType: $orderType
+    limit: $limit
+    cursor: $cursor
+  ) {
+    hasMore
+    posts {
+      ...RegularPostDetail
+    }
+  }
+}

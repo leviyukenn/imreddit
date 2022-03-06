@@ -279,6 +279,7 @@ export type Query = {
   userComments: Array<Post>;
   userUpvotedPosts: PaginatedPosts;
   userCommentedPosts: PaginatedPosts;
+  searchPosts: PaginatedPosts;
   userPosts: PaginatedPosts;
   communityPosts: PaginatedPosts;
   paginatedPosts: PaginatedPosts;
@@ -317,6 +318,15 @@ export type QueryUserCommentedPostsArgs = {
   userName: Scalars['String'];
   cursor?: Maybe<Scalars['String']>;
   limit?: Maybe<Scalars['Int']>;
+};
+
+
+export type QuerySearchPostsArgs = {
+  communityName?: Maybe<Scalars['String']>;
+  keyword: Scalars['String'];
+  cursor?: Maybe<Scalars['String']>;
+  limit?: Maybe<Scalars['Int']>;
+  orderType?: Maybe<Scalars['Int']>;
 };
 
 
@@ -1020,6 +1030,27 @@ export type SearchCommunitiesQuery = (
     { __typename?: 'Community' }
     & Pick<Community, 'id' | 'name' | 'icon' | 'totalMemberships'>
   )> }
+);
+
+export type SearchPostsQueryVariables = Exact<{
+  keyword: Scalars['String'];
+  communityName?: Maybe<Scalars['String']>;
+  orderType?: Maybe<Scalars['Int']>;
+  limit?: Maybe<Scalars['Int']>;
+  cursor?: Maybe<Scalars['String']>;
+}>;
+
+
+export type SearchPostsQuery = (
+  { __typename?: 'Query' }
+  & { searchPosts: (
+    { __typename?: 'PaginatedPosts' }
+    & Pick<PaginatedPosts, 'hasMore'>
+    & { posts: Array<(
+      { __typename?: 'Post' }
+      & RegularPostDetailFragment
+    )> }
+  ) }
 );
 
 export type TopicsQueryVariables = Exact<{ [key: string]: never; }>;
@@ -2388,6 +2419,54 @@ export function useSearchCommunitiesLazyQuery(baseOptions?: Apollo.LazyQueryHook
 export type SearchCommunitiesQueryHookResult = ReturnType<typeof useSearchCommunitiesQuery>;
 export type SearchCommunitiesLazyQueryHookResult = ReturnType<typeof useSearchCommunitiesLazyQuery>;
 export type SearchCommunitiesQueryResult = Apollo.QueryResult<SearchCommunitiesQuery, SearchCommunitiesQueryVariables>;
+export const SearchPostsDocument = gql`
+    query SearchPosts($keyword: String!, $communityName: String, $orderType: Int, $limit: Int, $cursor: String) {
+  searchPosts(
+    keyword: $keyword
+    communityName: $communityName
+    orderType: $orderType
+    limit: $limit
+    cursor: $cursor
+  ) {
+    hasMore
+    posts {
+      ...RegularPostDetail
+    }
+  }
+}
+    ${RegularPostDetailFragmentDoc}`;
+
+/**
+ * __useSearchPostsQuery__
+ *
+ * To run a query within a React component, call `useSearchPostsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useSearchPostsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useSearchPostsQuery({
+ *   variables: {
+ *      keyword: // value for 'keyword'
+ *      communityName: // value for 'communityName'
+ *      orderType: // value for 'orderType'
+ *      limit: // value for 'limit'
+ *      cursor: // value for 'cursor'
+ *   },
+ * });
+ */
+export function useSearchPostsQuery(baseOptions: Apollo.QueryHookOptions<SearchPostsQuery, SearchPostsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<SearchPostsQuery, SearchPostsQueryVariables>(SearchPostsDocument, options);
+      }
+export function useSearchPostsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<SearchPostsQuery, SearchPostsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<SearchPostsQuery, SearchPostsQueryVariables>(SearchPostsDocument, options);
+        }
+export type SearchPostsQueryHookResult = ReturnType<typeof useSearchPostsQuery>;
+export type SearchPostsLazyQueryHookResult = ReturnType<typeof useSearchPostsLazyQuery>;
+export type SearchPostsQueryResult = Apollo.QueryResult<SearchPostsQuery, SearchPostsQueryVariables>;
 export const TopicsDocument = gql`
     query Topics {
   topics {
@@ -2788,13 +2867,14 @@ export type PostResponseFieldPolicy = {
 	errors?: FieldPolicy<any> | FieldReadFunction<any>,
 	post?: FieldPolicy<any> | FieldReadFunction<any>
 };
-export type QueryKeySpecifier = ('user' | 'me' | 'userComments' | 'userUpvotedPosts' | 'userCommentedPosts' | 'userPosts' | 'communityPosts' | 'paginatedPosts' | 'allPosts' | 'postDetail' | 'communities' | 'community' | 'searchCommunities' | 'userRoles' | 'userRole' | 'getUpvote' | 'topics' | QueryKeySpecifier)[];
+export type QueryKeySpecifier = ('user' | 'me' | 'userComments' | 'userUpvotedPosts' | 'userCommentedPosts' | 'searchPosts' | 'userPosts' | 'communityPosts' | 'paginatedPosts' | 'allPosts' | 'postDetail' | 'communities' | 'community' | 'searchCommunities' | 'userRoles' | 'userRole' | 'getUpvote' | 'topics' | QueryKeySpecifier)[];
 export type QueryFieldPolicy = {
 	user?: FieldPolicy<any> | FieldReadFunction<any>,
 	me?: FieldPolicy<any> | FieldReadFunction<any>,
 	userComments?: FieldPolicy<any> | FieldReadFunction<any>,
 	userUpvotedPosts?: FieldPolicy<any> | FieldReadFunction<any>,
 	userCommentedPosts?: FieldPolicy<any> | FieldReadFunction<any>,
+	searchPosts?: FieldPolicy<any> | FieldReadFunction<any>,
 	userPosts?: FieldPolicy<any> | FieldReadFunction<any>,
 	communityPosts?: FieldPolicy<any> | FieldReadFunction<any>,
 	paginatedPosts?: FieldPolicy<any> | FieldReadFunction<any>,

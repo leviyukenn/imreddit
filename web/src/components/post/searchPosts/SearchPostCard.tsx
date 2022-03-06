@@ -9,24 +9,20 @@ import {
   Typography,
 } from "@material-ui/core";
 import { red } from "@material-ui/core/colors";
-import ViewHeadlineIcon from "@material-ui/icons/ViewHeadline";
 import { Skeleton } from "@material-ui/lab";
 import NextLink from "next/link";
 import { useRouter } from "next/router";
 import React from "react";
+import Highlighter from "react-highlight-words";
 import { SERVER_URL } from "../../../const/const";
 import { RegularPostDetailFragment } from "../../../generated/graphql";
-import { PostStatus } from "../../../graphql/hooks/useChangePostStatus";
 import { createPostDetailModalLink } from "../../../utils/links";
-import { createComposedClasses } from "../../../utils/utils";
 import PostInfo from "../PostInfo";
-import UpvoteBox from "../upvote/UpvoteBox";
-import PostToolBar from "../postToolBar/PostToolBar";
 
-interface UserPostCardProps extends CardProps {
+interface SearchPostCardProps extends CardProps {
   post: RegularPostDetailFragment;
+  keyword: string;
 }
-
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
     root: {
@@ -34,7 +30,6 @@ const useStyles = makeStyles((theme: Theme) =>
       backgroundColor: "rgb(248 249 250)",
     },
     card: {
-      paddingLeft: theme.spacing(5),
       borderRadius: 0,
       backgroundColor: theme.palette.background.paper,
 
@@ -45,20 +40,9 @@ const useStyles = makeStyles((theme: Theme) =>
         border: "1px solid #818181",
       },
     },
-    upvoteBox: {
-      position: "absolute",
-      top: 1,
-      left: 1,
-      borderLeft: "4px solid transparent",
-    },
-    removedPost: {
-      borderLeft: "4px solid #ff585b",
-    },
-    header: {
-      backgroundColor: theme.palette.background.paper,
-    },
     caption: {
-      color: "rgb(120 124 126)",
+      color: "rgb(135 138 140)",
+      marginRight: "0.5rem",
     },
     communityLink: {
       lineHeight: "20px",
@@ -74,11 +58,11 @@ const useStyles = makeStyles((theme: Theme) =>
       backgroundColor: red[500],
     },
     cardContent: {
-      display: "flex",
+      //   display: "flex",
       // alignItems: "center",
-      padding: "8px 8px 0",
+      padding: "1rem",
       "&:last-child": {
-        paddingBottom: 0,
+        paddingBottom: "1rem",
       },
     },
     imagePreview: {
@@ -102,74 +86,72 @@ const useStyles = makeStyles((theme: Theme) =>
       borderRadius: 4,
     },
     postInfoContainer: {
-      marginLeft: 8,
+      marginBottom: "1rem",
     },
     postTitle: {
-      color: "#9b9b9b",
+      fontSize: "1rem",
+      fontWeight: 500,
+      lineHeight: "20px",
     },
     toolBar: {
       display: "flex",
     },
+    highlight: {
+      backgroundColor: "#e9f5fd",
+    },
   })
 );
 
-const UserPostCard = ({ post, ...props }: UserPostCardProps) => {
+const SearchPostCard = ({ post, keyword, ...props }: SearchPostCardProps) => {
   const classes = useStyles();
-
-  // const timeago = useMemo(() => format(parseInt(post.createdAt)), [post]);
-  // const postInfo = useMemo(
-  //   () => (
-  //     <Box display="flex" alignItems="center">
-  //       <CommunityLink communityName={post.community.name} />
-  //       <span>&nbsp;&#183;&nbsp;</span>
-  //       <Typography
-  //         variant="caption"
-  //         className={classes.caption}
-  //       >{`Posted by u/${post.creator.username} ${timeago}`}</Typography>
-  //     </Box>
-  //   ),
-  //   [post, timeago]
-  // );
 
   const router = useRouter();
   const postDetailModalLink = createPostDetailModalLink(router.asPath, post.id);
-  const isRemoved = post.postStatus === PostStatus.REMOVED;
 
   return (
     <Box className={classes.root}>
-      <Box
-        className={createComposedClasses(
-          classes.upvoteBox,
-          isRemoved ? classes.removedPost : ""
-        )}
-      >
+      {/* <Box className={classes.upvoteBox}>
         <UpvoteBox post={post} isVerticalLayout={true} />
-      </Box>
-      <NextLink href={postDetailModalLink} shallow scroll={false}>
+      </Box> */}
+      <NextLink href={postDetailModalLink}>
         <Card className={classes.card} {...props}>
           <CardContent className={classes.cardContent}>
-            {post.images[0]?.path ? (
-              <Box
-                className={classes.imagePreview}
-                style={{
-                  backgroundImage: `url(${SERVER_URL + post.images[0].path})`,
-                }}
-              ></Box>
-            ) : (
-              <Box className={classes.textPostIcon}>
-                <ViewHeadlineIcon />
-              </Box>
-            )}
             <Box className={classes.postInfoContainer}>
-              <Typography variant="subtitle1" className={classes.postTitle}>
-                {post.title}
-              </Typography>
               <PostInfo
                 communityName={post.community.name}
                 userName={post.creator.username}
                 postCreatedAt={post.createdAt}
+                communityIcon={post.community.icon}
               />
-              <PostToolBar post={post} />
+            </Box>
+            <Box display="flex">
+              <Box flex={1} marginBottom={2}>
+                <Highlighter
+                  className={classes.postTitle}
+                  highlightClassName={classes.highlight}
+                  searchWords={[keyword]}
+                  autoEscape={true}
+                  textToHighlight={post.title!}
+                />
+                {/* <PostToolBar post={post} /> */}
+              </Box>
+              {post.images[0]?.path ? (
+                <Box
+                  className={classes.imagePreview}
+                  style={{
+                    backgroundImage: `url(${SERVER_URL + post.images[0].path})`,
+                  }}
+                ></Box>
+              ) : null}
+            </Box>
+            <Box>
+              <Typography variant="caption" className={classes.caption}>
+                {post.points + (post.points > 1 ? " upvotes" : " upvote")}
+              </Typography>
+              <Typography variant="caption" className={classes.caption}>
+                {post.totalComments +
+                  (post.totalComments > 1 ? " comments" : " comment")}
+              </Typography>
             </Box>
           </CardContent>
         </Card>
@@ -177,38 +159,27 @@ const UserPostCard = ({ post, ...props }: UserPostCardProps) => {
     </Box>
   );
 };
-
-export const LoadingUserPostCard = () => {
+export const LoadingSearchPostCard = () => {
   const classes = useStyles();
 
   return (
     <Box className={classes.root}>
-      <Box className={classes.upvoteBox}>
-        <Box display="flex" justifyContent="center" alignItems="center">
-          <Skeleton variant="rect" />
-        </Box>
-      </Box>
       <Card className={classes.card}>
         <CardContent className={classes.cardContent}>
-          <Box className={classes.textPostIcon}>
-            <Skeleton />
-          </Box>
           <Box className={classes.postInfoContainer}>
-            <Typography variant="subtitle1" className={classes.postTitle}>
-              <Skeleton width={40} />
-            </Typography>
-            <Skeleton width={60} />
-            <Box className={classes.toolBar}>
-              <Box>
-                <Typography variant="caption">
-                  <Skeleton width={70} />
-                </Typography>
-              </Box>
+            <Skeleton width={200} />
+          </Box>
+          <Box display="flex">
+            <Box flex={1} marginBottom={2}>
+              <Skeleton width={400} />
+              <Skeleton width={400} />
+              <Skeleton width={400} />
             </Box>
+            <Skeleton variant="rect" width={100} height={100} />
           </Box>
         </CardContent>
       </Card>
     </Box>
   );
 };
-export default UserPostCard;
+export default SearchPostCard;

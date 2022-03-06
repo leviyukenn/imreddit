@@ -3,6 +3,7 @@ import { createUploadLink } from "apollo-upload-client";
 import { GRAPHQL_SERVER_URL } from "../const/const";
 import { communityPostsFieldPolicy } from "./communityPostsFieldPolicy";
 import { postsFieldPolicy } from "./postsFieldPolicy";
+import { searchPostsFieldPolicy } from "./searchPostsFieldPolicy";
 import { userPostsFieldPolicy } from "./userPostsFieldPolicy";
 import { userUpvotedPostsFieldPolicy } from "./userUpvotedPostsFieldPolicy";
 const cache = new InMemoryCache({
@@ -18,6 +19,7 @@ const cache = new InMemoryCache({
         communityPosts: communityPostsFieldPolicy,
         paginatedPosts: postsFieldPolicy,
         userPosts: userPostsFieldPolicy,
+        searchPosts: searchPostsFieldPolicy,
         userCommentedPosts: userPostsFieldPolicy,
         userUpvotedPosts: userUpvotedPostsFieldPolicy,
       },

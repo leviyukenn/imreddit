@@ -26,6 +26,12 @@ export const createPostDetailPageLinkWithCommentId = (
 export const createUserProfileLink = (userName: string, sectionName: string) =>
   `/user/${userName}/${sectionName}`;
 
+export const createSearchResultPageLink = (
+  keyword: string,
+  communityName?: string
+) =>
+  `/search/${keyword}${communityName ? "?communityName=" + communityName : ""}`;
+
 export const homeLink = "/";
 export const createPostLink = "/create-post";
 export const loginPageLink = "/login";

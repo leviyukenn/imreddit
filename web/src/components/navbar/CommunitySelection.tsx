@@ -7,28 +7,15 @@ import { createStyles, makeStyles, Theme } from "@material-ui/core/styles";
 import AddIcon from "@material-ui/icons/Add";
 import ExpandMoreRoundedIcon from "@material-ui/icons/ExpandMoreRounded";
 import HomeIcon from "@material-ui/icons/Home";
-import Autocomplete, {
-  AutocompleteCloseReason,
-} from "@material-ui/lab/Autocomplete";
+import SearchIcon from "@material-ui/icons/Search";
+import Autocomplete, { AutocompleteCloseReason } from "@material-ui/lab/Autocomplete";
 import NextLink from "next/link";
 import { useRouter } from "next/router";
 import React, { useMemo, useState } from "react";
-import {
-  RegularUserFragment,
-  useUserRolesQuery,
-} from "../../generated/graphql";
+import { RegularUserFragment, useUserRolesQuery } from "../../generated/graphql";
 import theme from "../../theme";
-import {
-  CommunitySelectionOption,
-  CommunitySelectionOptionGroupType,
-  CommunitySelectionOptionIconType,
-} from "../../utils/factory/communitySelectionOption";
-import {
-  createCommunityHomeLink,
-  createCommunityPageLink,
-  createUserProfileLink,
-  homeLink,
-} from "../../utils/links";
+import { CommunitySelectionOption, CommunitySelectionOptionGroupType, CommunitySelectionOptionIconType } from "../../utils/factory/communitySelectionOption";
+import { createCommunityHomeLink, createCommunityPageLink, createUserProfileLink, homeLink } from "../../utils/links";
 import CommunityIcon from "../community/CommunityIcon";
 
 const useStyles = makeStyles((theme: Theme) =>
@@ -304,19 +291,20 @@ export default function CommunitySelection({
           onMouseUp={(e) => setIsButtonClicked(false)}
         >
           <Box display="flex" alignItems="center">
-            {!selectedOption ? (
+            {!selectedOption && router.query.keyword ? (
               <>
-                <HomeIcon />
-                <Box className={classes.placeholder}>Home</Box>
+                <SearchIcon />
+                {matches?
+                <Box className={classes.placeholder}>Search Results</Box>:null}
               </>
-            ) : (
+            ) : selectedOption ? (
               <>
                 {inputIcon}
                 {matches ? (
                   <div className={classes.tag}>{selectedOption.name}</div>
                 ) : null}
               </>
-            )}
+            ) : null}
           </Box>
           <ExpandMoreRoundedIcon className={classes.icon} />
         </ButtonBase>
